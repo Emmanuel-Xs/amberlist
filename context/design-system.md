@@ -173,3 +173,9 @@ From his 22:38 list on 2026-09-29. Nothing here may be coded before a design is 
 | Splash to app transition | The splash must hand off smoothly into the app | Today it fades out after the drop finishes. |
 | Motion library | Slower, visible, non janky motion; Motion library vs CSS | O3. |
 | Button below empty state illustrations | Reflect it in the design first | DS rule already says every empty state has a button; check the canvas. |
+
+### Round 3 proposals (2026-09-30, awaiting approval, canvas page "Round 3")
+- 13 Celebrations: every tick = honey fills the circle, check pops, six comb cell sparks (0.6 s); first task ever = honey drop falls and splashes into comb cells, then toast (1.6 s); all done today = the check's five cells fill one by one and seal into the logo, drop lets go (2.2 s). No bee.
+- 14 Icons v2: plain plus (no circle), Tasks list with a comb cell check, soft Home, open folder with files; active state A soft pill or B honey fill (recommended B).
+- 15 Empty states: logo as the ticked box in "Add your first task"; "All done" is the big logo with the drop landed as a honey puddle.
+- 16 Date wheel: days on a 3D cylinder, speed sensitive spin with spring settle, today centred, range oldest overdue (or 7 days back) to last task + 3 days, month date picker above.

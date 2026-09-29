@@ -90,7 +90,7 @@ def board(name, title, w, h, body, css=''):
 <script type="text/x-dc" data-dc-script data-props='{{"theme":{{"editor":"enum","options":["dark","light"],"default":"dark"}},"$preview":{{"width":{w},"height":{h}}}}}'>
 class Component extends DCLogic {{
   renderVals() {{
-    return {{ theme: this.props.theme ?? 'dark', yes: true, no: false, s14: 14, s16: 16, s18: 18, s20: 20, s22: 22, s24: 24, s28: 28, s32: 32, w120: 120, w140: 140, w160: 160 }};
+    return {{ theme: this.props.theme ?? 'dark', yes: true, no: false, s14: 14, s16: 16, s18: 18, s20: 20, s22: 22, s24: 24, s28: 28, s32: 32, w120: 120, w140: 140, w160: 160, w358: 358, w1000: 1000 }};
   }}
 }}
 </script>
