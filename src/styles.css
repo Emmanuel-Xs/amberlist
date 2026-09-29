@@ -327,11 +327,19 @@ body {
     display: block;
     position: sticky;
     top: 32px;
-    max-height: calc(100dvh - 64px);
-    overflow-y: auto;
     border-radius: 28px;
     background: var(--surface);
-    padding: 24px;
+    /* The card clips; an inner area scrolls, so the scrollbar sits inside the rounded corners */
+    overflow: hidden;
+    padding: 12px 6px 12px 0;
+  }
+  .tasks-pane-scroll {
+    max-height: calc(100dvh - 88px);
+    overflow-y: auto;
+    padding: 12px 12px 12px 24px;
+  }
+  .tasks-pane-scroll::-webkit-scrollbar-button {
+    display: none;
   }
 }
 @media (max-width: 1023.98px) {
@@ -513,9 +521,28 @@ textarea:focus-visible,
 #note-title:focus-visible {
   outline: none;
 }
-#scratch-body:focus,
-textarea#note-body:focus {
+#scratch-body:focus {
   box-shadow: 0 0 0 2px var(--ring);
+}
+.confirm-word {
+  color: var(--danger);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.app-modal-panel:focus {
+  outline: none;
+}
+/* Browser autofill: keep our surface and ink instead of the browser's yellow or blue */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-raised) inset;
+  box-shadow: 0 0 0 1000px var(--surface-raised) inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 /* Phones: no page scrollbar beside the bottom bar (touch scrolling needs none) */
@@ -620,9 +647,16 @@ textarea#note-body:focus {
 }
 .note-title:focus-visible,
 .note-body:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 4px;
-  border-radius: 8px;
+  outline: none;
+}
+/* One quiet frame on the note card while typing, instead of rings around each field */
+.note-card-editor {
+  transition: box-shadow 0.2s ease;
+}
+.note-card-editor:has(.note-title:focus-visible, .note-body:focus-visible) {
+  box-shadow:
+    0 0 0 1.5px var(--line-strong),
+    var(--shadow-card) !important;
 }
 .note-body {
   font: inherit;
@@ -787,88 +821,6 @@ textarea#note-body:focus {
   border: 1px solid currentColor;
   padding: 6px 10px;
   text-align: left;
-}
-
-/* Motion: small, quick, and off for reduced motion */
-.page-enter {
-  animation: page-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-@keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.zn-task:not(.task-row-exit) {
-  animation: row-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-@keyframes row-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.zn-check.is-on,
-.zn-check[aria-checked='true'],
-.zn-task.is-done .zn-check {
-  animation: check-pop 0.28s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-@keyframes check-pop {
-  0% {
-    transform: scale(0.8);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-.zn-btn,
-.zn-icon-btn,
-.zn-nav-item,
-.zn-chip {
-  transition:
-    transform 0.12s ease,
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-.zn-btn:active,
-.zn-icon-btn:active,
-.zn-chip:active {
-  transform: scale(0.96);
-}
-.zn-nav-item.is-active svg {
-  animation: nav-pop 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-@keyframes nav-pop {
-  from {
-    transform: scale(0.85);
-  }
-  to {
-    transform: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .page-enter,
-  .zn-task:not(.task-row-exit),
-  .zn-check,
-  .zn-nav-item.is-active svg {
-    animation: none !important;
-  }
-  .zn-btn:active,
-  .zn-icon-btn:active,
-  .zn-chip:active {
-    transform: none;
-  }
-}
-.zn-nav-item:not(.is-active) .logo-mark {
-  opacity: 0.55;
 }
 
 .phone-header {

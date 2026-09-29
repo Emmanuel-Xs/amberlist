@@ -220,7 +220,7 @@ function Home() {
                 <div
                   style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
                 >
-                  {dayTasks.slice(4).map((t) => (
+                  {dayTasks.slice(4, 6).map((t) => (
                     <TaskRow
                       key={t.id}
                       task={t}
@@ -230,6 +230,15 @@ function Home() {
                     />
                   ))}
                 </div>
+              )}
+              {dayTasks.length > 6 && (
+                <Link
+                  to="/tasks"
+                  className="link"
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  See all {dayTasks.length} tasks
+                </Link>
               )}
             </>
           )}

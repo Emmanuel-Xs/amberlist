@@ -424,8 +424,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const navigate = useNavigate()
-  const path = useRouterState({ select: (s) => s.location.pathname })
-
   useEffect(() => {
     ensureGuest()
       .then(() => {
@@ -490,9 +488,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Button>
             </div>
           ) : ready ? (
-            <div key={path.split('/')[1] ?? ''} className="page-enter">
-              {children}
-            </div>
+            children
           ) : (
             <div
               aria-busy="true"

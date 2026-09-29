@@ -278,6 +278,7 @@ function Editor({ note }: { note: Note }) {
       </header>
 
       <div
+        className="note-card-editor"
         style={{
           borderRadius: 24,
           padding: 'clamp(16px, 4vw, 28px)',

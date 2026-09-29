@@ -248,30 +248,32 @@ export function TasksPage({
     >
       {list}
       <aside className="tasks-pane" aria-label="Task details">
-        {selected ? (
-          <TaskDetail
-            key={selected.id}
-            task={selected}
-            onClose={() =>
-              void navigate({
-                to: folderId ? '/folders/$id' : '/tasks',
-                params: folderId ? { id: folderId } : undefined,
-              } as never)
-            }
-          />
-        ) : selectedId && tasks ? (
-          <EmptyState
-            illustration="search"
-            title="Task not found"
-            text="It may have been deleted."
-          />
-        ) : (
-          <EmptyState
-            illustration="tasks"
-            title="Pick a task"
-            text="Select a task to see its dates, subtasks and notes here. Press Q to add a new one."
-          />
-        )}
+        <div className="tasks-pane-scroll zn-scroll">
+          {selected ? (
+            <TaskDetail
+              key={selected.id}
+              task={selected}
+              onClose={() =>
+                void navigate({
+                  to: folderId ? '/folders/$id' : '/tasks',
+                  params: folderId ? { id: folderId } : undefined,
+                } as never)
+              }
+            />
+          ) : selectedId && tasks ? (
+            <EmptyState
+              illustration="search"
+              title="Task not found"
+              text="It may have been deleted."
+            />
+          ) : (
+            <EmptyState
+              illustration="tasks"
+              title="Pick a task"
+              text="Select a task to see its dates, subtasks and notes here. Press Q to add a new one."
+            />
+          )}
+        </div>
       </aside>
       {selectedId && (
         <div className="tasks-detail-mobile">

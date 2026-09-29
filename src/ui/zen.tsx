@@ -8,11 +8,6 @@ import type {
 import { createPortal } from 'react-dom'
 import { Icon } from './icons'
 import type { IconName } from './icons'
-import { Illustration } from './illustrations'
-import type { IllustrationName } from './illustrations'
-
-export { Illustration }
-export type { IllustrationName }
 
 const cx = (...c: Array<string | false | null | undefined>) =>
   c.filter(Boolean).join(' ')
@@ -90,7 +85,7 @@ export function Chip({
 
 // ---------- Fields ----------
 interface FieldBits {
-  label?: string
+  label?: ReactNode
   hint?: string
   error?: string | null
   optional?: boolean
@@ -259,6 +254,238 @@ export function SearchBar({
   )
 }
 
+// ---------- Illustrations (original, from the design system) ----------
+const S = {
+  stroke: 'var(--on-pastel)',
+  strokeWidth: 2,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
+const f = (c: string) => ({
+  style: { fill: c === 'paper' ? '#fdfcf9' : `var(--${c})` },
+})
+const Ground = () => (
+  <ellipse
+    cx={100}
+    cy={136}
+    rx={70}
+    ry={8}
+    style={{ fill: 'var(--surface-raised)' }}
+  />
+)
+const ILLOS: Record<string, () => ReactNode> = {
+  tasks: () => (
+    <>
+      <Ground />
+      <circle cx={156} cy={34} r={14} style={{ fill: 'var(--accent)' }} />
+      <rect
+        {...S}
+        {...f('lavender')}
+        x={58}
+        y={28}
+        width={84}
+        height={104}
+        rx={14}
+      />
+      <rect
+        {...S}
+        {...f('butter')}
+        x={80}
+        y={20}
+        width={40}
+        height={18}
+        rx={7}
+      />
+      <circle {...S} {...f('accent')} cx={80} cy={60} r={8} />
+      <path {...S} fill="none" d="M76 60l3 3 5-6M96 60h30" />
+      <circle {...S} {...f('paper')} cx={80} cy={84} r={8} />
+      <path {...S} fill="none" d="M96 84h24" />
+      <circle {...S} {...f('paper')} cx={80} cy={108} r={8} />
+      <path {...S} fill="none" d="M96 108h28" />
+    </>
+  ),
+  done: () => (
+    <>
+      <Ground />
+      <rect
+        {...S}
+        {...f('mint')}
+        x={30}
+        y={44}
+        width={28}
+        height={10}
+        rx={5}
+        transform="rotate(-20 44 49)"
+      />
+      <rect
+        {...S}
+        {...f('lavender')}
+        x={146}
+        y={30}
+        width={24}
+        height={10}
+        rx={5}
+        transform="rotate(25 158 35)"
+      />
+      <rect
+        {...S}
+        {...f('sky')}
+        x={150}
+        y={98}
+        width={26}
+        height={10}
+        rx={5}
+        transform="rotate(-10 163 103)"
+      />
+      <circle {...S} {...f('peach')} cx={42} cy={104} r={6} />
+      <circle {...S} {...f('accent')} cx={100} cy={74} r={42} />
+      <path
+        d="M80 74l14 14 26-28"
+        fill="none"
+        stroke="var(--on-pastel)"
+        strokeWidth={6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+  notes: () => (
+    <>
+      <Ground />
+      <rect
+        {...S}
+        {...f('butter')}
+        x={46}
+        y={34}
+        width={78}
+        height={96}
+        rx={12}
+        transform="rotate(-8 85 82)"
+      />
+      <rect
+        {...S}
+        {...f('lavender')}
+        x={72}
+        y={26}
+        width={78}
+        height={96}
+        rx={12}
+        transform="rotate(6 111 74)"
+      />
+      <path
+        {...S}
+        fill="none"
+        d="M88 52h40M86 66h44M84 80h30"
+        transform="rotate(6 111 74)"
+      />
+      <rect
+        {...S}
+        {...f('peach')}
+        x={144}
+        y={44}
+        width={14}
+        height={62}
+        rx={3}
+        transform="rotate(30 151 75)"
+      />
+    </>
+  ),
+  folder: () => (
+    <>
+      <Ground />
+      <path
+        {...S}
+        {...f('butter')}
+        d="M40 44a8 8 0 0 1 8-8h30l10 10h64a8 8 0 0 1 8 8v70a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8z"
+      />
+      <rect
+        x={62}
+        y={36}
+        width={76}
+        height={58}
+        rx={6}
+        style={{ fill: '#fdfcf9' }}
+        stroke="var(--on-pastel)"
+        strokeWidth={2}
+        strokeDasharray="5 5"
+      />
+      <path
+        {...S}
+        {...f('accent')}
+        d="M34 70a8 8 0 0 1 8-8h116a8 8 0 0 1 8 8l-6 52a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8z"
+      />
+    </>
+  ),
+  search: () => (
+    <>
+      <Ground />
+      <rect
+        x={40}
+        y={26}
+        width={104}
+        height={90}
+        rx={16}
+        fill="none"
+        stroke="var(--line-strong)"
+        strokeWidth={2}
+        strokeDasharray="6 6"
+      />
+      <path
+        {...S}
+        stroke="var(--ink)"
+        strokeWidth={10}
+        fill="none"
+        d="M128 98l24 24"
+      />
+      <circle {...S} {...f('sky')} cx={108} cy={76} r={30} />
+      <path
+        d="M98 70a10 10 0 1 1 14 9c-3 2-4 3-4 7M108 94v1"
+        fill="none"
+        stroke="var(--on-pastel)"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  offline: () => (
+    <>
+      <Ground />
+      <path
+        {...S}
+        {...f('sky')}
+        d="M58 104a24 24 0 0 1 4-47 32 32 0 0 1 60-6 26 26 0 0 1 22 53z"
+      />
+      <path
+        d="M60 36l84 84"
+        stroke="var(--danger)"
+        strokeWidth={6}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+}
+export type IllustrationName =
+  'tasks' | 'done' | 'notes' | 'folder' | 'search' | 'offline'
+export function Illustration({
+  name,
+  width = 180,
+}: {
+  name: IllustrationName
+  width?: number
+}) {
+  return (
+    <svg
+      width={width}
+      height={width * 0.75}
+      viewBox="0 0 200 150"
+      className="zn-illo"
+      aria-hidden="true"
+    >
+      {ILLOS[name]()}
+    </svg>
+  )
+}
+
 export function EmptyState({
   illustration,
   title,
@@ -353,33 +580,65 @@ export function MenuButton({
   items: MenuItem[]
 }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState<{
+    top?: number
+    bottom?: number
+    right: number
+  } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  const btn = useRef<HTMLButtonElement>(null)
+  const menu = useRef<HTMLDivElement>(null)
+  const place = () => {
+    const r = btn.current?.getBoundingClientRect()
+    if (!r) return
+    const right = Math.max(8, window.innerWidth - r.right)
+    // Open upward when there isn't room below.
+    setPos(
+      window.innerHeight - r.bottom < 280
+        ? { bottom: window.innerHeight - r.top + 6, right }
+        : { top: r.bottom + 6, right },
+    )
+  }
   useEffect(() => {
     if (!open) return
+    place()
     const close = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      const t = e.target as Node
+      if (!ref.current?.contains(t) && !menu.current?.contains(t))
+        setOpen(false)
     }
+    const reflow = () => setOpen(false)
+    window.addEventListener('scroll', reflow, true)
+    window.addEventListener('resize', reflow)
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     document.addEventListener('mousedown', close)
     document.addEventListener('keydown', esc)
-    ref.current?.querySelector<HTMLButtonElement>('[role=menuitem]')?.focus()
+    requestAnimationFrame(() =>
+      menu.current
+        ?.querySelector<HTMLButtonElement>('[role=menuitem]')
+        ?.focus(),
+    )
     return () => {
       document.removeEventListener('mousedown', close)
       document.removeEventListener('keydown', esc)
+      window.removeEventListener('scroll', reflow, true)
+      window.removeEventListener('resize', reflow)
     }
   }, [open])
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
     e.preventDefault()
     const els = Array.from(
-      ref.current?.querySelectorAll<HTMLButtonElement>('[role=menuitem]') ?? [],
+      menu.current?.querySelectorAll<HTMLButtonElement>('[role=menuitem]') ??
+        [],
     )
     const i = els.indexOf(document.activeElement as HTMLButtonElement)
     els.at((i + (e.key === 'ArrowDown' ? 1 : -1)) % els.length)?.focus()
   }
   return (
-    <div ref={ref} style={{ position: 'relative' }} onKeyDown={onKey}>
+    <div ref={ref} style={{ position: 'relative' }}>
       <button
+        ref={btn}
         type="button"
         className="zn-icon-btn"
         aria-label={label}
@@ -389,37 +648,42 @@ export function MenuButton({
       >
         <Icon name="more" />
       </button>
-      {open && (
-        <div
-          className="zn-menu"
-          role="menu"
-          aria-label={label}
-          style={{ position: 'absolute', right: 0, top: 44, zIndex: 40 }}
-        >
-          {items.map((it, i) =>
-            it.separator ? (
-              <div key={`s${i}`} className="zn-menu-sep" role="separator" />
-            ) : (
-              <button
-                key={it.label}
-                type="button"
-                role="menuitem"
-                className={cx('zn-menu-item', it.danger && 'is-danger')}
-                onClick={() => {
-                  setOpen(false)
-                  it.onSelect?.()
-                }}
-              >
-                {it.icon && <Icon name={it.icon} size={18} />}
-                <span>{it.label}</span>
-                {it.shortcut && (
-                  <kbd className="zn-menu-kbd">{it.shortcut}</kbd>
-                )}
-              </button>
-            ),
-          )}
-        </div>
-      )}
+      {open &&
+        pos &&
+        createPortal(
+          <div
+            ref={menu}
+            className="zn-menu"
+            role="menu"
+            aria-label={label}
+            onKeyDown={onKey}
+            style={{ position: 'fixed', ...pos, zIndex: 60 }}
+          >
+            {items.map((it, i) =>
+              it.separator ? (
+                <div key={`s${i}`} className="zn-menu-sep" role="separator" />
+              ) : (
+                <button
+                  key={it.label}
+                  type="button"
+                  role="menuitem"
+                  className={cx('zn-menu-item', it.danger && 'is-danger')}
+                  onClick={() => {
+                    setOpen(false)
+                    it.onSelect?.()
+                  }}
+                >
+                  {it.icon && <Icon name={it.icon} size={18} />}
+                  <span>{it.label}</span>
+                  {it.shortcut && (
+                    <kbd className="zn-menu-kbd">{it.shortcut}</kbd>
+                  )}
+                </button>
+              ),
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
@@ -448,6 +712,10 @@ export function Modal({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const tid = useId()
+  // Keep the latest onClose without re-running the effect: callers pass inline functions,
+  // and re-running it on every render refocused the first field (the phone keyboard kept popping up).
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
   useEffect(() => {
     if (!open) return
     const prev = document.activeElement as HTMLElement | null
@@ -458,13 +726,17 @@ export function Modal({
           'button,[href],input,textarea,select,[tabindex]:not([tabindex="-1"])',
         ) ?? [],
       ).filter((x) => !x.hasAttribute('disabled'))
-    const first =
-      el?.querySelector<HTMLElement>('[data-autofocus]') ?? focusables()[0]
-    first?.focus()
+    // On touch screens focusing a field opens the keyboard, so only do it where typing is the
+    // whole point (fields marked data-autofocus). Otherwise focus the panel itself.
+    const touch = window.matchMedia('(pointer: coarse)').matches
+    const marked = el?.querySelector<HTMLElement>('[data-autofocus]')
+    const first = touch ? marked : (marked ?? focusables()[0])
+    if (first) first.focus()
+    else el?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        closeRef.current()
       }
       if (e.key === 'Tab') {
         const els = focusables()
@@ -488,7 +760,7 @@ export function Modal({
       document.body.style.overflow = overflow
       prev?.focus()
     }
-  }, [open, onClose])
+  }, [open])
   if (!open || typeof document === 'undefined') return null
   return createPortal(
     <div className={cx('app-modal', `app-modal--${variant}`)}>
@@ -500,6 +772,7 @@ export function Modal({
       <div
         ref={ref}
         role={role}
+        tabIndex={-1}
         aria-modal="true"
         aria-labelledby={tid}
         className={cx('app-modal-panel', 'zn-scroll')}
@@ -590,7 +863,12 @@ export function ConfirmDialog({
     >
       {confirmText && (
         <Input
-          label={`Type ${confirmText} to confirm`}
+          label={
+            <>
+              Type <strong className="confirm-word">{confirmText}</strong> to
+              confirm
+            </>
+          }
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
           autoComplete="off"
