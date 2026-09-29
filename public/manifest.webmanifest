@@ -1,0 +1,13 @@
+{
+  "name": "Amberlist",
+  "short_name": "Amberlist",
+  "description": "Tasks, notes and a scratchpad in one calm place.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1c1d21",
+  "theme_color": "#1c1d21",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

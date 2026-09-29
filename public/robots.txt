@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /$
+Disallow: /api/
+Disallow: /tasks
+Disallow: /notes
+Disallow: /folders
+Disallow: /profile
