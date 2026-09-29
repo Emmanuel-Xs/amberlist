@@ -16,6 +16,7 @@ import {
 } from '#/lib/store'
 import { Icon } from '#/ui/icons'
 import { LogoMark } from '#/ui/logo'
+import { Splash } from '#/components/Splash'
 import type { IconName } from '#/ui/icons'
 import { Button, Modal, Skeleton } from '#/ui/zen'
 import { CreateTask } from './CreateTask'
@@ -63,7 +64,7 @@ function SideNav({ ready }: { ready: boolean }) {
           aria-label="Honeylist home"
           style={{ color: 'var(--ink)', textDecoration: 'none' }}
         >
-          <LogoMark size={32} />
+          <LogoMark size={40} />
           <span className="app-sidebar-extra">Honeylist</span>
         </Link>
         <ul className="zn-nav-list">
@@ -429,6 +430,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a href="#main" className="skip-link">
         Skip to content
       </a>
+      <Splash ready={ready} failed={failed} />
       <SideNav ready={ready} />
       <main id="main" className="app-main" tabIndex={-1}>
         <div className="app-content">

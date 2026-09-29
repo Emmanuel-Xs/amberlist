@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRouteWithContext,
@@ -7,6 +8,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { AppShell } from '#/components/AppShell'
+import { LogoMark } from '#/ui/logo'
 import appCss from '../styles.css?url'
 
 const TITLE = 'Honeylist: tasks, notes and a scratchpad in one calm place'
@@ -80,8 +82,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     }),
     shellComponent: RootDocument,
     component: RootComponent,
+    notFoundComponent: NotFound,
   },
 )
+
+function NotFound() {
+  return (
+    <div
+      style={{
+        padding: '48px 0',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12,
+        textAlign: 'center',
+      }}
+    >
+      <LogoMark size={96} />
+      <h1 className="title" style={{ margin: 0 }}>
+        That page has let go
+      </h1>
+      <p style={{ margin: 0, color: 'var(--ink-muted)' }}>
+        We couldn't find what you were looking for.
+      </p>
+      <Link
+        to="/"
+        className="zn-btn zn-btn--primary zn-btn--md"
+        style={{ textDecoration: 'none' }}
+      >
+        <span className="zn-btn-label">Back home</span>
+      </Link>
+    </div>
+  )
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext()
@@ -99,6 +132,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <noscript>
+          <style>{'.splash{display:none}'}</style>
+        </noscript>
       </head>
       <body>
         {children}

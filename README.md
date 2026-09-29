@@ -1,3 +1,5 @@
+<p align="center"><img src="public/logo.svg" alt="Honeylist logo" width="96" /></p>
+
 # Honeylist
 
 Tasks, notes and a scratchpad in one calm place. Built with AI for **HNG Internship 15, Stage 1**.

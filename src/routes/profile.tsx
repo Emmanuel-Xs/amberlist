@@ -6,6 +6,7 @@ import type { Prefs } from '#/lib/api'
 import { setSoundsEnabled, sound } from '#/lib/feedback'
 import { setShortcuts, toast } from '#/lib/store'
 import { Button, Chip, ConfirmDialog, Input, Switch } from '#/ui/zen'
+import { LogoMark } from '#/ui/logo'
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
@@ -315,7 +316,17 @@ function Profile() {
               Deleting removes every task, note and folder. It can't be undone.
             </p>
           </section>
-          <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-muted)' }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: 12,
+              color: 'var(--ink-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <LogoMark size={28} />
             Honeylist 0.1 · Built with AI for HNG 15
           </p>
         </div>
