@@ -10,6 +10,7 @@ import type { Element, Root } from 'hast'
 import { api, qk, useNoteMutations, useNotes, useTasks } from '#/lib/api'
 import type { Note } from '#/lib/api'
 import { sound } from '#/lib/feedback'
+import { deleteNoteWithUndo } from '#/lib/noteActions'
 import {
   checklistLines,
   continueList,
@@ -192,30 +193,8 @@ function Editor({ note }: { note: Note }) {
   }
 
   const remove = () => {
-    const prev = qc.getQueryData<Note[]>(qk.notes)
-    qc.setQueryData<Note[]>(qk.notes, (old) =>
-      old?.filter((n) => n.id !== note.id),
-    )
     latest.current.dirty = false
-    sound('delete')
-    let undone = false
-    setTimeout(() => {
-      if (undone) return
-      void api(`/notes/${note.id}`, { method: 'DELETE' }).finally(() => {
-        void qc.invalidateQueries({ queryKey: qk.notes })
-        void qc.invalidateQueries({ queryKey: qk.tasks })
-      })
-    }, 4200)
-    toast({
-      icon: 'trash',
-      message: 'Note deleted',
-      actionLabel: 'Undo',
-      onAction: () => {
-        undone = true
-        sound('undo')
-        if (prev) qc.setQueryData(qk.notes, prev)
-      },
-    })
+    deleteNoteWithUndo(qc, note.id)
     void navigate({ to: '/notes' })
   }
 

@@ -9,9 +9,16 @@ import { CELLS, DROP_PATH, HEX_PATH, STUB_PATH } from '#/ui/logo-data'
 export function LogoMark({
   size = 32,
   animated,
+  className,
+  x,
+  y,
 }: {
   size?: number
   animated?: boolean
+  className?: string
+  /** Position when nested inside another svg (used by the empty state art). */
+  x?: number
+  y?: number
 }) {
   const clipId = `hl-${useId().replace(/:/g, '')}`
   const detail = size >= 28
@@ -19,10 +26,14 @@ export function LogoMark({
     <svg
       width={size}
       height={size}
+      x={x}
+      y={y}
       viewBox="-6 -1 76 76"
       aria-hidden="true"
       focusable="false"
-      className={animated ? 'logo-mark logo-mark--animated' : 'logo-mark'}
+      className={['logo-mark', animated && 'logo-mark--animated', className]
+        .filter(Boolean)
+        .join(' ')}
       style={{ flexShrink: 0, display: 'block' }}
     >
       <defs>

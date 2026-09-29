@@ -77,8 +77,11 @@ function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div className="only-phone" style={{ display: 'block', marginBottom: 12 }}>
+        <div className="phone-header">
           <Logo size={40} />
+          <Link to="/profile" className="zn-icon-btn" aria-label="Profile">
+            <Icon name="user" size={24} />
+          </Link>
         </div>
         <p style={{ margin: 0, fontSize: 15, color: 'var(--ink-muted)' }}>
           {hello}

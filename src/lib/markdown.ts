@@ -72,7 +72,11 @@ export function continueList(body: string, caret: number): Edit | null {
 }
 
 /** Add or remove a line prefix (like "- [ ] " or "# ") on the line holding the caret. */
-export function togglePrefix(body: string, caret: number, prefix: string): Edit {
+export function togglePrefix(
+  body: string,
+  caret: number,
+  prefix: string,
+): Edit {
   const start = body.lastIndexOf('\n', caret - 1) + 1
   const endIdx = body.indexOf('\n', caret)
   const end = endIdx === -1 ? body.length : endIdx
@@ -84,7 +88,10 @@ export function togglePrefix(body: string, caret: number, prefix: string): Edit 
     }
   }
   // Swap any other list or heading marker for this one.
-  const stripped = line.replace(/^(\s*)([-*+] \[( |x|X)\] |[-*+] |\d+\. |#{1,6} )/, '$1')
+  const stripped = line.replace(
+    /^(\s*)([-*+] \[( |x|X)\] |[-*+] |\d+\. |#{1,6} )/,
+    '$1',
+  )
   return {
     body: body.slice(0, start) + prefix + stripped + body.slice(end),
     caret: caret + prefix.length - (line.length - stripped.length),

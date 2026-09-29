@@ -230,17 +230,15 @@ export async function createTask(
     })
     .returning()
   if (subs?.length) {
-    await db
-      .insert(subtask)
-      .values(
-        subs.map((title, i) => ({
-          id: id(),
-          userId,
-          taskId: row.id,
-          title,
-          position: i,
-        })),
-      )
+    await db.insert(subtask).values(
+      subs.map((title, i) => ({
+        id: id(),
+        userId,
+        taskId: row.id,
+        title,
+        position: i,
+      })),
+    )
   }
   return getTask(db, userId, row.id)
 }

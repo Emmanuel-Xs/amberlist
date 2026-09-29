@@ -272,6 +272,15 @@ body {
   right: 0;
   bottom: 0;
   z-index: 30;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.app-bottom.is-hidden {
+  transform: translateY(110%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-bottom {
+    transition: none;
+  }
 }
 @media (min-width: 768px) {
   .app-bottom {
@@ -778,4 +787,126 @@ textarea#note-body:focus {
   border: 1px solid currentColor;
   padding: 6px 10px;
   text-align: left;
+}
+
+/* Motion: small, quick, and off for reduced motion */
+.page-enter {
+  animation: page-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.zn-task:not(.task-row-exit) {
+  animation: row-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.zn-check.is-on,
+.zn-check[aria-checked='true'],
+.zn-task.is-done .zn-check {
+  animation: check-pop 0.28s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes check-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.zn-btn,
+.zn-icon-btn,
+.zn-nav-item,
+.zn-chip {
+  transition:
+    transform 0.12s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.zn-btn:active,
+.zn-icon-btn:active,
+.zn-chip:active {
+  transform: scale(0.96);
+}
+.zn-nav-item.is-active svg {
+  animation: nav-pop 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes nav-pop {
+  from {
+    transform: scale(0.85);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .zn-task:not(.task-row-exit),
+  .zn-check,
+  .zn-nav-item.is-active svg {
+    animation: none !important;
+  }
+  .zn-btn:active,
+  .zn-icon-btn:active,
+  .zn-chip:active {
+    transform: none;
+  }
+}
+.zn-nav-item:not(.is-active) .logo-mark {
+  opacity: 0.55;
+}
+
+.phone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+@media (min-width: 768px) {
+  .phone-header {
+    display: none;
+  }
+}
+
+.note-card-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.note-card-delete::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.note-card-delete:hover,
+.note-card-delete:focus-visible {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+.note-card:has(.note-card-delete) a > span:first-child {
+  padding-right: 24px;
 }

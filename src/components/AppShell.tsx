@@ -216,11 +216,33 @@ function SideNav({ ready }: { ready: boolean }) {
   )
 }
 
+/** Hides while scrolling down, comes back on any scroll up or at the top. */
+function useHideOnScroll() {
+  const [hidden, setHidden] = useState(false)
+  useEffect(() => {
+    let last = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      const dy = y - last
+      if (y < 48 || dy < -6) setHidden(false)
+      else if (dy > 6) setHidden(true)
+      last = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  return hidden
+}
+
 function BottomNav() {
   const isActive = useActive()
+  const hidden = useHideOnScroll()
   const items = [NAV[0], NAV[1], null, NAV[2], NAV[3]]
   return (
-    <nav aria-label="Main" className="zn-nav zn-nav--bar app-bottom">
+    <nav
+      aria-label="Main"
+      className={`zn-nav zn-nav--bar app-bottom${hidden ? ' is-hidden' : ''}`}
+    >
       <ul className="zn-nav-list">
         {items.map((n) =>
           n ? (
@@ -402,6 +424,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const navigate = useNavigate()
+  const path = useRouterState({ select: (s) => s.location.pathname })
 
   useEffect(() => {
     ensureGuest()
@@ -467,7 +490,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Button>
             </div>
           ) : ready ? (
-            children
+            <div key={path.split('/')[1] ?? ''} className="page-enter">
+              {children}
+            </div>
           ) : (
             <div
               aria-busy="true"

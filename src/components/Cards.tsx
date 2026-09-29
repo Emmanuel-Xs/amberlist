@@ -1,8 +1,10 @@
 import { Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import type { Category, Note, Task } from '#/lib/api'
 import { dueLabel, formatTimeRange, toISODate } from '#/lib/dates'
 import { Icon } from '#/ui/icons'
 import type { IconName } from '#/ui/icons'
+import { deleteNoteWithUndo } from '#/lib/noteActions'
 import { useTaskActions } from './useTaskActions'
 
 const TONES = ['accent', 'butter', 'lavender', 'mint', 'peach', 'sky'] as const
@@ -263,6 +265,7 @@ export function NoteCard({
   linkedTitle?: string
   height?: number
 }) {
+  const qc = useQueryClient()
   const onSurface = note.color === 'surface'
   const muted = onSurface ? 'var(--ink-muted)' : 'rgba(28,29,33,0.74)'
   const preview = note.body
@@ -270,82 +273,98 @@ export function NoteCard({
     .replace(/[#*_`>]/g, '')
     .slice(0, 220)
   return (
-    <Link
-      to="/notes/$id"
-      params={{ id: note.id }}
-      style={{
-        height,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        padding: 16,
-        borderRadius: 20,
-        background: `var(--${note.color})`,
-        color: onSurface ? 'var(--ink)' : 'var(--on-pastel)',
-        textDecoration: 'none',
-        boxShadow: 'var(--shadow-card)',
-        overflow: 'hidden',
-      }}
-    >
-      <span style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-        <span
-          style={{ flex: 1, fontSize: 15, lineHeight: '20px', fontWeight: 600 }}
-        >
-          {note.title || 'Untitled note'}
-        </span>
-        {note.pinned && (
-          <span aria-label="Pinned" style={{ display: 'inline-flex' }}>
-            <Icon name="pin" size={16} />
-          </span>
-        )}
-      </span>
-      <span
+    <div className="note-card" style={{ position: 'relative' }}>
+      <Link
+        to="/notes/$id"
+        params={{ id: note.id }}
         style={{
-          flex: 1,
-          fontSize: 13,
-          lineHeight: '19px',
-          color: muted,
-          whiteSpace: 'pre-line',
+          height,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          padding: 16,
+          borderRadius: 20,
+          background: `var(--${note.color})`,
+          color: onSurface ? 'var(--ink)' : 'var(--on-pastel)',
+          textDecoration: 'none',
+          boxShadow: 'var(--shadow-card)',
           overflow: 'hidden',
         }}
       >
-        {preview || 'Empty note'}
-      </span>
-      <span
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 11,
-          fontWeight: 500,
-          color: muted,
-          minWidth: 0,
-        }}
-      >
-        {linkedTitle ? (
-          <>
-            <Icon name="link" size={14} />
-            <span
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {linkedTitle}
-            </span>
-          </>
-        ) : (
-          <span>
-            Edited{' '}
-            {new Date(note.updatedAt).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-            })}
+        <span style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <span
+            style={{
+              flex: 1,
+              fontSize: 15,
+              lineHeight: '20px',
+              fontWeight: 600,
+            }}
+          >
+            {note.title || 'Untitled note'}
           </span>
-        )}
-      </span>
-    </Link>
+          {note.pinned && (
+            <span aria-label="Pinned" style={{ display: 'inline-flex' }}>
+              <Icon name="pin" size={16} />
+            </span>
+          )}
+        </span>
+        <span
+          style={{
+            flex: 1,
+            fontSize: 13,
+            lineHeight: '19px',
+            color: muted,
+            whiteSpace: 'pre-line',
+            overflow: 'hidden',
+          }}
+        >
+          {preview || 'Empty note'}
+        </span>
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 500,
+            color: muted,
+            minWidth: 0,
+          }}
+        >
+          {linkedTitle ? (
+            <>
+              <Icon name="link" size={14} />
+              <span
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {linkedTitle}
+              </span>
+            </>
+          ) : (
+            <span>
+              Edited{' '}
+              {new Date(note.updatedAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+              })}
+            </span>
+          )}
+        </span>
+      </Link>
+      <button
+        type="button"
+        className="note-card-delete"
+        aria-label={`Delete note ${note.title || 'Untitled note'}`}
+        onClick={() => deleteNoteWithUndo(qc, note.id)}
+        style={{ color: onSurface ? 'var(--ink-muted)' : 'var(--on-pastel)' }}
+      >
+        <Icon name="trash" size={16} />
+      </button>
+    </div>
   )
 }
 

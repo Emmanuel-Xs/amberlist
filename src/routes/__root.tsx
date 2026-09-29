@@ -42,11 +42,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: TITLE },
         { property: 'og:description', content: DESCRIPTION },
-        { property: 'og:image', content: 'https://honeylist.vercel.app/og.png' },
+        {
+          property: 'og:image',
+          content: 'https://honeylist.vercel.app/og.png',
+        },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: TITLE },
         { name: 'twitter:description', content: DESCRIPTION },
-        { name: 'twitter:image', content: 'https://honeylist.vercel.app/og.png' },
+        {
+          name: 'twitter:image',
+          content: 'https://honeylist.vercel.app/og.png',
+        },
       ],
       links: [
         { rel: 'stylesheet', href: appCss },
