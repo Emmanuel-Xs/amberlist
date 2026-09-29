@@ -179,13 +179,15 @@ export function useTaskMutations() {
   const updateSubtask = useMutation({
     mutationFn: ({
       id,
-      ...input
+      done,
+      title,
     }: {
       id: string
       taskId: string
       done?: boolean
       title?: string
-    }) => api<Task>(`/subtasks/${id}`, { method: 'PATCH', json: input }),
+    }) =>
+      api<Task>(`/subtasks/${id}`, { method: 'PATCH', json: { done, title } }),
     onMutate: ({ id, taskId, ...input }) => ({
       prev: patchCache(taskId, (t) => ({
         ...t,

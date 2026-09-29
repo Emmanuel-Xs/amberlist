@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -419,7 +419,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
   useHotkey('Q', focusQuickAdd)
   useHotkey('C', () => openCreate())
-  useHotkey('N', () => setScratch(true))
+  // "G N" goes to notes, so a bare N right after G must not open the scratchpad.
+  const lastG = useRef(0)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'g') lastG.current = Date.now()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [])
+  useHotkey('N', () => {
+    if (Date.now() - lastG.current < 1000) return
+    setScratch(true)
+  })
   useHotkey('Shift+/', () => setShortcuts(true))
   useHotkeySequence(['G', 'H'], () => void navigate({ to: '/' }))
   useHotkeySequence(['G', 'T'], () => void navigate({ to: '/tasks' }))

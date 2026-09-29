@@ -590,3 +590,192 @@ textarea#note-body:focus {
     transition: none !important;
   }
 }
+
+/* Note editor */
+.note-title {
+  font: inherit;
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  width: 100%;
+  padding: 4px 0;
+}
+.note-title::placeholder,
+.note-body::placeholder {
+  color: inherit;
+  opacity: 0.55;
+}
+.note-title:focus-visible,
+.note-body:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+.note-body {
+  font: inherit;
+  font-size: 16px;
+  line-height: 26px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  resize: none;
+  padding: 0;
+  overflow: hidden;
+}
+.note-mode,
+.note-tool {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  cursor: pointer;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+}
+.note-mode {
+  border-color: transparent;
+  opacity: 0.75;
+}
+.note-mode.is-on {
+  background: var(--on-accent);
+  color: var(--accent);
+  opacity: 1;
+}
+.note-mode:focus-visible,
+.note-tool:focus-visible,
+.md-check:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.note-swatch-ink {
+  color: var(--ink);
+}
+.note-delete {
+  align-self: flex-start;
+}
+.md {
+  font-size: 16px;
+  line-height: 26px;
+  overflow-wrap: anywhere;
+}
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md h1,
+.md h2,
+.md h3 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 20px 0 8px;
+}
+.md h1 {
+  font-size: 24px;
+}
+.md h2 {
+  font-size: 20px;
+}
+.md h3 {
+  font-size: 17px;
+}
+.md p,
+.md ul,
+.md ol,
+.md blockquote,
+.md pre {
+  margin: 0 0 12px;
+}
+.md ul,
+.md ol {
+  padding-left: 24px;
+}
+.md ul {
+  list-style: disc;
+}
+.md ol {
+  list-style: decimal;
+}
+.md ul.contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+.md li.task-list-item {
+  display: block;
+  margin: 4px 0;
+}
+.md li.task-list-item:has(.md-check.is-on) {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+.md-check {
+  display: inline-grid;
+  vertical-align: middle;
+  margin-right: 10px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 8px;
+  border: 2px solid currentColor;
+  background: transparent;
+  color: inherit;
+  place-items: center;
+  cursor: pointer;
+  /* 44px touch target without changing the look */
+  position: relative;
+}
+.md-check::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+.md-check.is-on {
+  background: var(--on-accent);
+  border-color: var(--on-accent);
+  color: var(--accent);
+}
+.md a {
+  color: inherit;
+  text-decoration: underline;
+}
+.md code {
+  font-size: 0.9em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(28, 29, 33, 0.12);
+}
+.md pre {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(28, 29, 33, 0.12);
+  overflow-x: auto;
+}
+.md pre code {
+  padding: 0;
+  background: transparent;
+}
+.md blockquote {
+  padding-left: 14px;
+  border-left: 3px solid currentColor;
+  opacity: 0.85;
+}
+.md table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.md th,
+.md td {
+  border: 1px solid currentColor;
+  padding: 6px 10px;
+  text-align: left;
+}
