@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, meQuery, qk, useNotes, useTasks } from '#/lib/api'
-import type { Prefs } from '#/lib/api'
+import { api, meQuery, useNotes, useTasks, useUpdateMe } from '#/lib/api'
+import type { PrefsUpdate } from '#/lib/api'
 import { setSoundsEnabled, sound } from '#/lib/feedback'
 import { setShortcuts, toast } from '#/lib/store'
 import { Button, Chip, ConfirmDialog, Input, Switch } from '#/ui/zen'
@@ -22,13 +22,20 @@ function Profile() {
   const [confirm, setConfirm] = useState(false)
   useEffect(() => setName(me?.displayName ?? ''), [me?.displayName])
 
-  const update = useMutation({
-    mutationFn: (p: Partial<Prefs>) =>
-      api<Prefs>('/me', { method: 'PATCH', json: p }),
-    onSuccess: (p) => qc.setQueryData(qk.me, p),
-    onError: (e) =>
-      toast({ tone: 'error', icon: 'alert', message: e.message, duration: 0 }),
-  })
+  const updateMe = useUpdateMe()
+  const update = {
+    mutate: (p: PrefsUpdate, opts?: { onSuccess?: () => void }) =>
+      updateMe.mutate(p, {
+        onSuccess: opts?.onSuccess,
+        onError: (e) =>
+          toast({
+            tone: 'error',
+            icon: 'alert',
+            message: e.message,
+            duration: 0,
+          }),
+      }),
+  }
   const wipe = useMutation({
     mutationFn: () => api('/me/data', { method: 'DELETE' }),
     onSuccess: () => {

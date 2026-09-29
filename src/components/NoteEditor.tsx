@@ -18,8 +18,10 @@ import {
   togglePrefix,
 } from '#/lib/markdown'
 import { toast } from '#/lib/store'
+import { colorVar, NOTE_PRESET_COLORS } from '#/lib/colors'
 import { Icon } from '#/ui/icons'
-import { Button, EmptyState, Skeleton } from '#/ui/zen'
+import { Button, EmptyState, IconButton, Skeleton } from '#/ui/zen'
+import { ColorPicker } from '#/components/ColorPicker'
 
 /** Tags each task checkbox with the source line of its list item, so a click can tick the right line. */
 function stampChecklistLines() {
@@ -45,15 +47,6 @@ const SCHEMA = {
     input: [...(defaultSchema.attributes?.input ?? []), 'dataLine'],
   },
 }
-
-const COLORS: Note['color'][] = [
-  'surface',
-  'lavender',
-  'butter',
-  'mint',
-  'peach',
-  'sky',
-]
 
 type Save = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -249,32 +242,26 @@ function Editor({ note }: { note: Note }) {
             </span>
           )}
         </span>
-        <button
-          type="button"
-          className="zn-icon-btn"
-          aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
+        <IconButton
+          label={note.pinned ? 'Unpin note' : 'Pin note'}
+          icon="pin"
+          iconSize={22}
           aria-pressed={note.pinned}
           onClick={() => persist({ pinned: !note.pinned })}
           style={note.pinned ? { color: 'var(--accent-ink)' } : undefined}
-        >
-          <Icon name="pin" size={22} />
-        </button>
-        <button
-          type="button"
-          className="zn-icon-btn"
-          aria-label="Duplicate note"
+        />
+        <IconButton
+          label="Duplicate note"
+          icon="copy"
+          iconSize={22}
           onClick={duplicate}
-        >
-          <Icon name="copy" size={22} />
-        </button>
-        <button
-          type="button"
-          className="zn-icon-btn"
-          aria-label="Delete note"
+        />
+        <IconButton
+          label="Delete note"
+          icon="trash"
+          iconSize={22}
           onClick={remove}
-        >
-          <Icon name="trash" size={22} />
-        </button>
+        />
       </header>
 
       <div
@@ -282,7 +269,7 @@ function Editor({ note }: { note: Note }) {
         style={{
           borderRadius: 24,
           padding: 'clamp(16px, 4vw, 28px)',
-          background: `var(--${note.color})`,
+          background: colorVar(note.color),
           color: onSurface ? 'var(--ink)' : 'var(--on-pastel)',
           boxShadow: 'var(--shadow-card)',
           display: 'flex',
@@ -356,48 +343,12 @@ function Editor({ note }: { note: Note }) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div>
-          <span className="zn-field-label">Color</span>
-          <div
-            role="radiogroup"
-            aria-label="Note color"
-            style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}
-          >
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                role="radio"
-                aria-checked={note.color === c}
-                aria-label={c === 'surface' ? 'Plain' : c}
-                className={['zn-swatch', note.color === c && 'is-selected']
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() => persist({ color: c })}
-                style={{
-                  background: `var(--${c})`,
-                  display: 'grid',
-                  placeItems: 'center',
-                  color: 'var(--on-pastel)',
-                  width: 44,
-                  height: 44,
-                  boxShadow:
-                    c === 'surface'
-                      ? 'inset 0 0 0 1px var(--line-strong)'
-                      : undefined,
-                }}
-              >
-                {note.color === c && (
-                  <Icon
-                    name="check"
-                    size={18}
-                    className={c === 'surface' ? 'note-swatch-ink' : undefined}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+        <ColorPicker
+          label="Note color"
+          presets={NOTE_PRESET_COLORS}
+          value={note.color}
+          onChange={(color) => persist({ color })}
+        />
 
         <div>
           <label className="zn-field-label" htmlFor="note-task">
@@ -520,3 +471,5 @@ function Preview({
     </div>
   )
 }
+
+/** Hue gradient for the slider track: every stop is the soft shade the slider would pick. */

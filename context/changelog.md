@@ -38,3 +38,12 @@ Notable commits, newest first (2026-09-29, times WAT). Add an entry with every c
 
 ## 598cca6, 18:03: Amberlist Stage 1
 - TanStack Start app with guest accounts (Better Auth anonymous), Drizzle on Postgres, tested REST API, responsive shell (phone bar, tablet rail, desktop sidebar plus detail pane), Zen Todo design system, tasks, quick add parser, notes list, scratchpad, folders, progressive Home, profile, shortcuts, toasts, sounds, confetti.
+
+## 2026-09-30: round 2 approvals built
+- Welcome screen with name and theme; dynamic greeting (time, weekday, new or returning), name updates live.
+- Quick add: no leading icon, amber Add pill on the right with a plain plus, desktop hint line, one-time shortcuts tip.
+- Friendly toasts (board 4): badge, title plus detail, rotating copy (`src/lib/messages.ts`), soft sound on success toasts.
+- Softer dark pastels; custom note and folder colours (`src/components/ColorPicker.tsx`, `src/lib/colors.ts`).
+- Rows: inset actions on hover, Low priority shown, tooltips, list or grid toggle, centred confirm dialogs.
+- Motion library (`motion`) adopted: toasts spring in, ticked rows hold 450 ms then glide to Completed, splash logo flies into the sidebar or phone header, page transitions via native View Transitions.
+- Repo skills: `.claude/skills/motion` (from motion-ai, MIT) and `.claude/skills/honeylist-motion`; Motion MCP in `.mcp.json`.

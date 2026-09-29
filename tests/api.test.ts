@@ -446,6 +446,68 @@ describe('profile, search and data', () => {
     ).toBe(400)
   })
 
+  it('marks the welcome screen as done with a name', async () => {
+    const first = (await call(h.me.GET, 'GET')).body
+    expect(first).toMatchObject({ onboarded: false, onboardedAt: null })
+    const r = await call(h.me.PATCH, 'PATCH', {
+      body: { displayName: 'Emmanuel', theme: 'light', onboarded: true },
+    })
+    expect(r.status).toBe(200)
+    expect(r.body).toMatchObject({
+      displayName: 'Emmanuel',
+      theme: 'light',
+      onboarded: true,
+    })
+    expect(r.body.onboardedAt).toEqual(expect.any(String))
+    // Setting it again keeps the first time.
+    const again = await call(h.me.PATCH, 'PATCH', { body: { onboarded: true } })
+    expect(again.body.onboardedAt).toBe(r.body.onboardedAt)
+    // Only this user is onboarded.
+    expect((await call(h.me.GET, 'GET', { user: 'bob' })).body.onboarded).toBe(
+      false,
+    )
+  })
+
+  it('skipping the welcome screen needs no name', async () => {
+    const r = await call(h.me.PATCH, 'PATCH', { body: { onboarded: true } })
+    expect(r.body).toMatchObject({ onboarded: true, displayName: null })
+    expect((await call(h.me.GET, 'GET')).body.onboarded).toBe(true)
+  })
+
+  it('treats guests who already have a task or note as onboarded', async () => {
+    await call(h.tasks.POST, 'POST', { body: { title: 'Old task' } })
+    await call(h.notes.POST, 'POST', { user: 'bob', body: { title: 'Idea' } })
+    // The scratchpad alone does not count.
+    await call(h.scratchpad.GET, 'GET', { user: 'carol' })
+    expect((await call(h.me.GET, 'GET')).body.onboarded).toBe(true)
+    expect((await call(h.me.GET, 'GET', { user: 'bob' })).body.onboarded).toBe(
+      true,
+    )
+    expect(
+      (await call(h.me.GET, 'GET', { user: 'carol' })).body.onboarded,
+    ).toBe(false)
+  })
+
+  it('rejects a bad onboarding body and a missing session', async () => {
+    for (const body of [
+      { onboarded: false },
+      { onboarded: 'yes' },
+      { onboardedAt: '2026-01-01' },
+      { displayName: 'x'.repeat(41), onboarded: true },
+    ]) {
+      expect((await call(h.me.PATCH, 'PATCH', { body })).status).toBe(400)
+    }
+    expect(
+      (
+        await call(h.me.PATCH, 'PATCH', {
+          user: null,
+          body: { onboarded: true },
+        })
+      ).status,
+    ).toBe(401)
+    expect((await call(h.me.GET, 'GET', { user: null })).status).toBe(401)
+  })
+
   it('searches tasks and notes together', async () => {
     await call(h.tasks.POST, 'POST', { body: { title: 'Send invoice' } })
     await call(h.notes.POST, 'POST', {
@@ -469,5 +531,123 @@ describe('profile, search and data', () => {
     expect((await call(h.tasks.GET, 'GET', { user: 'bob' })).body).toHaveLength(
       1,
     )
+  })
+})
+
+describe('custom colours for notes and folders', () => {
+  // #cca8f0 is HSL(270, 70%, 80%); #333366 is far too dark; #6666ff sits at 70% but fails 4.5:1.
+  const soft = '#cca8f0'
+  const bad = [
+    '#333366',
+    '#6666ff',
+    '#ffffff',
+    'neon',
+    '#abc',
+    'd4b9f0',
+    '#zzzzzz',
+    42,
+  ]
+
+  it('notes accept a preset or a soft custom hex, and reject dark or garbage colours', async () => {
+    const preset = await call(h.notes.POST, 'POST', { body: { color: 'mint' } })
+    expect(preset.status).toBe(201)
+    expect(preset.body.color).toBe('mint')
+    const custom = await call(h.notes.POST, 'POST', { body: { color: soft } })
+    expect(custom.status).toBe(201)
+    expect(custom.body.color).toBe(soft)
+    const upper = await call(h.noteById.PATCH, 'PATCH', {
+      params: { id: preset.body.id },
+      body: { color: '#CCA8F0' },
+    })
+    expect(upper.status).toBe(200)
+    for (const color of bad) {
+      expect(
+        (await call(h.notes.POST, 'POST', { body: { color } })).status,
+      ).toBe(400)
+      expect(
+        (
+          await call(h.noteById.PATCH, 'PATCH', {
+            params: { id: custom.body.id },
+            body: { color },
+          })
+        ).status,
+      ).toBe(400)
+    }
+    expect(
+      (await call(h.noteById.GET, 'GET', { params: { id: custom.body.id } }))
+        .body.color,
+    ).toBe(soft)
+    expect(
+      (
+        await call(h.noteById.PATCH, 'PATCH', {
+          user: 'bob',
+          params: { id: custom.body.id },
+          body: { color: soft },
+        })
+      ).status,
+    ).toBe(404)
+    expect(
+      (await call(h.notes.POST, 'POST', { user: null, body: { color: soft } }))
+        .status,
+    ).toBe(401)
+  })
+
+  it('folders accept a preset or a soft custom hex, and reject dark or garbage colours', async () => {
+    const preset = await call(h.categories.POST, 'POST', {
+      body: { name: 'Gym', color: 'peach' },
+    })
+    expect(preset.status).toBe(201)
+    const custom = await call(h.categories.POST, 'POST', {
+      body: { name: 'Garden', color: soft },
+    })
+    expect(custom.status).toBe(201)
+    expect(custom.body.color).toBe(soft)
+    const patched = await call(h.categoryById.PATCH, 'PATCH', {
+      params: { id: preset.body.id },
+      body: { color: soft },
+    })
+    expect(patched.body.color).toBe(soft)
+    // Folders have no plain surface colour.
+    expect(
+      (
+        await call(h.categories.POST, 'POST', {
+          body: { name: 'x', color: 'surface' },
+        })
+      ).status,
+    ).toBe(400)
+    for (const color of bad) {
+      expect(
+        (
+          await call(h.categories.POST, 'POST', {
+            body: { name: 'x', color },
+          })
+        ).status,
+      ).toBe(400)
+      expect(
+        (
+          await call(h.categoryById.PATCH, 'PATCH', {
+            params: { id: custom.body.id },
+            body: { color },
+          })
+        ).status,
+      ).toBe(400)
+    }
+    expect(
+      (
+        await call(h.categoryById.PATCH, 'PATCH', {
+          user: 'bob',
+          params: { id: custom.body.id },
+          body: { color: soft },
+        })
+      ).status,
+    ).toBe(404)
+    expect(
+      (
+        await call(h.categories.POST, 'POST', {
+          user: null,
+          body: { name: 'x', color: soft },
+        })
+      ).status,
+    ).toBe(401)
   })
 })

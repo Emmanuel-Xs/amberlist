@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { qk, useTaskMutations } from '#/lib/api'
 import type { Task } from '#/lib/api'
 import { groupOf, toISODate } from '#/lib/dates'
 import { confetti, sound } from '#/lib/feedback'
+import { TICK_HOLD_MS } from '#/lib/motion'
+import { doneMessage } from '#/lib/messages'
 import { toast } from '#/lib/store'
 
 /** Complete and delete with Undo instead of confirm dialogs, plus the rare celebration. */
@@ -12,8 +15,24 @@ export function useTaskActions() {
 
   const toggle = (t: Task) => {
     const done = t.status !== 'done'
-    m.update.mutate({ id: t.id, status: done ? 'done' : 'todo' })
-    if (!done) return
+    if (!done) {
+      m.update.mutate({ id: t.id, status: 'todo' })
+      return
+    }
+    // Hold briefly so the tick is seen before the row glides to Completed; Undo cancels the hold.
+    let pending = true
+    const timer = setTimeout(() => {
+      pending = false
+      m.update.mutate({ id: t.id, status: 'done' })
+    }, TICK_HOLD_MS)
+    const undo = () => {
+      sound('undo')
+      if (pending) {
+        pending = false
+        clearTimeout(timer)
+        window.dispatchEvent(new CustomEvent('task-untick', { detail: t.id }))
+      } else m.update.mutate({ id: t.id, status: t.status })
+    }
     const today = toISODate(new Date())
     const all = qc.getQueryData<Task[]>(qk.tasks) ?? []
     const wasToday =
@@ -29,21 +48,21 @@ export function useTaskActions() {
       confetti()
       toast({
         tone: 'success',
-        icon: 'check',
-        message: 'All done for today. Well played.',
+        silent: true,
+        badge: 'logo',
+        message: 'All done for today',
+        detail: 'Nice work. Rest, or pull something forward.',
       })
       return
     }
     sound('complete')
     toast({
       tone: 'success',
-      icon: 'check',
-      message: 'Task completed',
+      silent: true,
+      badge: 'check',
+      ...doneMessage(t, all),
       actionLabel: 'Undo',
-      onAction: () => {
-        sound('undo')
-        m.update.mutate({ id: t.id, status: t.status })
-      },
+      onAction: undo,
     })
   }
 
@@ -59,8 +78,11 @@ export function useTaskActions() {
       if (!undone) m.remove.mutate(t.id)
     }, 4200)
     toast({
-      icon: 'trash',
+      badge: 'trash',
       message: 'Task deleted',
+      detail: t.subtasks.length
+        ? `Its ${t.subtasks.length} subtask${t.subtasks.length === 1 ? '' : 's'} went with it.`
+        : undefined,
       actionLabel: 'Undo',
       onAction: () => {
         undone = true
@@ -91,4 +113,21 @@ export function useTaskActions() {
     m.update.mutate({ id: t.id, status: 'in_progress' })
 
   return { toggle, remove, duplicate, start, mutations: m }
+}
+
+/**
+ * Shows a task as ticked the moment it's clicked, during the short hold before the real update.
+ * Clears when the task's status changes or when Undo cancels the hold.
+ */
+export function useTicked(task: Task) {
+  const [ticked, setTicked] = useState(false)
+  useEffect(() => setTicked(false), [task.status])
+  useEffect(() => {
+    const off = (e: Event) => {
+      if ((e as CustomEvent<string>).detail === task.id) setTicked(false)
+    }
+    window.addEventListener('task-untick', off)
+    return () => window.removeEventListener('task-untick', off)
+  }, [task.id])
+  return [ticked, setTicked] as const
 }

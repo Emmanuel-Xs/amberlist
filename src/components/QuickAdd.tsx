@@ -8,10 +8,11 @@ import type { Category } from '#/lib/api'
 import { toISODate } from '#/lib/dates'
 import { sound } from '#/lib/feedback'
 import { parseQuickAdd } from '#/lib/parse'
-import { openCreate, toast } from '#/lib/store'
+import { toast } from '#/lib/store'
+import { useQueryClient } from '@tanstack/react-query'
+import { announceAdded } from '#/lib/announce'
 import { Icon } from '#/ui/icons'
 import type { IconName } from '#/ui/icons'
-import { Button } from '#/ui/zen'
 
 const CHIP_ICON: Record<string, IconName> = {
   date: 'calendar',
@@ -38,6 +39,7 @@ export function QuickAdd({
   const inputRef = useRef<HTMLInputElement>(null)
   const { data: cats = [] } = useCategories()
   const { create } = useTaskMutations()
+  const qc = useQueryClient()
   const catM = useCategoryMutations()
   const today = toISODate(new Date())
   // Short hint on narrow phones so the placeholder never gets cut off.
@@ -60,7 +62,10 @@ export function QuickAdd({
 
   const submit = async () => {
     const p = parsed
-    if (!p.title.trim()) return
+    if (!p.title.trim()) {
+      inputRef.current?.focus()
+      return
+    }
     let categoryId: string | null = null
     if (p.category) {
       const found = cats.find(
@@ -86,13 +91,9 @@ export function QuickAdd({
         categoryId,
       },
       {
-        onSuccess: () => {
+        onSuccess: (created) => {
           sound('complete')
-          toast({
-            tone: 'success',
-            icon: 'check',
-            message: `Added "${p.title}"`,
-          })
+          announceAdded(qc, created)
           onAdded?.()
         },
         onError: (e) => {
@@ -119,39 +120,7 @@ export function QuickAdd({
       }}
       style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
     >
-      <div
-        style={{
-          height: 56,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '0 8px 0 10px',
-          borderRadius: 9999,
-          background: 'var(--surface)',
-          border: `1px solid ${text ? 'var(--ring)' : 'var(--line)'}`,
-          boxShadow: 'var(--shadow-card)',
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => openCreate(text)}
-          aria-label="Open the full task form"
-          title="Full task form"
-          style={{
-            width: 36,
-            height: 36,
-            flexShrink: 0,
-            borderRadius: '50%',
-            background: 'var(--accent)',
-            color: 'var(--on-accent)',
-            border: 0,
-            display: 'grid',
-            placeItems: 'center',
-            cursor: 'pointer',
-          }}
-        >
-          <Icon name="plus" size={20} strokeWidth={2.25} />
-        </button>
+      <div className="quick-add-field">
         <label htmlFor="quick-add" className="sr-only">
           Add a task
         </label>
@@ -166,44 +135,26 @@ export function QuickAdd({
           }}
           placeholder={
             narrow
-              ? 'Add a task, try "Gym tomorrow"'
-              : 'Add a task. Try "Read 20 pages tomorrow #study"'
+              ? 'Add a task, like "Gym at 5pm"'
+              : 'Add a task, like "Call mum tomorrow 5pm"'
           }
           autoComplete="off"
+          enterKeyHint="done"
           maxLength={300}
-          style={{
-            flex: 1,
-            minWidth: 0,
-            height: 44,
-            border: 0,
-            outline: 0,
-            background: 'transparent',
-            font: 'inherit',
-            fontSize: 16,
-            color: 'var(--ink)',
-          }}
+          className="quick-add-input"
         />
-        {text.trim() ? (
-          <Button size="sm" type="submit">
+        <button type="submit" className="quick-add-btn" aria-label="Add task">
+          <Icon name="plus" size={20} strokeWidth={2.25} />
+          <span className="quick-add-btn-label" aria-hidden="true">
             Add
-          </Button>
-        ) : (
-          <kbd
-            className="from-tablet"
-            style={{
-              fontFamily: 'inherit',
-              fontSize: 12,
-              color: 'var(--ink-muted)',
-              padding: '3px 9px',
-              marginRight: 8,
-              border: '1px solid var(--line-strong)',
-              borderRadius: 8,
-            }}
-          >
-            Q
-          </kbd>
-        )}
+          </span>
+        </button>
       </div>
+      {parsed.chips.length === 0 && (
+        <p className="quick-add-hint">
+          Press Q anywhere to add a task · Enter saves
+        </p>
+      )}
       {parsed.chips.length > 0 && (
         <div
           style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingLeft: 12 }}

@@ -1,3 +1,4 @@
+import type { HexColor, NotePresetColor, PresetColor } from '#/lib/colors'
 import {
   queryOptions,
   useMutation,
@@ -32,7 +33,8 @@ export interface Note {
   id: string
   title: string
   body: string
-  color: 'surface' | 'lavender' | 'butter' | 'mint' | 'peach' | 'sky'
+  /** A preset token name or a soft custom `#rrggbb`. */
+  color: NotePresetColor | HexColor
   pinned: boolean
   taskId: string | null
   updatedAt: string
@@ -40,7 +42,8 @@ export interface Note {
 export interface Category {
   id: string
   name: string
-  color: 'lavender' | 'butter' | 'mint' | 'peach' | 'sky'
+  /** A preset token name or a soft custom `#rrggbb`. */
+  color: PresetColor | HexColor
   icon: string
   taskCount: number
   doneCount: number
@@ -49,7 +52,15 @@ export interface Prefs {
   displayName: string | null
   theme: 'dark' | 'light' | 'system'
   sounds: boolean
+  /** True once the welcome screen is done, or for guests who already had tasks, notes or a name. */
+  onboarded: boolean
+  onboardedAt: string | null
+  /** When the account was made (ISO), used for the "Welcome" greeting on day one. */
+  joinedAt: string | null
 }
+export type PrefsUpdate = Partial<
+  Pick<Prefs, 'displayName' | 'theme' | 'sounds'>
+> & { onboarded?: true }
 export type TaskInput = Partial<
   Omit<Task, 'id' | 'subtasks' | 'noteCount' | 'createdAt' | 'completedAt'>
 > & { subtasks?: string[] }
@@ -110,6 +121,17 @@ export const meQuery = queryOptions({
   queryKey: qk.me,
   queryFn: () => api<Prefs>('/me'),
 })
+
+/** Saves prefs (name, theme, sounds, onboarded) and updates every screen that reads the me query. */
+export function useUpdateMe() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (p: PrefsUpdate) =>
+      api<Prefs>('/me', { method: 'PATCH', json: p }),
+    onSuccess: (p) => qc.setQueryData(qk.me, p),
+    onSettled: () => void qc.invalidateQueries({ queryKey: qk.me }),
+  })
+}
 
 export const useTasks = () => useQuery(tasksQuery)
 export const useCategories = () => useQuery(categoriesQuery)

@@ -18,7 +18,7 @@ export function deleteNoteWithUndo(qc: QueryClient, id: string) {
     })
   }, 4200)
   toast({
-    icon: 'trash',
+    badge: 'trash',
     message: 'Note deleted',
     actionLabel: 'Undo',
     onAction: () => {

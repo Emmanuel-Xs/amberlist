@@ -1,10 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import type { Category, Note, Task } from '#/lib/api'
+import { colorVar } from '#/lib/colors'
 import { dueLabel, formatTimeRange, toISODate } from '#/lib/dates'
 import { Icon } from '#/ui/icons'
 import type { IconName } from '#/ui/icons'
 import { deleteNoteWithUndo } from '#/lib/noteActions'
+import { Priority } from './TaskRow'
 import { useTaskActions } from './useTaskActions'
 
 const TONES = ['accent', 'butter', 'lavender', 'mint', 'peach', 'sky'] as const
@@ -22,7 +24,7 @@ export function TodayCard({
   const { toggle } = useTaskActions()
   const tone =
     index === 0 ? 'accent' : (category?.color ?? TONES[(index % 5) + 1])
-  const bg = `var(--${tone})`
+  const bg = colorVar(tone)
   const today = toISODate(new Date())
   const badge =
     task.status === 'in_progress' ? 'In progress' : dueLabel(task, today)
@@ -79,6 +81,12 @@ export function TodayCard({
             >
               {badge}
             </span>
+          )}
+          {task.status !== 'done' && (
+            <Priority
+              priority={task.priority}
+              className="task-priority--pill"
+            />
           )}
         </div>
         <Link
@@ -186,7 +194,7 @@ export function TodayCard({
 }
 
 export function FolderCard({ category }: { category: Category }) {
-  const bg = `var(--${category.color})`
+  const bg = colorVar(category.color)
   const pct = category.taskCount
     ? Math.round((category.doneCount / category.taskCount) * 100)
     : 0
@@ -284,7 +292,7 @@ export function NoteCard({
           gap: 8,
           padding: 16,
           borderRadius: 20,
-          background: `var(--${note.color})`,
+          background: colorVar(note.color),
           color: onSurface ? 'var(--ink)' : 'var(--on-pastel)',
           textDecoration: 'none',
           boxShadow: 'var(--shadow-card)',

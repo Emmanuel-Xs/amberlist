@@ -1,7 +1,15 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import {
+  cloneElement,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
+  ReactElement,
   ReactNode,
   TextareaHTMLAttributes,
 } from 'react'
@@ -563,6 +571,166 @@ export function Alert({
   )
 }
 
+// ---------- Tooltip ----------
+const TIP_DELAY = 400
+const TIP_GAP = 8
+type TipChild = ReactElement<{
+  'aria-label'?: string
+  'aria-describedby'?: string
+}>
+/**
+ * Inverted bubble above an icon button (below when there is no room). Shows after 400ms of mouse
+ * hover or at once on keyboard focus, hides on Esc, blur, leave, press or scroll. Never on touch.
+ * The wrapper is `display: contents`, so it never changes the trigger's layout.
+ */
+export function Tooltip({
+  label,
+  shortcut,
+  media,
+  children,
+}: {
+  label: string
+  shortcut?: string
+  /** Only show while this media query matches, e.g. when a rail hides the labels. */
+  media?: string
+  children: TipChild
+}) {
+  const id = useId()
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+  const wrap = useRef<HTMLSpanElement>(null)
+  const tip = useRef<HTMLDivElement>(null)
+  const timer = useRef<number | undefined>(undefined)
+  const allowed = () =>
+    !window.matchMedia('(pointer: coarse)').matches &&
+    (!media || window.matchMedia(media).matches)
+  const trigger = () => wrap.current?.firstElementChild as HTMLElement | null
+  const hide = () => {
+    window.clearTimeout(timer.current)
+    setOpen(false)
+  }
+  const show = (delay: number) => {
+    if (!allowed()) return
+    window.clearTimeout(timer.current)
+    if (delay === 0) setOpen(true)
+    else timer.current = window.setTimeout(() => setOpen(true), delay)
+  }
+  useLayoutEffect(() => {
+    if (!open) {
+      setPos(null)
+      return
+    }
+    const r = trigger()?.getBoundingClientRect()
+    const el = tip.current
+    if (!r || !el) return
+    const w = el.offsetWidth
+    const h = el.offsetHeight
+    const above = r.top - h - TIP_GAP
+    const top = above < TIP_GAP ? r.bottom + TIP_GAP : above
+    const left = Math.min(
+      Math.max(TIP_GAP, r.left + r.width / 2 - w / 2),
+      window.innerWidth - w - TIP_GAP,
+    )
+    setPos({ left, top })
+  }, [open])
+  useEffect(() => {
+    if (!open) return
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && hide()
+    document.addEventListener('keydown', esc, true)
+    window.addEventListener('scroll', hide, true)
+    window.addEventListener('resize', hide)
+    return () => {
+      document.removeEventListener('keydown', esc, true)
+      window.removeEventListener('scroll', hide, true)
+      window.removeEventListener('resize', hide)
+    }
+  }, [open])
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+  // Only describe what the accessible name doesn't already say.
+  const describe = !!shortcut || children.props['aria-label'] !== label
+  const body = (
+    <>
+      {label}
+      {shortcut && <kbd className="zn-tooltip-kbd">{shortcut}</kbd>}
+    </>
+  )
+  return (
+    <span
+      ref={wrap}
+      className="zn-tooltip-anchor"
+      onPointerEnter={(e) => e.pointerType === 'mouse' && show(TIP_DELAY)}
+      onPointerLeave={() => {
+        if (!trigger()?.matches(':focus-visible')) hide()
+      }}
+      onPointerDown={hide}
+      onFocus={() => {
+        if (trigger()?.matches(':focus-visible')) show(0)
+      }}
+      onBlur={hide}
+    >
+      {describe
+        ? cloneElement(children, {
+            'aria-describedby': [children.props['aria-describedby'], id]
+              .filter(Boolean)
+              .join(' '),
+          })
+        : children}
+      {open ? (
+        createPortal(
+          <div
+            ref={tip}
+            id={id}
+            role="tooltip"
+            className="zn-tooltip"
+            style={{
+              left: pos?.left ?? 0,
+              top: pos?.top ?? 0,
+              visibility: pos ? 'visible' : 'hidden',
+            }}
+          >
+            {body}
+          </div>,
+          document.body,
+        )
+      ) : (
+        <span id={id} hidden>
+          {body}
+        </span>
+      )}
+    </span>
+  )
+}
+
+/** Icon-only button with its aria-label shown as a Tooltip (plus the shortcut, if any). */
+export function IconButton({
+  label,
+  icon,
+  shortcut,
+  iconSize = 20,
+  tooltipMedia,
+  className,
+  ...rest
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  label: string
+  icon: IconName
+  shortcut?: string
+  iconSize?: number
+  tooltipMedia?: string
+}) {
+  return (
+    <Tooltip label={label} shortcut={shortcut} media={tooltipMedia}>
+      <button
+        type="button"
+        {...rest}
+        aria-label={label}
+        className={cx('zn-icon-btn', className)}
+      >
+        <Icon name={icon} size={iconSize} />
+      </button>
+    </Tooltip>
+  )
+}
+
 // ---------- Menu ----------
 export interface MenuItem {
   label?: string
@@ -575,9 +743,14 @@ export interface MenuItem {
 export function MenuButton({
   label,
   items,
+  tip,
+  triggerClassName,
 }: {
   label: string
   items: MenuItem[]
+  /** Short tooltip for the trigger, e.g. "More actions". */
+  tip?: string
+  triggerClassName?: string
 }) {
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{
@@ -635,19 +808,22 @@ export function MenuButton({
     const i = els.indexOf(document.activeElement as HTMLButtonElement)
     els.at((i + (e.key === 'ArrowDown' ? 1 : -1)) % els.length)?.focus()
   }
+  const trigger = (
+    <button
+      ref={btn}
+      type="button"
+      className={cx('zn-icon-btn', triggerClassName)}
+      aria-label={label}
+      aria-haspopup="menu"
+      aria-expanded={open}
+      onClick={() => setOpen((o) => !o)}
+    >
+      <Icon name="more" />
+    </button>
+  )
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        ref={btn}
-        type="button"
-        className="zn-icon-btn"
-        aria-label={label}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <Icon name="more" />
-      </button>
+      {tip ? <Tooltip label={tip}>{trigger}</Tooltip> : trigger}
       {open &&
         pos &&
         createPortal(
@@ -775,7 +951,11 @@ export function Modal({
         tabIndex={-1}
         aria-modal="true"
         aria-labelledby={tid}
-        className={cx('app-modal-panel', 'zn-scroll')}
+        className={cx(
+          'app-modal-panel',
+          'zn-scroll',
+          role === 'alertdialog' && 'app-modal-panel--alert',
+        )}
       >
         {variant === 'responsive' && (
           <span className="zn-sheet-grip app-grip" aria-hidden="true" />
@@ -797,14 +977,12 @@ export function Modal({
             )}
           </div>
           {role === 'dialog' && (
-            <button
-              type="button"
-              className="zn-icon-btn"
-              aria-label="Close"
+            <IconButton
+              label="Close"
+              icon="x"
+              shortcut="Esc"
               onClick={onClose}
-            >
-              <Icon name="x" />
-            </button>
+            />
           )}
         </div>
         {children && <div className="zn-dialog-body">{children}</div>}

@@ -5,22 +5,20 @@ import { useQuery } from '@tanstack/react-query'
 import { useStore } from '@tanstack/react-store'
 import { useHotkey, useHotkeySequence } from '@tanstack/react-hotkeys'
 import { categoriesQuery, meQuery } from '#/lib/api'
+import { colorVar } from '#/lib/colors'
 import { ensureGuest } from '#/lib/auth-client'
 import { setSoundsEnabled } from '#/lib/feedback'
-import {
-  dismissToast,
-  openCreate,
-  setScratch,
-  setShortcuts,
-  ui,
-} from '#/lib/store'
+import { openCreate, setScratch, setShortcuts, toast, ui } from '#/lib/store'
+import { visitInfo } from '#/lib/visits'
 import { Icon } from '#/ui/icons'
 import { LogoMark } from '#/ui/logo'
 import { Splash } from '#/components/Splash'
 import type { IconName } from '#/ui/icons'
-import { Button, Modal, Skeleton } from '#/ui/zen'
+import { Button, Modal, Skeleton, Tooltip } from '#/ui/zen'
 import { CreateTask } from './CreateTask'
 import { Scratchpad } from './Scratchpad'
+import { Welcome } from './Welcome'
+import { Toaster } from './Toaster'
 
 const NAV: {
   to: '/' | '/tasks' | '/notes' | '/folders' | '/profile'
@@ -32,6 +30,9 @@ const NAV: {
   { to: '/notes', label: 'Notes', icon: 'note' },
   { to: '/folders', label: 'Folders', icon: 'folder' },
 ]
+
+/** Tablet rail: labels are hidden, so icon-only items get tooltips. */
+const RAIL = '(min-width: 768px) and (max-width: 1023.98px)'
 
 function useActive() {
   const path = useRouterState({ select: (s) => s.location.pathname })
@@ -136,7 +137,7 @@ function SideNav({ ready }: { ready: boolean }) {
                 width: 12,
                 height: 12,
                 borderRadius: 4,
-                background: `var(--${c.color})`,
+                background: colorVar(c.color),
                 flexShrink: 0,
               }}
             />
@@ -156,61 +157,67 @@ function SideNav({ ready }: { ready: boolean }) {
           gap: 6,
         }}
       >
-        <button
-          type="button"
-          onClick={() => setScratch(true)}
-          className="zn-nav-item"
-          style={{
-            gap: 12,
-            minHeight: 48,
-            padding: '0 12px',
-            fontSize: 15,
-            border: 0,
-            background: 'transparent',
-            cursor: 'pointer',
-            justifyContent: 'center',
-            font: 'inherit',
-          }}
-        >
-          <Icon name="scratch" size={22} />
-          <span
-            className="app-sidebar-extra"
-            style={{ flex: 1, textAlign: 'left' }}
-          >
-            Scratchpad
-          </span>
-          <kbd
-            className="app-sidebar-extra"
+        <Tooltip label="Scratchpad" shortcut="N" media={RAIL}>
+          <button
+            type="button"
+            aria-label="Scratchpad"
+            onClick={() => setScratch(true)}
+            className="zn-nav-item"
             style={{
-              fontFamily: 'inherit',
-              fontSize: 11,
-              color: 'var(--ink-muted)',
-              border: '1px solid var(--line-strong)',
-              borderRadius: 6,
-              padding: '1px 6px',
+              gap: 12,
+              minHeight: 48,
+              padding: '0 12px',
+              fontSize: 15,
+              border: 0,
+              background: 'transparent',
+              cursor: 'pointer',
+              justifyContent: 'center',
+              font: 'inherit',
             }}
           >
-            N
-          </kbd>
-        </button>
-        <Link
-          to="/profile"
-          className={['zn-nav-item', isActive('/profile') && 'is-active']
-            .filter(Boolean)
-            .join(' ')}
-          style={{
-            gap: 12,
-            minHeight: 48,
-            padding: '0 12px',
-            fontSize: 15,
-            justifyContent: 'center',
-          }}
-        >
-          <Icon name="user" size={22} />
-          <span className="app-sidebar-extra" style={{ flex: 1 }}>
-            Profile
-          </span>
-        </Link>
+            <Icon name="scratch" size={22} />
+            <span
+              className="app-sidebar-extra"
+              style={{ flex: 1, textAlign: 'left' }}
+            >
+              Scratchpad
+            </span>
+            <kbd
+              className="app-sidebar-extra"
+              style={{
+                fontFamily: 'inherit',
+                fontSize: 11,
+                color: 'var(--ink-muted)',
+                border: '1px solid var(--line-strong)',
+                borderRadius: 6,
+                padding: '1px 6px',
+              }}
+            >
+              N
+            </kbd>
+          </button>
+        </Tooltip>
+        <Tooltip label="Profile" media={RAIL}>
+          <Link
+            to="/profile"
+            aria-label="Profile"
+            className={['zn-nav-item', isActive('/profile') && 'is-active']
+              .filter(Boolean)
+              .join(' ')}
+            style={{
+              gap: 12,
+              minHeight: 48,
+              padding: '0 12px',
+              fontSize: 15,
+              justifyContent: 'center',
+            }}
+          >
+            <Icon name="user" size={22} />
+            <span className="app-sidebar-extra" style={{ flex: 1 }}>
+              Profile
+            </span>
+          </Link>
+        </Tooltip>
       </div>
     </aside>
   )
@@ -294,55 +301,6 @@ function BottomNav() {
   )
 }
 
-function Toaster() {
-  const toasts = useStore(ui, (s) => s.toasts)
-  return (
-    <div className="zn-toaster" aria-live="polite">
-      {toasts.map((t) => (
-        <div
-          key={t.id}
-          className={`zn-toast zn-toast--${t.tone ?? 'neutral'}`}
-          role={t.tone === 'error' ? 'alert' : 'status'}
-        >
-          {t.icon && (
-            <span className="zn-toast-icon">
-              <Icon name={t.icon} size={18} />
-            </span>
-          )}
-          <span className="zn-toast-msg">{t.message}</span>
-          {t.actionLabel && (
-            <button
-              type="button"
-              className="zn-toast-action"
-              onClick={() => {
-                t.onAction?.()
-                dismissToast(t.id)
-              }}
-            >
-              {t.actionLabel}
-            </button>
-          )}
-          <button
-            type="button"
-            className="zn-icon-btn"
-            aria-label="Dismiss"
-            onClick={() => dismissToast(t.id)}
-          >
-            <Icon name="x" size={18} />
-          </button>
-          {t.duration !== 0 && (
-            <span
-              className="zn-toast-timer"
-              aria-hidden="true"
-              style={{ animationDuration: `${t.duration ?? 4000}ms` }}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
 const SHORTCUTS = [
   ['Quick add a task', 'Q'],
   ['New task form', 'C'],
@@ -420,6 +378,73 @@ function useTheme(ready: boolean) {
   }, [data])
 }
 
+const TIP_KEY = 'honeylist-tip-shortcuts'
+const TIP_ACTIVE_MS = 90_000
+
+function tipSeen() {
+  try {
+    return localStorage.getItem(TIP_KEY) === '1'
+  } catch {
+    return true
+  }
+}
+function markTipSeen() {
+  try {
+    localStorage.setItem(TIP_KEY, '1')
+  } catch {
+    // Without storage the tip simply never shows.
+  }
+}
+const typing = () => {
+  const el = document.activeElement
+  return (
+    el instanceof HTMLInputElement ||
+    el instanceof HTMLTextAreaElement ||
+    el instanceof HTMLSelectElement ||
+    (el instanceof HTMLElement && el.isContentEditable)
+  )
+}
+
+/**
+ * Desktop only, once per browser: after about 90 seconds of active use (or on the 3rd visit),
+ * one toast points to the shortcuts sheet. It waits while the person is typing or a dialog is open.
+ */
+function useShortcutTip(enabled: boolean) {
+  const sheetOpen = useStore(ui, (s) => s.shortcutsOpen)
+  useEffect(() => {
+    // Opening the sheet any other way means they found it already.
+    if (sheetOpen) markTipSeen()
+  }, [sheetOpen])
+  useEffect(() => {
+    if (!enabled || tipSeen()) return
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    const due = visitInfo().count >= 3 ? 10_000 : TIP_ACTIVE_MS
+    let active = 0
+    const id = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      active += 1000
+      if (active < due || tipSeen()) return
+      const s = ui.state
+      const busy =
+        typing() ||
+        s.createOpen ||
+        s.scratchOpen ||
+        s.shortcutsOpen ||
+        document.querySelector('[aria-modal="true"]')
+      if (busy) return
+      window.clearInterval(id)
+      markTipSeen()
+      toast({
+        message: 'Tip: press ? to see all keyboard shortcuts',
+        actionLabel: 'Show',
+        onAction: () => setShortcuts(true),
+        duration: 8000,
+      })
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [enabled])
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -427,12 +452,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     ensureGuest()
       .then(() => {
+        visitInfo() // records this visit for the greeting and the shortcuts tip
         setReady(true)
       })
       .catch(() => setFailed(true))
   }, [])
 
   useTheme(ready)
+  const { data: me } = useQuery({
+    ...meQuery,
+    staleTime: 60_000,
+    enabled: ready,
+  })
+  useShortcutTip(ready && !!me?.onboarded)
   const focusQuickAdd = () => {
     const el = document.getElementById('quick-add')
     if (el) el.focus()
@@ -511,6 +543,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <CreateTask />
           <Scratchpad />
           <Shortcuts />
+          <Welcome />
         </>
       )}
     </div>

@@ -1,9 +1,23 @@
 import { z } from 'zod'
+import { isAllowedCustomColor } from '../lib/colors'
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM')
 export const COLORS = ['lavender', 'butter', 'mint', 'peach', 'sky'] as const
 export const NOTE_COLORS = ['surface', ...COLORS] as const
+const CUSTOM_COLOR_ERROR =
+  'Pick one of the colours, or a soft light shade (#rrggbb, 70% to 90% lightness).'
+/** A preset token name, or a soft custom hex that keeps on-pastel text readable. */
+const colorOf = <T extends readonly [string, ...string[]]>(presets: T) =>
+  z
+    .string()
+    .max(7)
+    .refine(
+      (c) =>
+        (presets as readonly string[]).includes(c) || isAllowedCustomColor(c),
+      CUSTOM_COLOR_ERROR,
+    )
+
 export const ICONS = [
   'folder',
   'pen',
@@ -48,7 +62,7 @@ export const noteCreate = z
   .object({
     title: z.string().max(200).optional(),
     body: z.string().max(50_000).optional(),
-    color: z.enum(NOTE_COLORS).optional(),
+    color: colorOf(NOTE_COLORS).optional(),
     pinned: z.boolean().optional(),
     taskId: z.string().max(64).nullable().optional(),
   })
@@ -61,7 +75,7 @@ export const scratchpadUpdate = z
 export const categoryCreate = z
   .object({
     name: z.string().trim().min(1, 'Name the folder.').max(40),
-    color: z.enum(COLORS).optional(),
+    color: colorOf(COLORS).optional(),
     icon: z.enum(ICONS).optional(),
   })
   .strict()
@@ -72,6 +86,8 @@ export const prefsUpdate = z
     displayName: z.string().trim().max(40).nullable().optional(),
     theme: z.enum(['dark', 'light', 'system']).optional(),
     sounds: z.boolean().optional(),
+    // Marks the welcome screen as done (finished or skipped). It can't be undone.
+    onboarded: z.literal(true).optional(),
   })
   .strict()
 

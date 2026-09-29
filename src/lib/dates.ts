@@ -89,12 +89,6 @@ export function formatTimeRange(
   return end ? `${start} to ${end}` : start
 }
 
-export function greeting(hour: number): string {
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 export function weekAround(
   today: string,
 ): { key: string; day: number; weekday: string; today: boolean }[] {

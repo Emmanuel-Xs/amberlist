@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react'
 import {
   HeadContent,
   Link,
@@ -126,9 +127,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext()
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell>
-        <Outlet />
-      </AppShell>
+      <MotionConfig reducedMotion="user">
+        <AppShell>
+          <Outlet />
+        </AppShell>
+      </MotionConfig>
     </QueryClientProvider>
   )
 }

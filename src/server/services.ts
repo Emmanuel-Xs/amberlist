@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Db } from './db'
-import { category, note, prefs, subtask, task } from './schema'
+import { category, note, prefs, subtask, task, user } from './schema'
 import type {
   categoryCreate,
   categoryUpdate,
@@ -46,13 +46,59 @@ export async function updatePrefs(
   userId: string,
   input: z.infer<typeof prefsUpdate>,
 ) {
-  await getPrefs(db, userId)
+  const current = await getPrefs(db, userId)
+  const { onboarded, ...rest } = input
   const [row] = await db
     .update(prefs)
-    .set({ ...input, updatedAt: now() })
+    .set({
+      ...rest,
+      ...(onboarded && !current.onboardedAt ? { onboardedAt: now() } : {}),
+      updatedAt: now(),
+    })
     .where(eq(prefs.userId, userId))
     .returning()
   return row
+}
+
+/**
+ * What GET /api/me returns: the prefs plus whether the welcome screen is done and when the
+ * account was made. Guests from before the welcome screen (any task, note or name) count as done.
+ */
+export async function getMe(db: Db, userId: string) {
+  const p = await getPrefs(db, userId)
+  return withMe(db, userId, p)
+}
+
+export async function updateMe(
+  db: Db,
+  userId: string,
+  input: z.infer<typeof prefsUpdate>,
+) {
+  return withMe(db, userId, await updatePrefs(db, userId, input))
+}
+
+async function withMe(db: Db, userId: string, p: typeof prefs.$inferSelect) {
+  const [account] = await db
+    .select({ createdAt: user.createdAt })
+    .from(user)
+    .where(eq(user.id, userId))
+  let onboarded = !!p.onboardedAt || !!p.displayName
+  if (!onboarded) {
+    const [[t], [n]] = await Promise.all([
+      db
+        .select({ id: task.id })
+        .from(task)
+        .where(eq(task.userId, userId))
+        .limit(1),
+      db
+        .select({ id: note.id })
+        .from(note)
+        .where(and(eq(note.userId, userId), eq(note.isScratchpad, false)))
+        .limit(1),
+    ])
+    onboarded = !!t || !!n
+  }
+  return { ...p, onboarded, joinedAt: account?.createdAt ?? null }
 }
 
 async function seedDefaults(db: Db, userId: string) {

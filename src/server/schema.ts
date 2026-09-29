@@ -134,6 +134,8 @@ export const prefs = pgTable('prefs', {
   theme: text('theme').notNull().default('dark'),
   seeded: boolean('seeded').notNull().default(false),
   sounds: boolean('sounds').notNull().default(true),
+  // Set when the welcome screen is finished or skipped. Null means not seen yet.
+  onboardedAt: timestamp('onboarded_at'),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
@@ -152,6 +154,7 @@ create index if not exists subtask_task_idx on "subtask"(task_id);
 create table if not exists "note" (id text primary key, user_id text not null, title text not null default '', body text not null default '', color text not null default 'surface', pinned boolean not null default false, task_id text, is_scratchpad boolean not null default false, created_at timestamp not null default now(), updated_at timestamp not null default now());
 create index if not exists note_user_idx on "note"(user_id);
 create table if not exists "prefs" (user_id text primary key, display_name text, theme text not null default 'dark', seeded boolean not null default false, sounds boolean not null default true, updated_at timestamp not null default now());
+alter table "prefs" add column if not exists onboarded_at timestamp;
 `
 
 export const schema = {

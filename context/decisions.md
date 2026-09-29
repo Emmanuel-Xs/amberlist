@@ -44,3 +44,9 @@ Made decisions are numbered D1, D2...; open ones O1, O2... Add new entries with 
 | O11 | 2026-09-29 22:38 | **Priority display:** only High shows a flag. PRD says default medium is hidden, show high and low. | Leaning: show Low with a quiet icon and word. Needs design. |
 | O12 | 2026-09-29 22:38 | **Quick add on desktop looks like search** (the + sits on the left). Move the +, add a clear focus state, and make Q discoverable. | Needs a design. |
 | O13 | 2026-09-29 | Does the HNG team repo need a specific structure or branch? | PRD open question, unanswered. |
+
+## 2026-09-30
+- D21: Motion (`motion/react`) is the motion library; native View Transitions for pages. Timings from board 11 approved (longer than the old 300 ms cap).
+- D22: Round 2 picks: onboarding yes with a dynamic greeting; quick add A refined (no Q box, plain plus, hint line, later shortcuts tip); toast placement yes, success toasts play a sound; friendly messages yes; date strip A plus a 3D spinning wheel and a date picker (redesign pending); rows, priority, tooltips, grid yes; confirmations yes (Undo for tasks), centred; note colours A plus custom colours with a palette icon; icons: new set liked, changes pending (plain plus, honeycomb tasks icon, soft home, open folder with files); splash hand off yes; empty states: logo variation for All done and the logo as the ticked box in Add your first task (redesign pending).
+- D23: Custom colour list is derived from colours in use (no new column). Revisit if people lose colours they liked.
+- D24: Every tick gets feedback; the proposal is a small burst from the checkbox plus sound, and the big celebration only for firsts and all done today (pending Emmanuel's approval of board 13).

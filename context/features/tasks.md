@@ -8,7 +8,9 @@ Built (Stage 1). Gaps listed under Planned.
 
 ## How it works now
 - Routes: `/tasks` and `/tasks/$id` (`src/routes/tasks/*.tsx`) both render `TasksPage` (`src/components/TasksPage.tsx`). `$id` selects a task: desktop (1024+) shows `TaskDetail` in the right pane; below 1024 the list hides and the detail shows full screen.
-- Row: `src/components/TaskRow.tsx`. Checkbox (`role="checkbox"`, name "Mark done: {title}"), link to detail, meta (In progress, time range, due label, folder tag, High flag, "2 of 5" subtasks, Note), menu "More actions for {title}" with Open, Start (todo only), Duplicate, Delete task.
+- Row: `src/components/TaskRow.tsx`. Checkbox (`role="checkbox"`, name "Mark done: {title}"), link to detail, meta (In progress, time range, due label, folder tag, priority, "2 of 5" subtasks, Note), then row actions: an "Open {title}" chevron link (out of the tab order, same target as the row) and the menu "More actions for {title}" with Open, Start (todo only), Duplicate, Delete task. Both are 36px, radius 12, inset 12px, with tooltips. With a fine pointer they fade in on row hover or `:focus-within` (opacity, never hidden from the tab order); on touch they always show.
+- Priority (`Priority` in `TaskRow.tsx`): High = flag + "High" in `--danger`, Low = chevron down + "Low" in `--ink-muted`, Medium shows nothing. Also on grid cards and the Home TodayCard (as a surface pill for contrast on pastel).
+- List or grid: segmented control "Task view" (List, Grid, `aria-pressed`) beside the title, saved in `localStorage` `honeylist-task-view` (read after mount). Grid keeps the same groups; each group is a `.task-grid` of `TaskGridCard` (8px folder colour band, check and More on top, 15px semibold title, meta: folder, time or due, subtasks, priority). 1 column on phones, 2 on tablet, 3 from 1024. The whole card opens the task.
 - Actions: `src/components/useTaskActions.ts`.
   - Complete: optimistic PATCH `status: done`, sound, toast "Task completed" with Undo. If it was the last open task in Today or Overdue: celebrate sound, confetti, toast "All done for today. Well played." (no Undo).
   - Delete: removed from cache at once, toast "Task deleted" with Undo; the real `DELETE /api/tasks/:id` fires after 4.2s unless undone.
@@ -22,7 +24,6 @@ Built (Stage 1). Gaps listed under Planned.
 - Move to folder from the row menu; reorder; repeat rule (see [repeating-tasks](repeating-tasks.md)); remind (see [reminders](reminders-notifications.md)).
 - "Day 4 of 21" with a progress bar for long running tasks.
 - Completed rows slide into Completed (motion, pending O3).
-- Show Low priority too (O11). List and grid toggle (L25, design).
 
 ## Known issues
 - Empty states have no action button (L23).
@@ -39,3 +40,5 @@ Built (Stage 1). Gaps listed under Planned.
 6. Filters: click chip `High priority`; only high tasks show. Type in `getByRole('searchbox', { name: 'Search tasks' })` a missing word: empty state `No results for "..."`.
 7. Complete a task, then click `getByRole('button', { name: /Completed/ })`: `aria-expanded="true"` and the done row shows.
 8. Confetti: with one task due today, complete it: toast "All done for today. Well played." and a `canvas` appears then goes (skipped with reduced motion).
+9. Desktop (1440): hover a row; `.task-row-actions` goes to opacity 1 and after 400ms a `role=tooltip` "More actions" shows above the button, wired by `aria-describedby`. Tab to the More button: tooltip shows at once; Esc hides it. At 390 with touch the actions are always visible and no tooltip appears.
+10. Click `Grid` in group "Task view", reload: Grid is still pressed and `.task-card`s render (3, 2, 1 columns at 1440, 820, 390). Click a card: it opens the task; its checkbox completes with the Undo toast.

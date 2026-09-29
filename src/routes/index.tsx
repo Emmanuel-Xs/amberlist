@@ -2,15 +2,10 @@ import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { meQuery, useCategories, useNotes, useTasks } from '#/lib/api'
-import {
-  greeting,
-  groupOf,
-  isOnDay,
-  sortTasks,
-  toISODate,
-  weekAround,
-} from '#/lib/dates'
+import { groupOf, isOnDay, sortTasks, toISODate, weekAround } from '#/lib/dates'
+import { greetingLine } from '#/lib/greeting'
 import { openCreate } from '#/lib/store'
+import { daysAway, visitInfo } from '#/lib/visits'
 import { Icon } from '#/ui/icons'
 import { EmptyState, Skeleton } from '#/ui/zen'
 import {
@@ -70,8 +65,12 @@ function Home() {
         ? todayTasks.length
         : open.filter((t) => isOnDay(t, d.key, today)).length,
   }))
-  const name = me?.displayName
-  const hello = `${greeting(new Date().getHours())}${name ? `, ${name}` : ''}`
+  const hello = greetingLine({
+    now: new Date(),
+    name: me?.displayName,
+    isNew: !!me?.joinedAt && toISODate(new Date(me.joinedAt)) === today,
+    daysAway: daysAway(visitInfo(), today),
+  })
   const fresh = tasks.length === 0
 
   return (
@@ -84,7 +83,7 @@ function Home() {
           </Link>
         </div>
         <p style={{ margin: 0, fontSize: 15, color: 'var(--ink-muted)' }}>
-          {hello}
+          {me ? hello : '\u00a0'}
         </p>
         <h1 className="display" style={{ margin: 0 }}>
           {fresh ? (

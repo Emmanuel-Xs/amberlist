@@ -7,19 +7,14 @@ import { Icon } from '#/ui/icons'
 import type { IconName } from '#/ui/icons'
 import { Button, Chip, EmptyState, Input, Modal, Skeleton } from '#/ui/zen'
 import { FolderCard } from '#/components/Cards'
+import { ColorPicker } from '#/components/ColorPicker'
+import { PRESET_COLORS } from '#/lib/colors'
 
 export const Route = createFileRoute('/folders/')({
   component: Folders,
   head: () => ({ meta: [{ title: 'Folders · Honeylist' }] }),
 })
 
-export const FOLDER_COLORS = [
-  'lavender',
-  'butter',
-  'mint',
-  'peach',
-  'sky',
-] as const
 export const FOLDER_ICONS: IconName[] = [
   'folder',
   'pen',
@@ -99,29 +94,12 @@ export function FolderDialog({
         onChange={(e) => (setName(e.target.value), setError(null))}
         onKeyDown={(e) => e.key === 'Enter' && save()}
       />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span className="zn-field-label">Color</span>
-        <div
-          role="radiogroup"
-          aria-label="Folder color"
-          style={{ display: 'flex', gap: 10 }}
-        >
-          {FOLDER_COLORS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              role="radio"
-              aria-checked={color === c}
-              aria-label={c}
-              className={['zn-swatch', color === c && 'is-selected']
-                .filter(Boolean)
-                .join(' ')}
-              style={{ background: `var(--${c})` }}
-              onClick={() => setColor(c)}
-            />
-          ))}
-        </div>
-      </div>
+      <ColorPicker
+        label="Folder color"
+        presets={PRESET_COLORS}
+        value={color}
+        onChange={setColor}
+      />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <span className="zn-field-label">Icon</span>
         <div

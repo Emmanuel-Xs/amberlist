@@ -862,3 +862,688 @@ select:-webkit-autofill {
 .note-card:has(.note-card-delete) a > span:first-child {
   padding-right: 24px;
 }
+
+/* Task rows: inset 36px actions, shown on hover or focus with a fine pointer, always on touch */
+.zn-task.task-row {
+  padding-right: 12px;
+}
+.task-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  transition: opacity 0.15s ease-out;
+}
+.task-action.zn-icon-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition:
+    background 0.15s ease-out,
+    color 0.15s ease-out;
+}
+.task-action.zn-icon-btn:hover,
+.task-action.zn-icon-btn[aria-expanded='true'] {
+  background: var(--surface);
+  color: var(--ink);
+}
+.task-card .task-action.zn-icon-btn:hover,
+.task-card .task-action.zn-icon-btn[aria-expanded='true'] {
+  background: var(--surface-raised);
+}
+/* 44px hit area around the 36px button */
+.task-action.zn-icon-btn::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+@media (pointer: coarse) {
+  .task-row-actions {
+    gap: 8px;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .task-row .task-row-actions {
+    opacity: 0;
+  }
+  .task-row:hover .task-row-actions,
+  .task-row:focus-within .task-row-actions,
+  .task-row:has([aria-expanded='true']) .task-row-actions {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .task-row-actions,
+  .task-action.zn-icon-btn {
+    transition: none;
+  }
+}
+.task-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 500;
+}
+.task-priority--high {
+  color: var(--danger);
+}
+.task-priority--low {
+  color: var(--ink-muted);
+}
+
+/* Tasks header and grid view */
+.tasks-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.tasks-head .zn-seg {
+  margin-left: auto;
+}
+.task-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .task-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .task-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.task-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  transition: background 0.15s ease-out;
+}
+.task-card:hover {
+  background: var(--surface-raised);
+}
+.task-card.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.task-card:has(.task-card-link:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.task-card-band {
+  height: 8px;
+  flex: none;
+}
+.task-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 16px 16px;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+.task-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.task-card-top > * {
+  position: relative;
+  z-index: 1;
+}
+.task-card-link {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  outline: none;
+}
+/* The whole card opens the task */
+.task-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.task-card.is-done .task-card-link {
+  text-decoration: line-through;
+  color: var(--ink-muted);
+}
+.task-card.is-done .zn-check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.task-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: auto;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .task-card {
+    transition: none;
+  }
+}
+
+/* Confirm dialogs (alertdialog): centred icon, title, text and buttons */
+.app-modal-panel--alert {
+  text-align: center;
+}
+.app-modal-panel--alert > .zn-dialog-icon {
+  align-self: center;
+}
+.app-modal-panel--alert .zn-dialog-head {
+  justify-content: center;
+}
+.app-modal-panel--alert .zn-dialog-body {
+  text-align: left;
+}
+.app-modal-panel--alert .zn-dialog-actions {
+  justify-content: center;
+}
+@media (max-width: 767.98px) {
+  .app-modal-panel--alert .zn-dialog-actions {
+    flex-direction: column;
+  }
+  .app-modal-panel--alert .zn-dialog-actions > .zn-btn {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* Quick add: pill field, Add button on the right, keyboard hint on desktop only */
+.quick-add-field {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 20px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.15s ease-out;
+}
+.quick-add-field:focus-within {
+  border-color: var(--ring);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    var(--shadow-card);
+}
+.quick-add-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+}
+.quick-add-input::placeholder {
+  color: var(--ink-muted);
+}
+.quick-add-btn {
+  flex-shrink: 0;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 18px 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+/* 44px touch target around the 40px button */
+.quick-add-btn::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+}
+.quick-add-btn:hover {
+  filter: brightness(1.05);
+}
+.quick-add-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (max-width: 767.98px) {
+  .quick-add-btn {
+    width: 40px;
+    padding: 0;
+  }
+  .quick-add-btn-label {
+    display: none;
+  }
+}
+.quick-add-hint {
+  display: none;
+  margin: -2px 0 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+}
+@media (hover: hover) and (pointer: fine) {
+  .quick-add-hint {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-add-field {
+    transition: none;
+  }
+}
+/* Priority on a pastel card: a surface pill keeps danger and muted text readable */
+.task-priority--pill {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+}
+
+/* Welcome: full page on phones, a dialog over the app from 768px */
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+.welcome-scrim {
+  position: fixed;
+  display: none;
+}
+.welcome-panel {
+  position: relative;
+  width: 100%;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--ink);
+  padding: calc(40px + env(safe-area-inset-top)) 20px
+    calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: welcome-in 0.3s ease-out;
+}
+.welcome-panel:focus {
+  outline: none;
+}
+.welcome-body {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.welcome-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.welcome-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink-muted);
+}
+.welcome-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.welcome-go {
+  width: 100%;
+}
+.welcome-caption {
+  margin: -8px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .welcome {
+    align-items: center;
+  }
+  .welcome-scrim {
+    display: block;
+  }
+  .welcome-panel {
+    width: min(520px, calc(100% - 48px));
+    max-height: calc(100dvh - 48px);
+    border-radius: 28px;
+    background: var(--surface);
+    box-shadow: var(--shadow-float);
+    padding: 32px;
+    animation: dialog-in 0.2s ease-out;
+  }
+  .welcome-actions {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+  .welcome-go {
+    width: auto;
+  }
+  .welcome-caption {
+    text-align: left;
+  }
+}
+@keyframes welcome-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-panel {
+    animation: none;
+  }
+}
+
+/* Colour picker for notes and folders: presets, custom swatches, "Add your own colour" popover */
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.color-picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.color-picker-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.color-swatch {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--on-pastel);
+}
+.color-add {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px dashed var(--line-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+.color-add:hover,
+.color-add[aria-expanded='true'] {
+  background: var(--surface);
+  border-style: solid;
+}
+.color-add:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.color-popover {
+  /* Opens in the flow under the swatches, so it is never clipped by a dialog or the screen edge. */
+  width: 100%;
+  max-width: 360px;
+  min-width: 0;
+  margin-top: 4px;
+  animation: color-popover-in 150ms ease-out;
+}
+@keyframes color-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.color-popover-title {
+  margin: 0;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.color-popover-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.color-preview {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--on-pastel);
+  font-size: 17px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.color-popover-slider {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.color-hue {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  border-radius: var(--radius-full);
+  background-clip: content-box !important;
+  padding: 14px 0;
+  cursor: pointer;
+}
+.color-hue::-webkit-slider-runnable-track {
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+.color-hue::-moz-range-track {
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+.color-hue::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--on-pastel);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.color-hue::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--on-pastel);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.color-hue:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.color-check {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+}
+.color-check svg {
+  color: var(--success);
+}
+.color-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .color-popover {
+    animation: none;
+  }
+  .color-add {
+    transition: none;
+  }
+}
+
+/* Friendly toasts (board 4): badge on the left, title plus an optional muted line */
+.zn-toast .zn-toast-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 0;
+}
+.toast-title {
+  font-weight: 600;
+}
+.toast-detail {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+.zn-toast.zn-toast--rich {
+  padding-left: 10px;
+  border-radius: 20px;
+}
+.zn-toaster .zn-toast {
+  animation: none;
+}
+.toast-badge {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.toast-badge--check {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.toast-badge--trash {
+  background: var(--surface);
+  color: var(--ink);
+}
+.toast-badge--alert {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.toast-badge--flame {
+  background: var(--peach);
+  color: var(--on-pastel);
+}
+
+/* Splash hand off (board 11): the logo flies to its spot while the page rises in */
+.splash.is-flying {
+  pointer-events: none;
+}
+.app-main.app-enter .app-content {
+  animation: app-enter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s both;
+}
+@keyframes app-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Page transitions: native View Transitions. The nav stays put; only the page content moves. */
+.app-content {
+  view-transition-name: page;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(page) {
+    animation: vt-out 0.16s ease-in both;
+  }
+  ::view-transition-new(page) {
+    animation: vt-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) 0.06s both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page),
+  ::view-transition-new(page) {
+    animation: none;
+  }
+  .app-main.app-enter .app-content {
+    animation: none;
+  }
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}

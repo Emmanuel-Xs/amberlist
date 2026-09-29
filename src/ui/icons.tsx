@@ -7,7 +7,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  CirclePlus,
   Clock,
   Copy,
   Download,
@@ -24,10 +23,12 @@ import {
   Menu,
   Moon,
   NotebookPen,
+  Palette,
   PencilLine,
   PenTool,
   Pin,
   Play,
+  Plus,
   RotateCw,
   Search,
   ShoppingCart,
@@ -48,7 +49,7 @@ export const ICONS = {
   note: NotebookPen,
   flame: Flame,
   folder: Folder,
-  plus: CirclePlus,
+  plus: Plus,
   search: Search,
   sliders: SlidersHorizontal,
   more: EllipsisVertical,
@@ -82,6 +83,7 @@ export const ICONS = {
   target: Target,
   cart: ShoppingCart,
   menu: Menu,
+  palette: Palette,
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof ICONS

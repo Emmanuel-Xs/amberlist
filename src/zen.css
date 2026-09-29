@@ -1449,3 +1449,102 @@ html {
     transform: scaleX(0.5);
   }
 }
+
+/* Tooltip: inverted bubble for icon-only buttons (never on touch) */
+.zn-tooltip-anchor {
+  display: contents;
+}
+.zn-tooltip {
+  position: fixed;
+  /* Reset the absolute DS reference rule above: this one is portaled and placed in JS */
+  bottom: auto;
+  transform: none;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 260px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-float);
+  animation: zn-tip-in 0.15s ease-out;
+}
+.zn-tooltip .zn-tooltip-kbd {
+  margin: 0;
+  opacity: 1;
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bg);
+}
+@keyframes zn-tip-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zn-tooltip {
+    animation: none;
+  }
+}
+
+/* Segmented control (List or grid) */
+.zn-seg {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+}
+.zn-seg-item {
+  position: relative;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    color 0.15s ease-out;
+}
+/* 44px tall hit area inside the 44px track */
+.zn-seg-item::after {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+.zn-seg-item:hover {
+  color: var(--ink);
+}
+.zn-seg-item[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.zn-seg-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}

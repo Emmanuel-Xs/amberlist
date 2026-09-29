@@ -133,6 +133,13 @@ Original DS art: pastel shapes with 2px round on-pastel outlines, 200x150 viewBo
 - One overlay at a time, scrim, focus trap, Esc closes, focus returns to the trigger.
 - Dialog max 520 (edit folder, shortcuts, guest merge "Keep this device's tasks?"). Bottom sheet on phones with a grip. Right sheet on tablet and desktop for the scratchpad. Popover for desktop filters (no scrim). Tooltip on icon buttons only.
 
+## Tooltip
+
+- `Tooltip` and `IconButton` in `src/ui/zen.tsx` (approved on round 2 board 7). Every icon-only button gets one, with its shortcut when there is one.
+- Look: inverted (`--ink` ground, `--bg` text), radius 10, 12px medium, optional kbd chip. Portaled, fixed, 8px above the trigger, flips below when there is no room, clamped to the viewport.
+- Behaviour: shows after 400ms of mouse hover or at once on keyboard focus (`:focus-visible`); hides on leave, blur, press, scroll and Esc. Never on touch (`pointer: coarse`). `media` prop limits it, e.g. rail only items whose label is hidden.
+- A11y: the trigger keeps its `aria-label`; `aria-describedby` points at the tooltip only when it adds something (a different label or a shortcut).
+
 ## Scrollbars
 
 - Pill thumb 6px in a 12px gutter, line-strong at rest, amber on hover and drag, transparent track. `.zn-scroll` reserves the gutter; sideways rows use `.zn-scroll-x-hidden` with snap and peek. Never hide the main list's vertical scrollbar on desktop.
@@ -143,7 +150,7 @@ Original DS art: pastel shapes with 2px round on-pastel outlines, 200x150 viewBo
 - Desktop 1440, Tablet 820, Phone 390, the same 10 each: Home, Home first visit, Home light, Tasks, Task detail, Create task, Notes and scratchpad, Profile, Loading (skeleton), Tasks empty with Undo toast.
 - Component boards: TodayCard, FolderCard, QuickAdd, NoteCard, HabitRow, Sidebar, TaskForm, ProfileContent.
 - State boards: interaction states and scrollbars; empty and offline; icons, destructive actions and errors (incl. "You're a guest", "Delete the Work folder?", "Delete all your data?"); modals, overlays and contrast (edit folder, merge prompt, shortcuts, filters sheet and popover, scratchpad right sheet, contrast table); toasts, sounds and confetti (interactive).
-- **Not designed yet:** onboarding name screen, habits pages, Google sign in screens, list vs grid toggle, color picker with custom colors. Logo and splash were designed ad hoc in chat.
+- **Not designed yet:** onboarding name screen, habits pages, Google sign in screens, color picker with custom colors. Logo and splash were designed ad hoc in chat.
 
 ## Brand
 
@@ -160,11 +167,8 @@ From his 22:38 list on 2026-09-29. Nothing here may be coded before a design is 
 | Toast system and Duolingo style messages | Encouraging toasts for create, complete, overdue; tell the user what happened on completion; rules for modal vs top vs left vs right | Decide placement rules (O4) and a copy set. |
 | First task celebration with a bee | Confetti plus a bee animation on the very first task | Bee style (O7). Must respect reduced motion. |
 | DateStrip radius and bounded momentum scroll | Less rounded pills on desktop; smooth, speed sensitive scroll limited to the last task date plus about 3 days | O6. |
-| Row overflow menu placement | "The three dots at the edge" look ugly | Menus now portal and flip (1315e68); the trigger placement itself still needs a design. |
-| Tooltips | Hover titles on icons that match the DS | DS Tooltip spec: radius sm, with shortcut. |
 | Confirmations | Confirm destructive actions, maybe task delete and complete; folder delete flow | Conflicts with "Undo instead of confirmations" (O2). |
 | Note and folder color picker with custom colors | Easier on the eyes, good contrast, let people add their own colors | O8. |
-| List and grid toggle for tasks | View tasks as a list or a grid | Not in the canvas. |
 | Icon set | New icons from scratch or keep lucide; nav icons must not look alike | O5. The honeycomb set was reverted. |
 | Splash to app transition | The splash must hand off smoothly into the app | Today it fades out after the drop finishes. |
 | Motion library | Slower, visible, non janky motion; Motion library vs CSS | O3. |

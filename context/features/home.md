@@ -4,12 +4,13 @@
 Show what matters today and capture fast. Home grows with the user: sections appear only once used.
 
 ## Status
-Built. Onboarding name, habits row, nudges not built.
+Built. Habits row, nudges not built. Welcome screen and dynamic greeting done 2026-09-30.
 
 ## How it works now
 - Route `/` (`src/routes/index.tsx`).
 - Phone header (under 768, `.phone-header`): logo plus a link "Profile".
-- Greeting: "Good morning / afternoon / evening" plus ", {name}" when a display name is set; h1 "Let's plan your day." (no tasks), "Nothing due today.", or "You have **N tasks** today." (count in accent-ink).
+- Greeting line: `greetingLine()` in `src/lib/greeting.ts` (unit tests in `tests/greeting.test.ts`). Picks from small pools by slot (morning 5 to 12, afternoon, evening 17 to 22, night) and weekday (Monday morning, Friday, Saturday and Sunday lines). New account (joined today): "Welcome, {name}" or "Welcome to Honeylist". Back after 2+ days away (per browser, `src/lib/visits.ts`, localStorage): "Welcome back" style lines. The pick is stable for a day and slot. ", {name}" is appended when a name is set and updates live after saving it (welcome screen or Profile). No emoji, no dashes. Empty until the me query loads, so it never flickers.
+- h1 "Let's plan your day." (no tasks), "Nothing due today.", or "You have **N tasks** today." (count in accent-ink).
 - `QuickAdd` always.
 - First visit (no tasks): empty state "Add your first task" with a parser hint (no button).
 - `DateStrip` (see [date-strip](date-strip.md)) once any task has a start or due date. Picking a day shows that day's tasks.
@@ -22,13 +23,11 @@ Built. Onboarding name, habits row, nudges not built.
 - Loading: skeletons.
 
 ## Planned per PRD
-- Onboarding name screen so the greeting has a name (L1, design).
 - Habits row after the first habit; save your data nudge card; just in time tips; "+ Add a habit" foot link.
 - Desktop: Today cards in 2 columns, Habits and Recent notes side by side, folders 4 to 6 columns.
 - Duolingo style messages and first task bee (L7, design).
 
 ## Known issues
-- Greeting without a name reads oddly (L1).
 - Folders row is not capped at 6 (L20).
 - First visit and "Nothing planned" empty states have no button (L23).
 - Home nav item staying amber: verify.
@@ -41,5 +40,5 @@ Built. Onboarding name, habits row, nudges not built.
 5. Seed a task with a past `dueDate`: banner text contains "1 overdue:"; click it lands on `/tasks`.
 6. Click `getByRole('listbox', { name: 'Pick a day' }).getByRole('option').nth(6)`: the section heading shows that date and its tasks.
 7. Complete every today task via their "Mark done: ..." checkboxes: "All done for today" state and the celebration toast.
-8. Set name via `api(page, '/me', 'PATCH', { displayName: 'Emmanuel' })`, reload: greeting ends ", Emmanuel".
+8. Set name via `api(page, '/me', 'PATCH', { displayName: 'Emmanuel' })`, reload: greeting ends ", Emmanuel". Change it in Profile, go Home with the nav: the greeting shows the new name without a reload.
 9. Create a note: "Recent notes" appears with "All notes" linking to `/notes`.

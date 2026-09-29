@@ -150,11 +150,9 @@ export const categoryById = {
 }
 
 export const me = {
-  GET: route(async ({ db, userId }) => json(await s.getPrefs(db, userId))),
+  GET: route(async ({ db, userId }) => json(await s.getMe(db, userId))),
   PATCH: route(async ({ db, userId, request }) =>
-    json(
-      await s.updatePrefs(db, userId, await readBody(request, v.prefsUpdate)),
-    ),
+    json(await s.updateMe(db, userId, await readBody(request, v.prefsUpdate))),
   ),
 }
 

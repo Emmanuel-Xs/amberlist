@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '@tanstack/react-store'
+import { useQueryClient } from '@tanstack/react-query'
+import { announceAdded } from '#/lib/announce'
 import { useForm } from '@tanstack/react-form'
 import { useCategories, useTaskMutations } from '#/lib/api'
 import { toISODate } from '#/lib/dates'
@@ -15,6 +17,7 @@ export function CreateTask() {
   const draft = useStore(ui, (s) => s.createDraft)
   const { data: cats = [] } = useCategories()
   const { create } = useTaskMutations()
+  const qc = useQueryClient()
   const [subInput, setSubInput] = useState('')
   const today = toISODate(new Date())
 
@@ -44,9 +47,9 @@ export function CreateTask() {
           subtasks: value.subtasks,
         },
         {
-          onSuccess: () => {
+          onSuccess: (created) => {
             sound('complete')
-            toast({ tone: 'success', icon: 'check', message: 'Task created' })
+            announceAdded(qc, created)
             closeCreate()
           },
           onError: (e) =>
