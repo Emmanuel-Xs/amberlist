@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home, desktop, first visit</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 1440px; height: 1024px; display: flex; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<dc-import name="Sidebar" active="home" h="1024" fresh="{{yes}}" hint-size="256px,1024px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 32px 40px; display: flex; flex-direction: column; align-items: center">
+<div style="align-self: stretch; display: flex; justify-content: flex-end"><a href="DesktopProfile.dc.html" aria-label="Profile, you are a guest" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; font-weight: 600; text-decoration: none">E</a></div>
+<div style="width: 720px; display: flex; flex-direction: column; gap: 24px; margin-top: 64px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted)">Good evening</p>
+<h1 class="display-lg" style="margin: 0">Let's plan your day.</h1>
+</div>
+<dc-import name="QuickAdd" w="720" filled="{{no}}" hint-size="720px,56px"></dc-import>
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="tasks" title="Add your first task" text="Type it above and press Enter. Try &quot;Read 20 pages tomorrow #study&quot; and we'll set the date and folder for you."></x-import>
+</div>
+<div style="display: flex; gap: 24px">
+<a href="#" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none"><x-import component-from-global-scope="Zen.Icon" name="plus" size="{{s16}}"></x-import>Add a habit</a>
+<a href="#" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none"><x-import component-from-global-scope="Zen.Icon" name="plus" size="{{s16}}"></x-import>New folder</a>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1024}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { yes: true, no: false, s16: 16 };
+  }
+}
+</script>
+</body>
+</html>

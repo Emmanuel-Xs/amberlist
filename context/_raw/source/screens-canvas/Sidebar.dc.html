@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Desktop sidebar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 256px; height: {{hpx}}; box-sizing: border-box; display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--line); font-family: var(--font-sans); color: var(--ink)">
+<x-import component-from-global-scope="Zen.AppNav" layout="sidebar" brand="Amberlist" active="{{active}}" items="{{items}}" style="height: 372px; flex-shrink: 0"></x-import>
+<div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 2px">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px 6px 12px">
+<span style="font-size: 12px; font-weight: 600; color: var(--ink-muted)">Folders</span>
+<button type="button" aria-label="New folder" style="width: 32px; height: 32px; border-radius: 10px; border: 0; background: transparent; color: var(--ink-muted); display: grid; place-items: center; cursor: pointer; padding: 0"><x-import component-from-global-scope="Zen.Icon" name="plus" size="{{s18}}"></x-import></button>
+</div>
+<sc-for list="{{folders}}" as="f" hint-placeholder-count="5">
+<a href="#" style="display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; border-radius: 12px; color: var(--ink); text-decoration: none; font-size: 14px">
+<span style="width: 12px; height: 12px; border-radius: 4px; background: {{f.bg}}; flex-shrink: 0"></span>
+<span style="flex-grow: 1">{{f.label}}</span>
+<span style="font-size: 12px; color: var(--ink-muted)">{{f.count}}</span>
+</a>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="padding: 16px; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line)">
+<a href="DesktopNotes.dc.html" style="display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 12px; border-radius: 14px; background: {{scratchBg}}; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500">
+<x-import component-from-global-scope="Zen.Icon" name="scratch" size="{{s20}}"></x-import>
+<span style="flex-grow: 1">Scratchpad</span>
+<kbd style="font: inherit; font-size: 11px; color: var(--ink-muted); border: 1px solid var(--line-strong); border-radius: 6px; padding: 1px 6px">N</kbd>
+</a>
+<div style="padding: 0 12px">
+<x-import component-from-global-scope="Zen.Switch" label="Dark theme" icon="moon" checked="{{isDark}}"></x-import>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["home","tasks","notes","habits","folders"],"default":"home"},"h":{"editor":null,"default":1024},"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"scratch":{"editor":"boolean","default":false},"fresh":{"editor":"boolean","default":false},"$preview":{"width":256,"height":1024}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const theme = p.theme ?? 'dark';
+    const scratch = p.scratch === true || p.scratch === 'true';
+    const fresh = p.fresh === true || p.fresh === 'true';
+    return {
+      theme: theme,
+      isDark: theme === 'dark',
+      active: p.active ?? 'home',
+      hpx: Number(p.h ?? 1024) + 'px',
+      s18: 18, s20: 20,
+      scratchBg: scratch ? 'var(--accent-soft)' : 'transparent',
+      items: [
+        { id: 'home', label: 'Home', icon: 'home', href: 'Main.dc.html' },
+        { id: 'tasks', label: 'Tasks', icon: 'tasks', href: 'DesktopTasks.dc.html' },
+        { id: 'notes', label: 'Notes', icon: 'note', href: 'DesktopNotes.dc.html' },
+        { id: 'habits', label: 'Habits', icon: 'flame' },
+        { id: 'folders', label: 'Folders', icon: 'folder' }
+      ],
+      folders: fresh ? [
+        { label: 'Personal', count: 0, bg: 'var(--mint)' },
+        { label: 'Work', count: 0, bg: 'var(--butter)' },
+        { label: 'Study', count: 0, bg: 'var(--lavender)' }
+      ] : [
+        { label: 'Work', count: 6, bg: 'var(--butter)' },
+        { label: 'Study', count: 4, bg: 'var(--lavender)' },
+        { label: 'Personal', count: 3, bg: 'var(--mint)' },
+        { label: 'Health', count: 2, bg: 'var(--peach)' },
+        { label: 'Side projects', count: 2, bg: 'var(--sky)' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

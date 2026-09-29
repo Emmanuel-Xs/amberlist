@@ -1,0 +1,12 @@
+<!-- @dsCard group="Navigation" height=120 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>DateStrip</title></head>
+<body>
+<div id="root" class="zn-stack"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(Z.DateStrip,{defaultValue:'10',days:[['7','Sun'],['8','Mon'],['9','Tue'],['10','Wed'],['11','Thu'],['12','Fri'],['13','Sat']].map(function(d){return {key:d[0],day:d[0],weekday:d[1],today:d[0]==='9'}})}));
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home, tablet, light</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="light" style="width: 820px; height: 1480px; background: var(--bg)">
+<dc-import name="TabletHome" theme="light" hint-size="820px,1480px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":1480}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Toasts, sounds and confetti</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="position: relative; width: 1440px; height: 1100px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 32px; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="display-lg" style="margin: 0">Toasts, sounds and confetti</h1>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">Press Play on this artboard and try it: tick the tasks, delete a note, break a save. Finish all three tasks for the celebration.</p>
+</header>
+<div style="display: grid; grid-template-columns: 520px 1fr; gap: 32px; align-items: start">
+<section aria-labelledby="try-h" style="display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: 28px; background: var(--surface)">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<h2 id="try-h" class="heading" style="margin: 0">Today</h2>
+<span style="font-size: 13px; font-weight: 600; color: var(--accent-ink)">{{progress}}</span>
+</div>
+<sc-for list="{{tasks}}" as="t" hint-placeholder-count="3">
+<x-import component-from-global-scope="Zen.TaskItem" title="{{t.title}}" time="{{t.time}}" done="{{t.done}}" on-toggle="{{t.toggle}}"></x-import>
+</sc-for>
+<sc-if value="{{allDone}}" hint-placeholder-val="{{no}}">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="done" title="All done for today" text="Nice work. Tomorrow has 2 tasks waiting." illustration-width="{{w140}}"></x-import>
+</sc-if>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--line)">
+<x-import component-from-global-scope="Zen.Button" variant="danger" size="sm" icon="trash" on-click="{{delNote}}">Delete a note</x-import>
+<x-import component-from-global-scope="Zen.Button" variant="outline" size="sm" icon="alert" on-click="{{fail}}">Fail a save</x-import>
+<x-import component-from-global-scope="Zen.Button" variant="ghost" size="sm" icon="refresh" on-click="{{reset}}">Reset</x-import>
+</div>
+<x-import component-from-global-scope="Zen.Switch" label="Sounds" icon="bell" checked="{{soundOn}}" on-checked-change="{{setSound}}"></x-import>
+</section>
+<div style="display: flex; flex-direction: column; gap: 24px">
+<section aria-labelledby="snd-h" style="display: flex; flex-direction: column; gap: 8px; padding: 24px; border-radius: 28px; background: var(--surface)">
+<h2 id="snd-h" class="heading" style="margin: 0 0 8px">When things make a sound</h2>
+<sc-for list="{{sounds}}" as="s" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 140px 1fr 120px; gap: 12px; align-items: center; min-height: 44px; border-bottom: 1px solid var(--line); font-size: 14px">
+<span style="font-weight: 600">{{s.name}}</span>
+<span style="color: var(--ink-muted)">{{s.when}}</span>
+<x-import component-from-global-scope="Zen.Button" variant="secondary" size="sm" icon="play" on-click="{{s.play}}">Play</x-import>
+</div>
+</sc-for>
+<p style="margin: 8px 0 0; font-size: 13px; line-height: 19px; color: var(--ink-muted)">Quiet, synthesized tones at 6% volume. Only after something you did, never on page load. One switch in Profile turns them off.</p>
+</section>
+<section aria-labelledby="cf-h" style="display: flex; flex-direction: column; gap: 8px; padding: 24px; border-radius: 28px; background: var(--surface)">
+<h2 id="cf-h" class="heading" style="margin: 0">Confetti is rare on purpose</h2>
+<p style="margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted)">Only for finishing the last task due today, completing a long running task, or reaching a habit goal such as 21 of 21. Never for one ordinary task. Skipped under reduced motion; the celebrate sound and the All done state still mark the moment.</p>
+<div><x-import component-from-global-scope="Zen.Button" icon="flame" on-click="{{party}}">Preview confetti</x-import></div>
+</section>
+</div>
+</div>
+<div style="position: absolute; left: 48px; bottom: 32px; width: 420px">
+<x-import component-from-global-scope="Zen.Toaster" position="static">
+<sc-for list="{{toasts}}" as="n" hint-placeholder-count="0">
+<x-import component-from-global-scope="Zen.Toast" tone="{{n.tone}}" icon="{{n.icon}}" message="{{n.message}}" action-label="{{n.action}}" on-action="{{n.onAction}}" on-close="{{n.onClose}}" duration="{{n.duration}}"></x-import>
+</sc-for>
+</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { done: [false, false, false], toasts: [], sound: true };
+    this.seq = 0;
+  }
+  toast(t) {
+    const id = ++this.seq;
+    this.setState((s) => ({ toasts: s.toasts.concat([Object.assign({ id: id }, t)]).slice(-3) }));
+    if (t.duration !== 0) setTimeout(() => this.drop(id), t.duration || 4000);
+    return id;
+  }
+  drop(id) { this.setState((s) => ({ toasts: s.toasts.filter((x) => x.id !== id) })); }
+  renderVals() {
+    const Z = window.Zen, self = this, st = this.state;
+    const titles = [['Submit HNG Stage 1', '18:00 to 23:30'], ['Buy groceries', '17:30'], ['Read 20 pages', '21:00 to 21:30']];
+    const count = st.done.filter(Boolean).length;
+    const toggle = (i) => () => {
+      const next = st.done.slice(); next[i] = !next[i];
+      self.setState({ done: next });
+      if (!next[i]) return;
+      if (next.every(Boolean)) {
+        Z.sound('celebrate'); Z.confetti({ y: 360 });
+        self.toast({ tone: 'success', icon: 'check', message: 'All done for today. Well played.', action: '' });
+      } else {
+        Z.sound('complete');
+        const id = self.toast({ tone: 'success', icon: 'check', message: 'Task completed', action: 'Undo' });
+        self.undoFor = self.undoFor || {}; self.undoFor[id] = i;
+      }
+    };
+    const withHandlers = (n) => Object.assign({}, n, {
+      action: n.action || '',
+      duration: n.duration === 0 ? 0 : (n.duration || 4000),
+      onClose: () => self.drop(n.id),
+      onAction: () => {
+        if (n.action === 'Undo') {
+          Z.sound('undo');
+          const i = self.undoFor && self.undoFor[n.id];
+          if (i != null) { const next = self.state.done.slice(); next[i] = false; self.setState({ done: next }); }
+        } else if (n.action === 'Retry') { Z.sound('complete'); self.toast({ tone: 'success', icon: 'check', message: 'Saved' }); }
+        self.drop(n.id);
+      }
+    });
+    const play = (name) => () => Z.sound(name);
+    return {
+      no: false, w140: 140,
+      soundOn: st.sound,
+      setSound: (v) => { Z.sound.enable(v); self.setState({ sound: v }); },
+      progress: count + ' of 3 done',
+      allDone: count === 3,
+      tasks: titles.map((t, i) => ({ title: t[0], time: t[1], done: st.done[i], toggle: toggle(i) })),
+      delNote: () => { Z.sound('delete'); self.toast({ icon: 'trash', message: 'Note deleted', action: 'Undo' }); },
+      fail: () => { Z.sound('error'); self.toast({ tone: 'error', icon: 'alert', message: "Couldn't save your note", action: 'Retry', duration: 0 }); },
+      reset: () => self.setState({ done: [false, false, false], toasts: [] }),
+      party: () => { Z.sound('celebrate'); Z.confetti({ y: 360 }); },
+      toasts: st.toasts.map(withHandlers),
+      sounds: [
+        { name: 'Complete', when: 'Ticking a task or subtask, a habit check in', play: play('complete') },
+        { name: 'Undo', when: 'Pressing Undo on a toast', play: play('undo') },
+        { name: 'Delete', when: 'Deleting a task or note', play: play('delete') },
+        { name: 'Error', when: 'A save or load fails', play: play('error') },
+        { name: 'Celebrate', when: 'Finishing the day or a habit goal', play: play('celebrate') }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

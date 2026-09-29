@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile, tablet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 820px; height: 1320px; display: flex; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<x-import component-from-global-scope="Zen.AppNav" layout="rail" active="none" items="{{items}}" style="height: 1320px; flex-shrink: 0"></x-import>
+<main style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<h1 class="display" style="margin: 0">Profile</h1>
+<dc-import name="ProfileContent" w="684" cols="1" keys="{{yes}}" hint-size="684px,1200px"></dc-import>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { yes: true, items: [
+      { id: 'home', label: 'Home', icon: 'home', href: 'TabletHome.dc.html' },
+      { id: 'tasks', label: 'Tasks', icon: 'tasks', href: 'TabletTasks.dc.html' },
+      { id: 'notes', label: 'Notes', icon: 'note', href: 'TabletNotes.dc.html' },
+      { id: 'habits', label: 'Habits', icon: 'flame' },
+      { id: 'folders', label: 'Folders', icon: 'folder' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

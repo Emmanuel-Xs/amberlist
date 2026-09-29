@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Icons, destructive actions and errors</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 1440px; height: 1320px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 40px; background: var(--bg); color: var(--ink); font-family: var(--font-sans)">
+<section aria-labelledby="h-ic" style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 id="h-ic" class="display-lg" style="margin: 0">Icons</h1>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">Line icons on a 24px grid, 1.75 stroke, round caps. Every name maps to lucide-react, so the app imports the real set.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 16px 8px; padding: 24px; border-radius: 28px; background: var(--surface)">
+<sc-for list="{{icons}}" as="i" hint-placeholder-count="39">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+<x-import component-from-global-scope="Zen.Icon" name="{{i.name}}" size="{{s24}}"></x-import>
+<span style="font-size: 11px; line-height: 14px; color: var(--ink-muted); text-align: center">{{i.lucide}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; align-items: flex-end; gap: 32px; color: var(--ink-muted); font-size: 12px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="color: var(--ink)"><x-import component-from-global-scope="Zen.Icon" name="folder" size="{{s16}}"></x-import></span>16 chips, toasts</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="color: var(--ink)"><x-import component-from-global-scope="Zen.Icon" name="folder" size="{{s18}}"></x-import></span>18 menus, fields</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="color: var(--ink)"><x-import component-from-global-scope="Zen.Icon" name="folder" size="{{s20}}"></x-import></span>20 rows, buttons</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="color: var(--ink)"><x-import component-from-global-scope="Zen.Icon" name="folder" size="{{s22}}"></x-import></span>22 navigation</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="color: var(--ink)"><x-import component-from-global-scope="Zen.Icon" name="folder" size="{{s44}}" stroke-width="{{thin}}"></x-import></span>44+ cards, stroke 1.25</div>
+</div>
+</section>
+
+<section aria-labelledby="h-de" style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h2 id="h-de" class="display" style="margin: 0">Destructive actions</h2>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">Friction matches the damage. Reversible deletes act at once with Undo. Big ones confirm. Irreversible ones make you type DELETE.</p>
+</div>
+<div style="display: grid; grid-template-columns: 260px 1fr 1fr; gap: 24px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="caption" style="color: var(--ink-muted)">1. Reversible: menu, then Undo</span>
+<x-import component-from-global-scope="Zen.Menu" label="Task actions" items="{{menu}}"></x-import>
+<x-import component-from-global-scope="Zen.Toast" icon="trash" message="Task deleted" action-label="Undo"></x-import>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="caption" style="color: var(--ink-muted)">2. Big but safe: confirm and say what happens</span>
+<x-import component-from-global-scope="Zen.ConfirmDialog" id="cd1" icon="folder" title="Delete the Work folder?" text="Its 6 tasks and 2 notes move to Inbox. Nothing else is deleted." confirm-label="Delete folder"></x-import>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="caption" style="color: var(--ink-muted)">3. Irreversible: type DELETE to unlock</span>
+<x-import component-from-global-scope="Zen.ConfirmDialog" id="cd2" title="Delete all your data?" text="Every task, note, habit and folder will be removed from this device for good. This cannot be undone." confirm-label="Delete everything" confirm-text="DELETE"></x-import>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<span class="caption" style="color: var(--ink-muted); width: 120px">Danger buttons</span>
+<x-import component-from-global-scope="Zen.Button" variant="danger" size="sm" icon="trash">Delete task</x-import>
+<x-import component-from-global-scope="Zen.Button" variant="danger-solid" size="sm" icon="trash">Delete folder</x-import>
+<x-import component-from-global-scope="Zen.Button" variant="danger-solid" size="sm" loading="{{yes}}">Deleting</x-import>
+<x-import component-from-global-scope="Zen.Button" variant="danger-solid" size="sm" icon="trash" disabled="{{yes}}">Delete everything</x-import>
+</div>
+</section>
+
+<section aria-labelledby="h-er" style="display: flex; flex-direction: column; gap: 16px">
+<h2 id="h-er" class="display" style="margin: 0">Errors and notices</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<x-import component-from-global-scope="Zen.Alert" tone="danger" title="Couldn't save your note" action-label="Retry" action-icon="refresh">Check your connection. Your text is kept on this device.</x-import>
+<x-import component-from-global-scope="Zen.Alert" tone="warning" title="You're a guest">Clearing your browser data will remove your tasks. Save with Google to keep them.</x-import>
+<x-import component-from-global-scope="Zen.Alert" tone="success">Your data is saved to your Google account.</x-import>
+<x-import component-from-global-scope="Zen.Toast" icon="alert" message="Couldn't load your tasks" action-label="Retry"></x-import>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const map = [['home','House'],['tasks','ListTodo'],['note','NotebookPen'],['flame','Flame'],['folder','Folder'],['plus','CirclePlus'],['search','Search'],['sliders','SlidersHorizontal'],['more','EllipsisVertical'],['x','X'],['calendar','Calendar'],['clock','Clock'],['flag','Flag'],['bell','Bell'],['inbox','Inbox'],['check','Check'],['play','Play'],['pin','Pin'],['link','Link'],['scratch','PencilLine'],['trash','Trash2'],['alert','TriangleAlert'],['refresh','RotateCw'],['undo','Undo2'],['download','Download'],['copy','Copy'],['logout','LogOut'],['arrowLeft','ArrowLeft'],['chevronRight','ChevronRight'],['chevronDown','ChevronDown'],['user','User'],['moon','Moon'],['sun','Sun'],['book','BookOpen'],['pen','PenTool'],['droplet','Droplet'],['target','Target'],['cart','ShoppingCart'],['menu','Menu']];
+    return {
+      yes: true, s16: 16, s18: 18, s20: 20, s22: 22, s24: 24, s44: 44, thin: 1.25,
+      icons: map.map(function (m) { return { name: m[0], lucide: m[1] }; }),
+      menu: [
+        { label: 'Edit', icon: 'pen', shortcut: 'E' },
+        { label: 'Start', icon: 'play' },
+        { label: 'Move to folder', icon: 'folder' },
+        { label: 'Duplicate', icon: 'copy' },
+        { separator: true },
+        { label: 'Delete task', icon: 'trash', danger: true, shortcut: 'Del' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Interaction states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.fh .zn-btn--primary{filter:brightness(1.05)}
+.fh .zn-btn--secondary,.fh .zn-btn--outline,.fh .zn-btn--ghost,.fh .zn-btn--danger{background:var(--surface-raised);filter:brightness(1.08)}
+.fp .zn-btn{transform:scale(0.98)}
+.fp .zn-btn--primary{filter:brightness(0.95)}
+.fp .zn-btn--secondary,.fp .zn-btn--outline,.fp .zn-btn--ghost,.fp .zn-btn--danger{background:var(--surface-raised)}
+.ff .zn-btn,.ff .zn-chip,.ff .zn-check,.ff .zn-switch{outline:2px solid var(--ring);outline-offset:2px}
+.fh .zn-chip{background:var(--surface-raised)}
+.fh .zn-chip.is-selected{background:var(--accent);filter:brightness(1.05)}
+.fh .zn-task{background:var(--surface-raised)}
+.fh .zn-check{border-color:var(--accent)}
+.ff .zn-field--line .zn-input{border-bottom-color:var(--ring);box-shadow:0 1px 0 0 var(--ring)}
+.demo-scroll{height:220px;overflow-y:scroll;border-radius:20px;background:var(--surface);padding:8px 4px 8px 12px;display:flex;flex-direction:column;gap:8px}
+.fhs::-webkit-scrollbar-thumb{background-color:var(--accent)}
+</style>
+</helmet>
+<div data-theme="dark" style="width: 1440px; height: 1840px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 40px; background: var(--bg); color: var(--ink); font-family: var(--font-sans)">
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="display-lg" style="margin: 0">Interaction states</h1>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">Every control shows the same five states: hover lifts the surface, press shrinks 2%, focus draws the 2px amber ring, loading shows a spinner and blocks clicks, disabled drops to 45% and blocks clicks.</p>
+</header>
+
+<section aria-labelledby="h-btn" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-btn" class="heading" style="margin: 0">Buttons</h2>
+<div style="display: grid; grid-template-columns: 120px repeat(6, minmax(0, 1fr)); gap: 14px 16px; align-items: center">
+<span></span>
+<sc-for list="{{btnCols}}" as="c" hint-placeholder-count="6"><span class="caption" style="color: var(--ink-muted)">{{c}}</span></sc-for>
+<sc-for list="{{variants}}" as="v" hint-placeholder-count="5">
+<span class="label" style="color: var(--ink-muted)">{{v.label}}</span>
+<div><x-import component-from-global-scope="Zen.Button" variant="{{v.id}}" size="sm" icon="{{v.icon}}">{{v.text}}</x-import></div>
+<div class="fh"><x-import component-from-global-scope="Zen.Button" variant="{{v.id}}" size="sm" icon="{{v.icon}}">{{v.text}}</x-import></div>
+<div class="fp"><x-import component-from-global-scope="Zen.Button" variant="{{v.id}}" size="sm" icon="{{v.icon}}">{{v.text}}</x-import></div>
+<div class="ff"><x-import component-from-global-scope="Zen.Button" variant="{{v.id}}" size="sm" icon="{{v.icon}}">{{v.text}}</x-import></div>
+<div><x-import component-from-global-scope="Zen.Button" variant="{{v.id}}" size="sm" loading="{{yes}}">{{v.loadingText}}</x-import></div>
+<div><x-import component-from-global-scope="Zen.Button" variant="{{v.id}}" size="sm" icon="{{v.icon}}" disabled="{{yes}}">{{v.text}}</x-import></div>
+</sc-for>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px">
+<section aria-labelledby="h-chip" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-chip" class="heading" style="margin: 0">Chips</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 12px; align-items: center">
+<span class="caption" style="color: var(--ink-muted)">Default</span><span class="caption" style="color: var(--ink-muted)">Hover</span><span class="caption" style="color: var(--ink-muted)">Selected</span><span class="caption" style="color: var(--ink-muted)">Focus</span><span class="caption" style="color: var(--ink-muted)">Disabled</span>
+<div><x-import component-from-global-scope="Zen.Chip">Study</x-import></div>
+<div class="fh"><x-import component-from-global-scope="Zen.Chip">Study</x-import></div>
+<div><x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">Study</x-import></div>
+<div class="ff"><x-import component-from-global-scope="Zen.Chip">Study</x-import></div>
+<div><x-import component-from-global-scope="Zen.Chip" disabled="{{yes}}">Study</x-import></div>
+</div>
+</section>
+<section aria-labelledby="h-sw" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-sw" class="heading" style="margin: 0">Switches</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; align-items: center">
+<span class="caption" style="color: var(--ink-muted)">Off</span><span class="caption" style="color: var(--ink-muted)">On</span><span class="caption" style="color: var(--ink-muted)">Focus</span><span class="caption" style="color: var(--ink-muted)">Disabled off</span><span class="caption" style="color: var(--ink-muted)">Disabled on</span>
+<div><x-import component-from-global-scope="Zen.Switch" aria-label="Off example"></x-import></div>
+<div><x-import component-from-global-scope="Zen.Switch" aria-label="On example" default-checked="{{yes}}"></x-import></div>
+<div class="ff"><x-import component-from-global-scope="Zen.Switch" aria-label="Focus example" default-checked="{{yes}}"></x-import></div>
+<div><x-import component-from-global-scope="Zen.Switch" aria-label="Disabled off example" disabled="{{yes}}"></x-import></div>
+<div><x-import component-from-global-scope="Zen.Switch" aria-label="Disabled on example" default-checked="{{yes}}" disabled="{{yes}}"></x-import></div>
+</div>
+</section>
+</div>
+
+<section aria-labelledby="h-task" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-task" class="heading" style="margin: 0">Task rows</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 16px">
+<span class="caption" style="color: var(--ink-muted)">Default</span><span class="caption" style="color: var(--ink-muted)">Hover</span><span class="caption" style="color: var(--ink-muted)">Selected (desktop detail open)</span><span class="caption" style="color: var(--ink-muted)">Done</span><span class="caption" style="color: var(--ink-muted)">Focus on checkbox</span>
+<div><x-import component-from-global-scope="Zen.TaskItem" title="Call mum" time="17:00" category="Personal"></x-import></div>
+<div class="fh"><x-import component-from-global-scope="Zen.TaskItem" title="Call mum" time="17:00" category="Personal"></x-import></div>
+<div><x-import component-from-global-scope="Zen.TaskItem" title="Call mum" time="17:00" category="Personal" selected="{{yes}}"></x-import></div>
+<div><x-import component-from-global-scope="Zen.TaskItem" title="Call mum" time="17:00" category="Personal" done="{{yes}}"></x-import></div>
+<div class="ff"><x-import component-from-global-scope="Zen.TaskItem" title="Call mum" time="17:00" category="Personal"></x-import></div>
+</div>
+</section>
+
+<section aria-labelledby="h-in" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-in" class="heading" style="margin: 0">Inputs</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 24px; align-items: start">
+<span class="caption" style="color: var(--ink-muted)">Empty</span><span class="caption" style="color: var(--ink-muted)">Focus</span><span class="caption" style="color: var(--ink-muted)">Filled</span><span class="caption" style="color: var(--ink-muted)">Error</span><span class="caption" style="color: var(--ink-muted)">Disabled</span>
+<x-import component-from-global-scope="Zen.Input" id="i1" label="Title" placeholder="What needs doing?"></x-import>
+<div class="ff"><x-import component-from-global-scope="Zen.Input" id="i2" label="Title" default-value="Book readi"></x-import></div>
+<x-import component-from-global-scope="Zen.Input" id="i3" label="Due" default-value="Today, 23:59" trailing-icon="calendar"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="i4" label="Title" default-value="" error="{{yes}}" hint="Give the task a title."></x-import>
+<x-import component-from-global-scope="Zen.Input" id="i5" label="Folder" default-value="Work" disabled="{{yes}}" hint="Folders arrive once you add one."></x-import>
+</div>
+</section>
+
+<section aria-labelledby="h-scroll" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-scroll" class="heading" style="margin: 0">Scrollbars</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 24px">
+<span class="caption" style="color: var(--ink-muted)">At rest: pill thumb in line-strong</span><span class="caption" style="color: var(--ink-muted)">Hover or drag: thumb turns amber</span><span class="caption" style="color: var(--ink-muted)">Sideways rows: bar hidden, next item peeks</span>
+<div class="demo-scroll zn-scroll"><sc-for list="{{rows}}" as="r" hint-placeholder-count="8"><x-import component-from-global-scope="Zen.TaskItem" title="{{r}}"></x-import></sc-for></div>
+<div class="demo-scroll zn-scroll fhs"><sc-for list="{{rows}}" as="r" hint-placeholder-count="8"><x-import component-from-global-scope="Zen.TaskItem" title="{{r}}"></x-import></sc-for></div>
+<div style="height: 220px; border-radius: 20px; background: var(--surface); padding: 16px 0 16px 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; overflow: hidden">
+<div class="zn-scroll-x-hidden" style="display: flex; gap: 8px"><x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">All</x-import><x-import component-from-global-scope="Zen.Chip">Work</x-import><x-import component-from-global-scope="Zen.Chip">Study</x-import><x-import component-from-global-scope="Zen.Chip">Personal</x-import><x-import component-from-global-scope="Zen.Chip">Health</x-import><x-import component-from-global-scope="Zen.Chip">Side projects</x-import></div>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="h-fb" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-fb" class="heading" style="margin: 0">Feedback</h2>
+<div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap">
+<x-import component-from-global-scope="Zen.Toast" icon="check" message="Task completed" action-label="Undo" style="width: 360px"></x-import>
+<x-import component-from-global-scope="Zen.Toast" icon="trash" message="Note deleted" action-label="Undo" style="width: 360px"></x-import>
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted)"><span class="zn-spinner" aria-hidden="true"></span>Saving</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-muted)"><x-import component-from-global-scope="Zen.Icon" name="check" size="{{s16}}"></x-import>Saved</span>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1840}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      yes: true, s16: 16,
+      rows: ['Send invoice to client', 'Submit HNG Stage 1', 'Design review with the team', 'Buy groceries', 'Read 20 pages', 'Call mum', 'Prepare Stage 2 notes', 'Plan portfolio redesign'],
+      btnCols: ['Default', 'Hover', 'Pressed', 'Focus', 'Loading', 'Disabled'],
+      variants: [
+        { id: 'primary', label: 'Primary', text: 'Create task', loadingText: 'Saving', icon: 'plus' },
+        { id: 'secondary', label: 'Secondary', text: 'Cancel', loadingText: 'Working', icon: '' },
+        { id: 'outline', label: 'Outline', text: 'Add tag', loadingText: 'Adding', icon: 'plus' },
+        { id: 'ghost', label: 'Ghost', text: 'See all', loadingText: 'Loading', icon: '' },
+        { id: 'danger', label: 'Danger', text: 'Delete', loadingText: 'Deleting', icon: 'trash' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

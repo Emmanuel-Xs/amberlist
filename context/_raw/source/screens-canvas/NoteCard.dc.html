@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Note card</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<a href="#" style="width: {{wpx}}; height: {{hpx}}; flex-shrink: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 20px; background: {{bg}}; color: {{fg}}; text-decoration: none; font-family: var(--font-sans); box-shadow: var(--shadow-card); overflow: hidden">
+<div style="display: flex; align-items: flex-start; gap: 8px">
+<span style="flex-grow: 1; font-size: 15px; line-height: 20px; font-weight: 600">{{heading}}</span>
+<sc-if value="{{pinned}}" hint-placeholder-val="{{no}}">
+<span aria-label="Pinned" style="display: inline-flex"><x-import component-from-global-scope="Zen.Icon" name="pin" size="{{s16}}"></x-import></span>
+</sc-if>
+</div>
+<p style="margin: 0; flex-grow: 1; font-size: 13px; line-height: 19px; color: {{muted}}; white-space: pre-line; overflow: hidden">{{body}}</p>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 11px; line-height: 14px; font-weight: 500; color: {{muted}}">
+<sc-if value="{{hasLink}}" hint-placeholder-val="{{no}}">
+<x-import component-from-global-scope="Zen.Icon" name="link" size="{{s14}}"></x-import>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{linked}}</span>
+</sc-if>
+<sc-if value="{{noLink}}" hint-placeholder-val="{{yes}}">
+<span>{{updated}}</span>
+</sc-if>
+</div>
+</a>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tone":{"editor":"enum","options":["surface","lavender","butter","mint","peach","sky"],"default":"butter"},"heading":{"editor":null,"default":"Stage 1 checklist"},"body":{"editor":null,"default":"Tasks with dates and subtasks\nNotes and the scratchpad\nEndpoint tests passing\nDeploy, then submit on Zedu"},"pinned":{"editor":"boolean","default":true},"linked":{"editor":null,"default":"Submit HNG Stage 1"},"updated":{"editor":null,"default":"Edited today"},"w":{"editor":null,"default":300},"h":{"editor":null,"default":200},"$preview":{"width":300,"height":200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const tone = p.tone ?? 'butter';
+    const onSurface = tone === 'surface';
+    const linked = p.linked ?? '';
+    return {
+      yes: true, no: false, s14: 14, s16: 16,
+      wpx: Number(p.w ?? 300) + 'px', hpx: Number(p.h ?? 200) + 'px',
+      bg: 'var(--' + tone + ')',
+      fg: onSurface ? 'var(--ink)' : 'var(--on-pastel)',
+      muted: onSurface ? 'var(--ink-muted)' : 'rgba(28,29,33,0.74)',
+      heading: p.heading ?? 'Stage 1 checklist',
+      body: p.body ?? '',
+      pinned: p.pinned === true || p.pinned === 'true',
+      linked: linked, hasLink: linked !== '', noLink: linked === '',
+      updated: p.updated ?? 'Edited today'
+    };
+  }
+}
+</script>
+</body>
+</html>

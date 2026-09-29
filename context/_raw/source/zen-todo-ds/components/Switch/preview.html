@@ -1,0 +1,12 @@
+<!-- @dsCard group="Inputs" height=110 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Switch</title></head>
+<body>
+<div id="root" class="zn-stack"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(Z.Switch,{label:'Remind me',icon:'bell',defaultChecked:true}),h(Z.Switch,{label:'Repeat daily',icon:'clock'})));
+</script>
+</body>
+</html>

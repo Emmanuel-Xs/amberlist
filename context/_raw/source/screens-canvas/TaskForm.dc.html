@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create task form</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div role="dialog" aria-modal="true" aria-labelledby="tf-h" style="width: {{wpx}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; padding: 24px; border-radius: {{radius}}; background: var(--surface); box-shadow: var(--shadow-float); color: var(--ink); font-family: var(--font-sans)">
+<sc-if value="{{sheet}}" hint-placeholder-val="{{no}}"><span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 9999px; background: var(--line-strong); margin-top: -12px"></span></sc-if>
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h2 id="tf-h" class="title" style="margin: 0">New task</h2>
+<x-import component-from-global-scope="Zen.Button" variant="ghost" size="sm" icon="x" aria-label="Close"></x-import>
+</div>
+<x-import component-from-global-scope="Zen.Input" id="tf-title" label="Title" default-value="Prepare Stage 2 notes"></x-import>
+<x-import component-from-global-scope="Zen.Textarea" id="tf-notes" label="Notes" optional="{{yes}}" placeholder="Anything to remember? Markdown works." variant="filled"></x-import>
+<div style="display: grid; grid-template-columns: repeat({{cols}}, minmax(0, 1fr)); gap: 16px 20px">
+<x-import component-from-global-scope="Zen.Input" id="tf-start" label="Start" default-value="Tomorrow" trailing-icon="calendar"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="tf-due" label="Due" optional="{{yes}}" placeholder="No deadline" trailing-icon="flag"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="tf-time" label="Time" optional="{{yes}}" default-value="10:00 to 11:00" trailing-icon="clock"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="tf-repeat" label="Repeat" default-value="Does not repeat" trailing-icon="chevronDown"></x-import>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="label" style="color: var(--ink-muted)">Folder</span>
+<div role="radiogroup" aria-label="Folder" style="display: flex; gap: 8px; flex-wrap: wrap">
+<x-import component-from-global-scope="Zen.Chip">Work</x-import>
+<x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">Study</x-import>
+<x-import component-from-global-scope="Zen.Chip">Personal</x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="plus">New folder</x-import>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="label" style="color: var(--ink-muted)">Priority</span>
+<div role="radiogroup" aria-label="Priority" style="display: flex; gap: 8px">
+<x-import component-from-global-scope="Zen.Chip">Low</x-import>
+<x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">Medium</x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="flag">High</x-import>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span class="label" style="color: var(--ink-muted)">Subtasks</span>
+<div style="display: flex; align-items: center; gap: 12px; min-height: 40px"><span style="width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line-strong)"></span><span style="font-size: 14px">Reread the Stage 2 brief</span></div>
+<button type="button" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0; border: 0; background: transparent; color: var(--ink-muted); font-family: var(--font-sans); font-size: 14px; cursor: pointer"><x-import component-from-global-scope="Zen.Icon" name="plus" size="{{s18}}"></x-import>Add subtask</button>
+</div>
+<x-import component-from-global-scope="Zen.Switch" label="Remind me at 10:00" icon="bell"></x-import>
+<div style="display: flex; gap: 12px; justify-content: flex-end">
+<x-import component-from-global-scope="Zen.Button" variant="secondary">Cancel</x-import>
+<x-import component-from-global-scope="Zen.Button" icon="plus">Create task</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"w":{"editor":null,"default":560},"sheet":{"editor":"boolean","default":false},"$preview":{"width":560,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const sheet = p.sheet === true || p.sheet === 'true';
+    const w = Number(p.w ?? 560);
+    return {
+      yes: true, no: false, s18: 18, sheet: sheet,
+      wpx: w + 'px',
+      radius: sheet ? '28px 28px 0 0' : '28px',
+      cols: w < 480 ? 1 : 2
+    };
+  }
+}
+</script>
+</body>
+</html>

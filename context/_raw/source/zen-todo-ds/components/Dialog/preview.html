@@ -1,0 +1,15 @@
+<!-- @dsCard group="Overlays" height=420 width=900 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Dialog</title></head>
+<body>
+<div id="root" style="position:relative;height:420px;display:flex;align-items:center;justify-content:center;gap:24px"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h('div', {className:'zn-scrim'}),
+  h('div', {style:{position:'relative'}}, h(Z.Dialog, {id:'m', title:'Keep this device’s tasks?', description:'This device has 4 tasks and 2 notes. Your Google account already has data from another device.', onClose:null,
+    footer:[h(Z.Button,{key:'d',variant:'ghost'},'Discard them'), h(Z.Button,{key:'m'},'Merge into account')]}))));
+</script>
+</body>
+</html>

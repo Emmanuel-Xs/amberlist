@@ -1,0 +1,28 @@
+<!-- @dsCard group="Layout" height=520 width=1200 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AppShell</title><style>html,body,#root{height:100%}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+var items = [{id:'home',label:'Home',icon:'home'},{id:'tasks',label:'Tasks',icon:'tasks'},{id:'add',label:'Add',icon:'plus'},{id:'cal',label:'Calendar',icon:'calendar'},{id:'me',label:'Profile',icon:'user'}];
+var main = h('div', {style:{display:'flex',flexDirection:'column',gap:16}},
+  h('p',{style:{margin:0,color:'var(--ink-muted)'}},'Good morning, Emmanuel!'),
+  h('h1',{className:'display-lg',style:{margin:0}},'You have ',h('span',{style:{color:'var(--accent-ink)'}},'4 tasks'),' today.'),
+  h(Z.SearchBar,{placeholder:'Search tasks and notes'}),
+  h('div',{style:{display:'flex',gap:8}},h(Z.Chip,null,'All'),h(Z.Chip,{selected:true},'Projects'),h(Z.Chip,null,'Study')),
+  h(Z.TaskItem,{title:'Photo editing',time:'10:00 to 10:30'}),
+  h(Z.TaskItem,{title:'Zen list app design',time:'11:00 to 12:45',hasNote:true,selected:true}),
+  h(Z.TaskItem,{title:'Meeting with the boss',time:'08:00 to 08:20',done:true}));
+var aside = h('div',{style:{display:'flex',flexDirection:'column',gap:20}},
+  h('h2',{className:'title',style:{margin:0}},'Zen list app design'),
+  h(Z.Input,{id:'a1',label:'Time',defaultValue:'11:00 to 12:45',trailingIcon:'clock'}),
+  h(Z.Textarea,{id:'a2',label:'Notes',defaultValue:'Focus on minimalism. Try the amber accent on dark first, then check light mode contrast.'}),
+  h(Z.Switch,{label:'Remind me',icon:'bell',defaultChecked:true}),
+  h(Z.Button,{block:true},'Save changes'));
+ReactDOM.createRoot(document.getElementById('root')).render(
+  h(Z.AppShell,{layout:'sidebar',nav:h(Z.AppNav,{layout:'sidebar',brand:'Zen Todo',active:'tasks',items:items}),aside:aside},main));
+</script>
+</body>
+</html>

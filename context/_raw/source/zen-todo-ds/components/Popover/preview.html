@@ -1,0 +1,16 @@
+<!-- @dsCard group="Overlays" height=260 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Popover</title></head>
+<body>
+<div id="root" class="zn-demo" style="align-items:flex-start"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(Z.Popover, {label:'Filters'},
+  h('span',{className:'label',style:{color:'var(--ink-muted)'}},'Folder'),
+  h('div',{style:{display:'flex',gap:8}}, h(Z.Chip,{selected:true},'Work'), h(Z.Chip,null,'Study')),
+  h('span',{className:'label',style:{color:'var(--ink-muted)'}},'Priority'),
+  h('div',{style:{display:'flex',gap:8}}, h(Z.Chip,null,'Low'), h(Z.Chip,{icon:'flag'},'High'))));
+</script>
+</body>
+</html>

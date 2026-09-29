@@ -1,0 +1,55 @@
+<!-- @dsCard height=320 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zen Todo</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:320px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:320px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:320px; }
+  .amber { fill:var(--accent); }
+  .lav { fill:var(--lavender); }
+  .but { fill:var(--butter); }
+  .mint { fill:var(--mint); }
+  .tile { rx:var(--radius-xl); }
+  .pill { fill:none; stroke:var(--line-strong); stroke-width:1.5; rx:20px; }
+  .pill.on { fill:var(--accent); stroke:none; rx:24px; }
+  .words { position:absolute; left:var(--space-8); bottom:var(--space-8); max-width:440px; }
+  .name { margin:0; font-size:112px; line-height:.95; font-weight:700; letter-spacing:-.03em; color:var(--ink); }
+  .tag { margin:var(--space-3) 0 0 4px; font-size:14px; line-height:20px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 320" width="480" height="320">
+<!--
+  blocks      accent 136x232 slab bled off the top (the brand) · lavender 136x168 · butter 168x132 bled off top and right · mint 168x88 bled off right; about 35% of 960x320
+  arrangement one tall amber slab with pastel satellites, like the category row beside the primary action
+  pattern     pills, from the date strip: "radius-full for buttons, chips, search, date pills": eight outlined day pills at a space-12+space-2 pitch, the selected one filled amber and taller
+  scales      gutters space-4; pill 40x64 and 48x80 (the date sizes), rx half the width; tiles radius-xl
+-->
+<rect class="amber tile" x="24" y="-28" width="136" height="232" rx="28"/>
+<rect class="lav tile" x="176" y="36" width="136" height="168" rx="28"/>
+<rect class="but tile" x="328" y="-28" width="168" height="132" rx="28"/>
+<rect class="mint tile" x="328" y="116" width="168" height="88" rx="28"/>
+<rect class="pill" x="24" y="236" width="40" height="64" rx="20"/>
+<rect class="pill" x="80" y="236" width="40" height="64" rx="20"/>
+<rect class="pill" x="136" y="236" width="40" height="64" rx="20"/>
+<rect class="pill on" x="188" y="228" width="48" height="80" rx="24"/>
+<rect class="pill" x="248" y="236" width="40" height="64" rx="20"/>
+<rect class="pill" x="304" y="236" width="40" height="64" rx="20"/>
+<rect class="pill" x="360" y="236" width="40" height="64" rx="20"/>
+<rect class="pill" x="416" y="236" width="40" height="64" rx="20"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Zen<br>Todo</h1>
+<p class="tag">Calm tasks and notes, from phone to laptop.</p>
+</div>
+</div>
+</body>
+</html>

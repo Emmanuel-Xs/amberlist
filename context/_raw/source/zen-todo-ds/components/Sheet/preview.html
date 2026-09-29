@@ -1,0 +1,17 @@
+<!-- @dsCard group="Overlays" height=460 width=420 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Sheet</title></head>
+<body>
+<div id="root" style="position:relative;height:460px;overflow:hidden"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h('div', {className:'zn-scrim'}),
+  h('div', {style:{position:'absolute',left:0,right:0,bottom:0}}, h(Z.Sheet, {title:'Filters',
+    footer:[h(Z.Button,{key:'r',variant:'secondary'},'Reset'), h(Z.Button,{key:'a'},'Show 9 tasks')]},
+    h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}}, h(Z.Chip,{selected:true},'Work'), h(Z.Chip,null,'Study'), h(Z.Chip,null,'Personal')),
+    h('div',{style:{display:'flex',gap:8}}, h(Z.Chip,null,'Todo'), h(Z.Chip,{selected:true},'In progress'), h(Z.Chip,null,'Done'))))));
+</script>
+</body>
+</html>

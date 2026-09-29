@@ -1,0 +1,14 @@
+<!-- @dsCard group="Actions" height=320 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Menu</title></head>
+<body>
+<div id="root" class="zn-demo"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(Z.Menu, {label:'Task actions', items:[
+  {label:'Edit', icon:'pen', shortcut:'E'}, {label:'Start', icon:'play'}, {label:'Move to folder', icon:'folder'}, {label:'Duplicate', icon:'copy'},
+  {separator:true}, {label:'Delete task', icon:'trash', danger:true, shortcut:'Del'}]}));
+</script>
+</body>
+</html>

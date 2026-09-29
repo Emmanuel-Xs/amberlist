@@ -6,6 +6,14 @@ Rules for any AI coding agent working in this repository. Read this file fully b
 
 Honeylist is a calm task, notes and scratchpad app (HNG Internship 15, Stage 1). Guests use it without signing up; each browser gets an anonymous account. The product spec lives in the PRD; the look lives in the Zen Todo design system.
 
+## Context folder (read first)
+
+Start every task with [`context/README.md`](context/README.md): it gives the reading order for the backlog, decisions, design system, per feature notes and the Playwright test plan.
+
+- **Design approval:** any UI change that departs from the approved design (Zen Todo DS plus the Amberlist Screens canvas) needs Emmanuel's approval first, shown as a design. Pending proposals are listed in `context/design-system.md`.
+- **shadcn check:** before creating a UI component, check whether shadcn/ui has one and use it styled with our tokens. The adoption approach is still an open decision (`context/decisions.md` O1); confirm it before the first install.
+- **Keep docs updated:** update the relevant files in `context/` (feature status, backlog, decisions, changelog) in the same commit as the change. Never edit `context/_raw/`.
+
 ## Stack (use only these)
 
 - **TanStack Start** (React 19, TypeScript, Vite) with file routes in `src/routes`.

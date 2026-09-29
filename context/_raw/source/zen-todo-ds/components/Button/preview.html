@@ -1,0 +1,12 @@
+<!-- @dsCard group="Actions" height=88 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Button</title></head>
+<body>
+<div id="root" class="zn-demo"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(Z.Button,null,'Create task'),h(Z.Button,{variant:'secondary'},'Cancel'),h(Z.Button,{variant:'outline',icon:'plus'},'Add tag'),h(Z.Button,{variant:'ghost',size:'sm'},'See all'),h(Z.Button,{variant:'danger',size:'sm',icon:'trash'},'Delete'),h(Z.Button,{icon:'plus','aria-label':'Add task'})));
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Short label on icon-only buttons, shown on hover and keyboard focus after 400ms, with the shortcut when there is one. Inverted colors (`ink` on `bg`) so it reads on any surface. Render with shadcn `Tooltip`.

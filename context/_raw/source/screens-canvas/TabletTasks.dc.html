@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tasks, tablet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 820px; height: 1180px; display: flex; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<x-import component-from-global-scope="Zen.AppNav" layout="rail" active="tasks" items="{{items}}" style="height: 1180px; flex-shrink: 0"></x-import>
+<main style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<header style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; align-items: baseline; gap: 12px">
+<h1 class="display" style="margin: 0">Tasks</h1>
+<span style="font-size: 14px; color: var(--ink-muted)">9 open</span>
+</div>
+<a href="TabletProfile.dc.html" aria-label="Profile, you are a guest" style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; font-weight: 600; text-decoration: none">E</a>
+</header>
+<x-import component-from-global-scope="Zen.SearchBar" placeholder="Search tasks"></x-import>
+<dc-import name="QuickAdd" w="684" filled="{{yes}}" hint-size="684px,98px"></dc-import>
+<div role="group" aria-label="Filter tasks" style="display: flex; gap: 8px; flex-wrap: wrap">
+<x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">All</x-import>
+<x-import component-from-global-scope="Zen.Chip">Work</x-import>
+<x-import component-from-global-scope="Zen.Chip">Study</x-import>
+<x-import component-from-global-scope="Zen.Chip">Personal</x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="flag">High priority</x-import>
+</div>
+<h2 style="margin: 4px 0 0; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--danger)"><x-import component-from-global-scope="Zen.Icon" name="flag" size="{{s16}}"></x-import>Overdue <span style="color: var(--ink-muted); font-weight: 500">1</span></h2>
+<x-import component-from-global-scope="Zen.TaskItem" title="Send invoice to client" time="Due yesterday" category="Work"></x-import>
+<h2 style="margin: 4px 0 0; font-size: 13px; font-weight: 600">Today <span style="color: var(--ink-muted); font-weight: 500">4</span></h2>
+<x-import component-from-global-scope="Zen.TaskItem" title="Submit HNG Stage 1" time="18:00 to 23:30" category="Work" has-note="{{yes}}"></x-import>
+<x-import component-from-global-scope="Zen.TaskItem" title="Design review with the team" time="11:00 to 12:00" category="Work" has-note="{{yes}}"></x-import>
+<x-import component-from-global-scope="Zen.TaskItem" title="Buy groceries" time="17:30" category="Personal"></x-import>
+<x-import component-from-global-scope="Zen.TaskItem" title="Read 20 pages of Atomic Habits" time="21:00 to 21:30" category="Study"></x-import>
+<h2 style="margin: 4px 0 0; font-size: 13px; font-weight: 600">Tomorrow <span style="color: var(--ink-muted); font-weight: 500">2</span></h2>
+<x-import component-from-global-scope="Zen.TaskItem" title="Call mum" time="17:00" category="Personal"></x-import>
+<x-import component-from-global-scope="Zen.TaskItem" title="Prepare Stage 2 notes" category="Study"></x-import>
+<button type="button" aria-expanded="false" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 4px; border: 0; background: transparent; color: var(--ink-muted); font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer"><x-import component-from-global-scope="Zen.Icon" name="chevronRight" size="{{s18}}"></x-import>Completed 4</button>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      yes: true, s16: 16, s18: 18,
+      items: [
+        { id: 'home', label: 'Home', icon: 'home', href: 'TabletHome.dc.html' },
+        { id: 'tasks', label: 'Tasks', icon: 'tasks', href: 'TabletTasks.dc.html' },
+        { id: 'notes', label: 'Notes', icon: 'note' },
+        { id: 'habits', label: 'Habits', icon: 'flame' },
+        { id: 'folders', label: 'Folders', icon: 'folder' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

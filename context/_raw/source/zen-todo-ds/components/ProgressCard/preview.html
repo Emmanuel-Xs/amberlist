@@ -1,0 +1,12 @@
+<!-- @dsCard group="Tasks" height=280 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ProgressCard</title></head>
+<body>
+<div id="root" class="zn-stack"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(Z.ProgressCard,{title:'Drink 8 glasses of water',meta:'Day 19 of 21 days',description:'Use a marked bottle and drink it before noon.',value:90,icon:'droplet'}),h(Z.ProgressCard,{title:'Zen list app design',meta:'Day 8 of 16 days',description:'Focus on minimalism, explore color schemes.',value:50,icon:'pen'})));
+</script>
+</body>
+</html>

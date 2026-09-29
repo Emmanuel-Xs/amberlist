@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Task detail, tablet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 820px; height: 1180px; display: flex; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<x-import component-from-global-scope="Zen.AppNav" layout="rail" active="tasks" items="{{items}}" style="height: 1180px; flex-shrink: 0"></x-import>
+<main style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<header style="display: flex; align-items: center; justify-content: space-between; height: 48px">
+<a href="TabletTasks.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500"><x-import component-from-global-scope="Zen.Icon" name="arrowLeft" size="{{s20}}"></x-import>Tasks</a>
+<div style="display: flex; gap: 8px"><x-import component-from-global-scope="Zen.Button" variant="danger" size="sm" icon="trash">Delete</x-import><x-import component-from-global-scope="Zen.Button" variant="ghost" size="sm" icon="more" aria-label="More actions"></x-import></div>
+</header>
+<dc-import name="TodayCard" tone="accent" heading="Submit HNG Stage 1" category="Work" time="18:00 to 23:30" badge="Due today" done="3" total="6" icon="flag" w="684" hint-size="684px,188px"></dc-import>
+<div role="radiogroup" aria-label="Status" style="display: flex; gap: 8px">
+<x-import component-from-global-scope="Zen.Chip">Todo</x-import>
+<x-import component-from-global-scope="Zen.Chip" selected="{{yes}}" icon="play">In progress</x-import>
+<x-import component-from-global-scope="Zen.Chip">Done</x-import>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 16px; border-radius: 20px; background: var(--surface); align-content: start">
+<x-import component-from-global-scope="Zen.Input" id="t-start" label="Start" default-value="Today" trailing-icon="calendar"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="t-due" label="Due" default-value="Today, 23:59" trailing-icon="flag"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="t-folder" label="Folder" default-value="Work" trailing-icon="chevronDown"></x-import>
+<x-import component-from-global-scope="Zen.Input" id="t-prio" label="Priority" default-value="High" trailing-icon="chevronDown"></x-import>
+<div style="grid-column: 1 / -1"><x-import component-from-global-scope="Zen.Switch" label="Remind me at 18:00" icon="bell" default-checked="{{yes}}"></x-import></div>
+</div>
+<section aria-labelledby="tst-h" style="display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 20px; background: var(--surface)">
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px"><h2 id="tst-h" style="margin: 0; font-size: 15px; font-weight: 600">Subtasks</h2><span style="font-size: 13px; font-weight: 600; color: var(--accent-ink)">3 of 6</span></div>
+<sc-for list="{{subtasks}}" as="s" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 12px; min-height: 40px">
+<button type="button" role="checkbox" aria-checked="{{s.done}}" aria-label="{{s.label}}" style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid {{s.border}}; background: {{s.bg}}; color: var(--on-accent); display: grid; place-items: center; cursor: pointer; padding: 0"><sc-if value="{{s.done}}" hint-placeholder-val="{{no}}"><x-import component-from-global-scope="Zen.Icon" name="check" size="{{s14}}" stroke-width="{{bold}}"></x-import></sc-if></button>
+<span style="font-size: 14px; line-height: 20px; color: {{s.color}}; text-decoration: {{s.deco}}">{{s.label}}</span>
+</div>
+</sc-for>
+</section>
+</div>
+<section aria-labelledby="tnt-h" style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; justify-content: space-between"><h2 id="tnt-h" style="margin: 0; font-size: 15px; font-weight: 600">Notes</h2><a href="TabletNotes.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none">New note</a></div>
+<dc-import name="NoteCard" tone="butter" heading="Stage 1 checklist" body="{{note}}" pinned="{{yes}}" linked="" updated="Edited 10 minutes ago" w="684" h="140" hint-size="684px,140px"></dc-import>
+</section>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-muted)"><x-import component-from-global-scope="Zen.Icon" name="check" size="{{s14}}"></x-import>Saved</span>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { yes: true, no: false, s14: 14, s20: 20, bold: 3,
+      note: 'Deadline 11:59pm.\nConfirm the form link in announcements.\nTest the live URL before submitting.',
+      subtasks: [['Build the design system', true], ['Write the PRD', true], ['Design all screens', true], ['Build the app with AI', false], ['Write endpoint tests', false], ['Deploy and submit on Zedu', false]].map(function (t) { var d = t[1]; return { label: t[0], done: d, border: d ? 'var(--accent)' : 'var(--line-strong)', bg: d ? 'var(--accent)' : 'transparent', color: d ? 'var(--ink-muted)' : 'var(--ink)', deco: d ? 'line-through' : 'none' }; }),
+      items: [
+      { id: 'home', label: 'Home', icon: 'home', href: 'TabletHome.dc.html' },
+      { id: 'tasks', label: 'Tasks', icon: 'tasks', href: 'TabletTasks.dc.html' },
+      { id: 'notes', label: 'Notes', icon: 'note', href: 'TabletNotes.dc.html' },
+      { id: 'habits', label: 'Habits', icon: 'flame' },
+      { id: 'folders', label: 'Folders', icon: 'folder' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

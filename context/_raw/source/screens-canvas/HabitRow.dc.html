@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Habit row</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: {{wpx}}; height: 72px; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 0 14px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-card); font-family: var(--font-sans); color: var(--ink)">
+<span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center">
+<x-import component-from-global-scope="Zen.Icon" name="{{icon}}" size="{{s22}}"></x-import>
+</span>
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{heading}}</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--ink-muted)">
+<span>{{meta}}</span>
+<span style="display: inline-flex; align-items: center; gap: 2px; color: var(--accent-ink); font-weight: 600">
+<x-import component-from-global-scope="Zen.Icon" name="flame" size="{{s14}}"></x-import>
+<span>{{streak}}</span>
+</span>
+</span>
+</div>
+<button type="button" role="checkbox" aria-checked="{{done}}" aria-label="Check in: {{heading}}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid {{checkBorder}}; background: {{checkBg}}; color: var(--on-accent); display: grid; place-items: center; cursor: pointer; padding: 0">
+<sc-if value="{{done}}" hint-placeholder-val="{{no}}">
+<x-import component-from-global-scope="Zen.Icon" name="check" size="{{s18}}" stroke-width="{{bold}}"></x-import>
+</sc-if>
+</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"heading":{"editor":null,"default":"Drink 8 glasses of water"},"meta":{"editor":null,"default":"Day 19 of 21"},"streak":{"editor":null,"default":"12 days"},"done":{"editor":"boolean","default":true},"icon":{"editor":null,"default":"droplet"},"w":{"editor":null,"default":360},"$preview":{"width":360,"height":72}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const done = p.done === true || p.done === 'true';
+    return {
+      no: false, s14: 14, s18: 18, s22: 22, bold: 3,
+      wpx: Number(p.w ?? 360) + 'px',
+      heading: p.heading ?? 'Drink 8 glasses of water',
+      meta: p.meta ?? 'Day 19 of 21',
+      streak: p.streak ?? '12 days',
+      done: done,
+      checkBorder: done ? 'var(--accent)' : 'var(--line-strong)',
+      checkBg: done ? 'var(--accent)' : 'transparent',
+      icon: p.icon ?? 'droplet'
+    };
+  }
+}
+</script>
+</body>
+</html>

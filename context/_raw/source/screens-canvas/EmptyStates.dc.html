@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Empty and offline states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 1440px; height: 1060px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 32px; background: var(--bg); color: var(--ink); font-family: var(--font-sans)">
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="display-lg" style="margin: 0">Empty and offline states</h1>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">Every list that can be empty gets an illustration, one line of help and the next action.</p>
+</header>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="tasks" title="Nothing planned today" text="Add a task above, or press Q anywhere."><x-import component-from-global-scope="Zen.Button" icon="plus">Add a task</x-import></x-import>
+</div>
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="done" title="All done for today" text="Nice work. Tomorrow has 2 tasks waiting."><x-import component-from-global-scope="Zen.Button" variant="secondary">See tomorrow</x-import></x-import>
+</div>
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="notes" title="No notes yet" text="Capture ideas, meeting notes and checklists. Markdown works."><x-import component-from-global-scope="Zen.Button" icon="plus">New note</x-import></x-import>
+</div>
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="folder" title="This folder is empty" text="Move tasks here from their menu, or type #work when you add one."><x-import component-from-global-scope="Zen.Button" icon="plus">Add a task</x-import></x-import>
+</div>
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="habits" title="Build your first habit" text="Pick something small you want to do most days. We'll track the streak."><x-import component-from-global-scope="Zen.Button" icon="plus">Add a habit</x-import></x-import>
+</div>
+<div style="border-radius: 28px; background: var(--surface)">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="search" title="No results for &quot;invoce&quot;" text="Check the spelling, or try a word from the note instead."><x-import component-from-global-scope="Zen.Button" variant="outline">Clear search</x-import></x-import>
+</div>
+</div>
+<section aria-label="Offline banner" style="display: flex; align-items: center; gap: 20px; padding: 12px 24px 12px 12px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line-strong)">
+<x-import component-from-global-scope="Zen.Illustration" name="offline" width="{{w96}}"></x-import>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; font-weight: 600">You're offline</span>
+<span style="font-size: 13px; line-height: 19px; color: var(--ink-muted)">You can keep working. Changes are saved on this device and sync when you're back online.</span>
+</div>
+<x-import component-from-global-scope="Zen.Button" variant="ghost" size="sm">Retry now</x-import>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() { return { w96: 96 }; }
+}
+</script>
+</body>
+</html>

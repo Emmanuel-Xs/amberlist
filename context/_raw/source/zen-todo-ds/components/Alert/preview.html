@@ -1,0 +1,15 @@
+<!-- @dsCard group="Feedback" height=250 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Alert</title></head>
+<body>
+<div id="root" class="zn-stack" style="max-width:520px"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h(Z.Alert, {tone:'danger', title:"Couldn't save your note", actionLabel:'Retry', actionIcon:'refresh'}, 'Check your connection. Your text is kept on this device.'),
+  h(Z.Alert, {tone:'warning', title:'You are a guest'}, 'Clearing your browser data will remove your tasks.'),
+  h(Z.Alert, {tone:'success'}, 'Your data is saved to your Google account.')));
+</script>
+</body>
+</html>

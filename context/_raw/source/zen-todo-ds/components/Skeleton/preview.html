@@ -1,0 +1,13 @@
+<!-- @dsCard group="Feedback" height=180 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Skeleton</title></head>
+<body>
+<div id="root" class="zn-stack" aria-busy="true"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+function row(){ return h('div',{className:'zn-task'}, h(Z.Skeleton,{width:22,height:22,radius:'50%'}), h('div',{style:{flex:1,display:'flex',flexDirection:'column',gap:8}}, h(Z.Skeleton,{width:'70%',height:14}), h(Z.Skeleton,{width:'40%',height:10}))); }
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, row(), row()));
+</script>
+</body>
+</html>

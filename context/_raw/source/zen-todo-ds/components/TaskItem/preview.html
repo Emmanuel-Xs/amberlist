@@ -1,0 +1,12 @@
+<!-- @dsCard group="Tasks" height=340 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>TaskItem</title></head>
+<body>
+<div id="root" class="zn-stack"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(Z.TaskItem,{title:'Photo editing',time:'10:00 to 10:30',category:'Projects'}),h(Z.TaskItem,{title:'Zen list app design',time:'11:00 to 12:45',hasNote:true,selected:true}),h(Z.TaskItem,{title:'Doing UX exercises',time:'15:00 to 16:30'}),h(Z.TaskItem,{title:'Meeting with the boss',time:'08:00 to 08:20',done:true})));
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quick add</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0} .qa-input::placeholder{color:var(--ink-muted)}</style>
+</helmet>
+<div style="width: {{wpx}}; height: {{hpx}}; display: flex; flex-direction: column; gap: 10px; font-family: var(--font-sans); color: var(--ink)">
+<div style="height: 56px; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 0 8px 0 10px; border-radius: 9999px; background: var(--surface); border: 1px solid {{border}}; box-shadow: var(--shadow-card)">
+<span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center">
+<x-import component-from-global-scope="Zen.Icon" name="plus" size="{{s20}}" stroke-width="{{bold}}"></x-import>
+</span>
+<input class="qa-input" aria-label="Add a task" readonly="{{yes}}" value="{{value}}" placeholder="Add a task. Try &quot;Read 20 pages tomorrow #study&quot;" style="flex-grow: 1; min-width: 0; height: 44px; border: 0; outline: 0; background: transparent; font-family: var(--font-sans); font-size: 15px; color: var(--ink)">
+<sc-if value="{{filled}}" hint-placeholder-val="{{no}}">
+<x-import component-from-global-scope="Zen.Button" size="sm">Add</x-import>
+</sc-if>
+<sc-if value="{{empty}}" hint-placeholder-val="{{yes}}">
+<kbd style="font-family: var(--font-sans); font-size: 12px; color: var(--ink-muted); padding: 3px 9px; margin-right: 8px; border: 1px solid var(--line-strong); border-radius: 8px">Q</kbd>
+</sc-if>
+</div>
+<sc-if value="{{filled}}" hint-placeholder-val="{{no}}">
+<div style="display: flex; gap: 8px; flex-wrap: wrap; padding-left: 12px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 6px 0 12px; border-radius: 9999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 13px; font-weight: 500">
+<x-import component-from-global-scope="Zen.Icon" name="{{c.icon}}" size="{{s16}}"></x-import>
+<span>{{c.label}}</span>
+<button type="button" aria-label="Remove {{c.label}}" style="width: 24px; height: 24px; border-radius: 50%; border: 0; background: transparent; color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; padding: 0"><x-import component-from-global-scope="Zen.Icon" name="x" size="{{s14}}"></x-import></button>
+</span>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"filled":{"editor":"boolean","default":true},"w":{"editor":null,"default":640},"$preview":{"width":640,"height":98}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const filled = p.filled === true || p.filled === 'true';
+    return {
+      yes: true, no: false, s14: 14, s16: 16, s20: 20, bold: 2.25,
+      filled: filled, empty: !filled,
+      wpx: Number(p.w ?? 640) + 'px',
+      hpx: filled ? '98px' : '56px',
+      border: filled ? 'var(--ring)' : 'var(--line)',
+      value: filled ? 'Call mum tomorrow 5pm #personal !high' : '',
+      chips: [
+        { icon: 'calendar', label: 'Tomorrow' },
+        { icon: 'clock', label: '17:00' },
+        { icon: 'folder', label: 'Personal' },
+        { icon: 'flag', label: 'High priority' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

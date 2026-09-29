@@ -1,0 +1,14 @@
+<!-- @dsCard group="Feedback" height=400 width=920 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ConfirmDialog</title></head>
+<body>
+<div id="root" class="zn-demo" style="align-items:flex-start"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h(Z.ConfirmDialog, {id:'a', icon:'folder', title:'Delete the Work folder?', text:'Its 6 tasks and 2 notes move to Inbox. Nothing else is deleted.', confirmLabel:'Delete folder'}),
+  h(Z.ConfirmDialog, {id:'b', title:'Delete all your data?', text:'Every task, note, habit and folder will be removed from this device for good. This cannot be undone.', confirmLabel:'Delete everything', confirmText:'DELETE'})));
+</script>
+</body>
+</html>

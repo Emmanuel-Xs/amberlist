@@ -1,0 +1,15 @@
+<!-- @dsCard group="Feedback" height=250 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Toast</title></head>
+<body>
+<div id="root" class="zn-stack"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(Z.Toaster, {position:'static'},
+  h(Z.Toast, {tone:'success', icon:'check', message:'Task completed', actionLabel:'Undo', paused:true}),
+  h(Z.Toast, {icon:'trash', message:'Note deleted', actionLabel:'Undo', paused:true}),
+  h(Z.Toast, {tone:'error', icon:'alert', message:"Couldn't save your note", actionLabel:'Retry', duration:0})));
+</script>
+</body>
+</html>

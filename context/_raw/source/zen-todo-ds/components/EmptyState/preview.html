@@ -1,0 +1,14 @@
+<!-- @dsCard group="Feedback" height=330 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>EmptyState</title></head>
+<body>
+<div id="root" class="zn-demo" style="justify-content:center"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h(Z.EmptyState, {illustration:'tasks', title:'Nothing planned today', text:'Add a task above, or press Q anywhere.'}, h(Z.Button,{icon:'plus'},'Add a task')),
+  h(Z.EmptyState, {illustration:'done', title:'All done for today', text:'Nice work. Tomorrow has 2 tasks waiting.'})));
+</script>
+</body>
+</html>

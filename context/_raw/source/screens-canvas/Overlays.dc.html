@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Modals, overlays and contrast</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 1440px; height: 2080px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 32px; background: var(--bg); color: var(--ink); font-family: var(--font-sans)">
+<header style="display: flex; flex-direction: column; gap: 6px">
+<h1 class="display-lg" style="margin: 0">Modals and overlays</h1>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">One overlay at a time. Dialogs and sheets dim the page with the scrim, trap focus, close on Esc and hand focus back. Popovers and tooltips float with no scrim.</p>
+</header>
+<div style="position: relative; height: 520px; border-radius: 28px; overflow: hidden; background: var(--surface)">
+<div class="zn-scrim"></div>
+<div style="position: absolute; inset: 0; display: flex; gap: 24px; align-items: center; justify-content: center; padding: 24px">
+<x-import component-from-global-scope="Zen.Dialog" id="d-folder" title="Edit folder" footer="{{folderFooter}}">
+<x-import component-from-global-scope="Zen.Input" id="f-name" label="Name" default-value="Work"></x-import>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="label" style="color: var(--ink-muted)">Color</span>
+<div role="radiogroup" aria-label="Folder color" style="display: flex; gap: 10px">
+<sc-for list="{{swatches}}" as="s" hint-placeholder-count="5"><button type="button" role="radio" aria-checked="{{s.on}}" aria-label="{{s.name}}" class="zn-swatch {{s.cls}}" style="background: {{s.bg}}"></button></sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="label" style="color: var(--ink-muted)">Icon</span>
+<div role="radiogroup" aria-label="Folder icon" style="display: flex; gap: 8px">
+<x-import component-from-global-scope="Zen.Chip" selected="{{yes}}" icon="pen" aria-label="Pen"></x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="book" aria-label="Book"></x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="home" aria-label="Home"></x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="target" aria-label="Target"></x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="droplet" aria-label="Droplet"></x-import>
+</div>
+</div>
+</x-import>
+<x-import component-from-global-scope="Zen.Dialog" id="d-merge" title="Keep this device's tasks?" description="This device has 4 tasks and 2 notes. Your Google account already has data from another device." on-close="{{none}}" footer="{{mergeFooter}}"></x-import>
+<x-import component-from-global-scope="Zen.Dialog" id="d-keys" title="Keyboard shortcuts">
+<sc-for list="{{keys}}" as="k" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 24px; font-size: 14px"><span>{{k.label}}</span><kbd style="font-family: var(--font-sans); font-size: 12px; font-weight: 600; padding: 2px 10px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 8px">{{k.key}}</kbd></div>
+</sc-for>
+</x-import>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 390px 1fr 380px; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="caption" style="color: var(--ink-muted)">Phone: bottom sheet with grip, swipe down to close</span>
+<div style="position: relative; height: 520px; border-radius: 28px; overflow: hidden; background: var(--bg); border: 1px solid var(--line)">
+<div style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<x-import component-from-global-scope="Zen.TaskItem" title="Submit HNG Stage 1" time="18:00 to 23:30" category="Work"></x-import>
+<x-import component-from-global-scope="Zen.TaskItem" title="Buy groceries" time="17:30" category="Personal"></x-import>
+</div>
+<div class="zn-scrim"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0">
+<x-import component-from-global-scope="Zen.Sheet" id="s-filter" title="Filters" footer="{{sheetFooter}}">
+<span class="label" style="color: var(--ink-muted)">Folder</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">Work</x-import><x-import component-from-global-scope="Zen.Chip">Study</x-import><x-import component-from-global-scope="Zen.Chip">Personal</x-import></div>
+<span class="label" style="color: var(--ink-muted)">Status</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><x-import component-from-global-scope="Zen.Chip">Todo</x-import><x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">In progress</x-import><x-import component-from-global-scope="Zen.Chip">Done</x-import></div>
+</x-import>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="caption" style="color: var(--ink-muted)">Desktop: filter popover anchored to its button, no scrim; tooltips on icon buttons</span>
+<div style="position: relative; height: 520px; border-radius: 28px; background: var(--bg); border: 1px solid var(--line); padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<x-import component-from-global-scope="Zen.SearchBar" placeholder="Search tasks"></x-import>
+<div style="align-self: flex-end">
+<x-import component-from-global-scope="Zen.Popover" label="Filters">
+<span class="label" style="color: var(--ink-muted)">Folder</span>
+<div style="display: flex; gap: 8px"><x-import component-from-global-scope="Zen.Chip" selected="{{yes}}">Work</x-import><x-import component-from-global-scope="Zen.Chip">Study</x-import><x-import component-from-global-scope="Zen.Chip">Personal</x-import></div>
+<span class="label" style="color: var(--ink-muted)">Priority</span>
+<div style="display: flex; gap: 8px"><x-import component-from-global-scope="Zen.Chip">Low</x-import><x-import component-from-global-scope="Zen.Chip">Medium</x-import><x-import component-from-global-scope="Zen.Chip" icon="flag">High</x-import></div>
+<x-import component-from-global-scope="Zen.Switch" label="Show completed"></x-import>
+</x-import>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; gap: 120px; padding: 0 0 8px 40px">
+<x-import component-from-global-scope="Zen.Tooltip" label="Scratchpad" shortcut="N"><x-import component-from-global-scope="Zen.Button" variant="secondary" icon="scratch" aria-label="Scratchpad"></x-import></x-import>
+<x-import component-from-global-scope="Zen.Tooltip" label="Quick add" shortcut="Q"><x-import component-from-global-scope="Zen.Button" icon="plus" aria-label="Quick add"></x-import></x-import>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="caption" style="color: var(--ink-muted)">Tablet: scratchpad as a right sheet</span>
+<div style="position: relative; height: 520px; border-radius: 28px; overflow: hidden; background: var(--bg); border: 1px solid var(--line)">
+<div class="zn-scrim"></div>
+<div style="position: absolute; top: 0; right: 0; bottom: 0; width: 330px">
+<x-import component-from-global-scope="Zen.Sheet" id="s-scratch" side="right" title="Scratchpad">
+<p style="margin: 0; font-size: 15px; line-height: 22px">Ask the team about the Stage 2 brief</p>
+<p style="margin: 0; font-size: 15px; line-height: 22px">Call the bank before Friday</p>
+<p style="margin: 0; font-size: 15px; line-height: 22px">Buy printer ink</p>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted)">Type a thought</p>
+</x-import>
+</div>
+</div>
+</div>
+</div>
+<section aria-labelledby="h-con" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-con" class="display" style="margin: 0">Contrast checks</h2>
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">All 36 pairs pass WCAG 2.2 AA in both themes. Fixed here: line-strong darkened for surface-raised, light success darkened, and a 1.5px accent-edge on amber state fills so selected chips, switches and dates read at 3:1 on the light page.</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; padding: 16px 24px; border-radius: 28px; background: var(--surface)">
+<sc-for list="{{cols}}" as="col" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column">
+<div style="display: grid; grid-template-columns: 1fr 64px 72px 72px; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 600; color: var(--ink-muted)"><span>Pair</span><span>Needs</span><span>Dark</span><span>Light</span></div>
+<sc-for list="{{col.rows}}" as="r" hint-placeholder-count="18">
+<div style="display: grid; grid-template-columns: 1fr 64px 72px 72px; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; line-height: 18px"><span>{{r.pair}}</span><span style="color: var(--ink-muted)">{{r.min}}</span><span style="display: inline-flex; align-items: center; gap: 4px; color: var(--success)"><x-import component-from-global-scope="Zen.Icon" name="check" size="{{s14}}"></x-import>{{r.dark}}</span><span style="display: inline-flex; align-items: center; gap: 4px; color: var(--success)"><x-import component-from-global-scope="Zen.Icon" name="check" size="{{s14}}"></x-import>{{r.light}}</span></div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement, Z = window.Zen;
+    const rows = [{"pair": "ink on bg", "min": "4.5:1", "dark": "15.4:1", "light": "15.2:1"}, {"pair": "ink on surface", "min": "4.5:1", "dark": "12.9:1", "light": "16.8:1"}, {"pair": "ink on surface-raised", "min": "4.5:1", "dark": "11.2:1", "light": "14.0:1"}, {"pair": "ink-muted on bg", "min": "4.5:1", "dark": "6.6:1", "light": "5.7:1"}, {"pair": "ink-muted on surface", "min": "4.5:1", "dark": "5.5:1", "light": "6.4:1"}, {"pair": "ink-muted on surface-raised", "min": "4.5:1", "dark": "4.8:1", "light": "5.3:1"}, {"pair": "accent-ink on bg", "min": "4.5:1", "dark": "9.7:1", "light": "5.2:1"}, {"pair": "accent-ink on surface", "min": "4.5:1", "dark": "8.1:1", "light": "5.8:1"}, {"pair": "accent-ink on surface-raised", "min": "4.5:1", "dark": "7.0:1", "light": "4.8:1"}, {"pair": "danger on bg", "min": "4.5:1", "dark": "7.4:1", "light": "5.9:1"}, {"pair": "danger on surface", "min": "4.5:1", "dark": "6.2:1", "light": "6.6:1"}, {"pair": "danger on surface-raised", "min": "4.5:1", "dark": "5.3:1", "light": "5.5:1"}, {"pair": "success on bg", "min": "4.5:1", "dark": "8.9:1", "light": "5.5:1"}, {"pair": "success on surface", "min": "4.5:1", "dark": "7.5:1", "light": "6.1:1"}, {"pair": "success on surface-raised", "min": "4.5:1", "dark": "6.4:1", "light": "5.1:1"}, {"pair": "ink on accent-soft", "min": "4.5:1", "dark": "11.9:1", "light": "14.3:1"}, {"pair": "ink-muted on accent-soft", "min": "4.5:1", "dark": "5.0:1", "light": "5.4:1"}, {"pair": "accent-ink on accent-soft", "min": "4.5:1", "dark": "7.4:1", "light": "4.9:1"}, {"pair": "danger on danger-soft", "min": "4.5:1", "dark": "6.3:1", "light": "5.6:1"}, {"pair": "ink on danger-soft", "min": "4.5:1", "dark": "13.3:1", "light": "14.3:1"}, {"pair": "on-accent on accent", "min": "4.5:1", "dark": "9.7:1", "light": "9.7:1"}, {"pair": "on-danger on danger", "min": "4.5:1", "dark": "7.4:1", "light": "6.6:1"}, {"pair": "on-pastel on lavender", "min": "4.5:1", "dark": "9.7:1", "light": "11.1:1"}, {"pair": "on-pastel on butter", "min": "4.5:1", "dark": "13.3:1", "light": "13.7:1"}, {"pair": "on-pastel on mint", "min": "4.5:1", "dark": "13.1:1", "light": "13.5:1"}, {"pair": "on-pastel on peach", "min": "4.5:1", "dark": "11.2:1", "light": "12.2:1"}, {"pair": "on-pastel on sky", "min": "4.5:1", "dark": "11.6:1", "light": "12.4:1"}, {"pair": "line-strong on bg", "min": "3:1", "dark": "4.4:1", "light": "3.7:1"}, {"pair": "line-strong on surface", "min": "3:1", "dark": "3.6:1", "light": "4.1:1"}, {"pair": "line-strong on surface-raised", "min": "3:1", "dark": "3.2:1", "light": "3.4:1"}, {"pair": "ring on bg", "min": "3:1", "dark": "9.7:1", "light": "5.2:1"}, {"pair": "ring on surface", "min": "3:1", "dark": "8.1:1", "light": "5.8:1"}, {"pair": "ring on surface-raised", "min": "3:1", "dark": "7.0:1", "light": "4.8:1"}, {"pair": "accent-edge on bg", "min": "3:1", "dark": "9.7:1", "light": "5.2:1"}, {"pair": "accent-edge on surface", "min": "3:1", "dark": "8.1:1", "light": "5.8:1"}, {"pair": "accent-edge on surface-raised", "min": "3:1", "dark": "7.0:1", "light": "4.8:1"}];
+    const half = Math.ceil(rows.length / 2);
+    const sw = [['Butter','butter',true],['Lavender','lavender',false],['Mint','mint',false],['Peach','peach',false],['Sky','sky',false]];
+    return {
+      yes: true, none: null, s14: 14,
+      swatches: sw.map(function (s) { return { name: s[0], bg: 'var(--' + s[1] + ')', on: s[2], cls: s[2] ? 'is-selected' : '' }; }),
+      folderFooter: [h(Z.Button, { key: 'c', variant: 'secondary' }, 'Cancel'), h(Z.Button, { key: 's' }, 'Save')],
+      mergeFooter: [h(Z.Button, { key: 'd', variant: 'ghost' }, 'Discard them'), h(Z.Button, { key: 'm' }, 'Merge into account')],
+      sheetFooter: [h(Z.Button, { key: 'r', variant: 'secondary' }, 'Reset'), h(Z.Button, { key: 'a' }, 'Show 9 tasks')],
+      keys: [{ label: 'Quick add a task', key: 'Q' }, { label: 'Open the scratchpad', key: 'N' }, { label: 'Search', key: '/' }, { label: 'Go to Home', key: 'G then H' }, { label: 'Go to Tasks', key: 'G then T' }, { label: 'Close anything', key: 'Esc' }],
+      cols: [{ rows: rows.slice(0, half) }, { rows: rows.slice(half) }]
+    };
+  }
+}
+</script>
+</body>
+</html>

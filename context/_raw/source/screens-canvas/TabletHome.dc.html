@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home, tablet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 820px; height: 1480px; display: flex; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<x-import component-from-global-scope="Zen.AppNav" layout="rail" active="home" items="{{items}}" style="height: 1480px; flex-shrink: 0"></x-import>
+<main style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<header style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted)">Good evening, Emmanuel</p>
+<h1 class="display" style="margin: 0">You have <span style="color: var(--accent-ink)">5 tasks</span> today.</h1>
+</div>
+<div style="display: flex; gap: 8px">
+<a href="#" aria-label="Scratchpad" style="width: 48px; height: 48px; border-radius: 50%; background: var(--surface); color: var(--ink); display: grid; place-items: center"><x-import component-from-global-scope="Zen.Icon" name="scratch" size="{{s20}}"></x-import></a>
+<a href="TabletProfile.dc.html" aria-label="Profile, you are a guest" style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; font-weight: 600; text-decoration: none">E</a>
+</div>
+</header>
+<x-import component-from-global-scope="Zen.SearchBar" placeholder="Search tasks and notes"></x-import>
+<dc-import name="QuickAdd" w="684" filled="{{no}}" hint-size="684px,56px"></dc-import>
+<x-import component-from-global-scope="Zen.DateStrip" days="{{days}}" default-value="29" label="This week"></x-import>
+<a href="TabletTasks.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--danger); color: var(--ink); text-decoration: none">
+<span style="color: var(--danger); display: inline-flex"><x-import component-from-global-scope="Zen.Icon" name="flag" size="{{s20}}"></x-import></span>
+<span style="flex-grow: 1; font-size: 14px; line-height: 20px"><strong style="color: var(--danger); font-weight: 600">1 overdue:</strong> Send invoice to client, due yesterday</span>
+<span style="font-size: 13px; font-weight: 600; color: var(--accent-ink)">Review</span>
+</a>
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<h2 class="heading" style="margin: 0">Today</h2>
+<a href="TabletTasks.dc.html" style="font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none">See all 5</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<dc-import name="TodayCard" tone="accent" heading="Submit HNG Stage 1" category="Work" time="18:00 to 23:30" badge="Due today" done="3" total="6" icon="flag" w="334" hint-size="334px,188px"></dc-import>
+<dc-import name="TodayCard" tone="butter" heading="Design review with the team" category="Work" time="11:00 to 12:00" badge="In progress" done="2" total="4" icon="pen" w="334" hint-size="334px,188px"></dc-import>
+<dc-import name="TodayCard" tone="lavender" heading="Read 20 pages of Atomic Habits" category="Study" time="21:00 to 21:30" badge="" done="0" total="0" icon="book" w="334" hint-size="334px,188px"></dc-import>
+<dc-import name="TodayCard" tone="mint" heading="Buy groceries" category="Personal" time="17:30" badge="" done="1" total="5" icon="cart" w="334" hint-size="334px,188px"></dc-import>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<h2 class="heading" style="margin: 0">Habits</h2>
+<a href="#" style="font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none">See all</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<dc-import name="HabitRow" heading="Drink 8 glasses of water" meta="Day 19 of 21" streak="12 days" done="{{yes}}" icon="droplet" w="334" hint-size="334px,72px"></dc-import>
+<dc-import name="HabitRow" heading="Read 20 minutes" meta="Ongoing" streak="5 days" done="{{no}}" icon="book" w="334" hint-size="334px,72px"></dc-import>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<h2 class="heading" style="margin: 0">Folders</h2>
+<a href="#" style="font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none">New folder</a>
+</div>
+<div style="display: flex; gap: 12px">
+<dc-import name="FolderCard" tone="butter" heading="Work" count="6" done="2" icon="pen" w="162" hint-size="162px,160px"></dc-import>
+<dc-import name="FolderCard" tone="lavender" heading="Study" count="4" done="1" icon="book" w="162" hint-size="162px,160px"></dc-import>
+<dc-import name="FolderCard" tone="mint" heading="Personal" count="3" done="1" icon="home" w="162" hint-size="162px,160px"></dc-import>
+<dc-import name="FolderCard" tone="peach" heading="Health" count="2" done="0" icon="droplet" w="162" hint-size="162px,160px"></dc-import>
+</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<h2 class="heading" style="margin: 0">Recent notes</h2>
+<a href="#" style="font-size: 13px; font-weight: 600; color: var(--accent-ink); text-decoration: none">All notes</a>
+</div>
+<div style="display: flex; gap: 16px">
+<dc-import name="NoteCard" tone="butter" heading="Stage 1 checklist" body="{{note1}}" pinned="{{yes}}" linked="Submit HNG Stage 1" w="334" h="150" hint-size="334px,150px"></dc-import>
+<dc-import name="NoteCard" tone="surface" heading="Design review notes" body="{{note2}}" pinned="{{no}}" linked="Design review with the team" w="334" h="150" hint-size="334px,150px"></dc-import>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":820,"height":1480}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      theme: this.props.theme ?? 'dark',
+      yes: true, no: false, s20: 20,
+      note1: 'Tasks with dates and subtasks\nNotes and the scratchpad\nEndpoint tests passing',
+      note2: 'Keep amber for fills only.\nFolder tabs need more contrast in light mode.',
+      items: [
+        { id: 'home', label: 'Home', icon: 'home', href: 'TabletHome.dc.html' },
+        { id: 'tasks', label: 'Tasks', icon: 'tasks', href: 'TabletTasks.dc.html' },
+        { id: 'notes', label: 'Notes', icon: 'note' },
+        { id: 'habits', label: 'Habits', icon: 'flame' },
+        { id: 'folders', label: 'Folders', icon: 'folder' }
+      ],
+      days: [
+        { key: '27', day: 27, weekday: 'Sun' }, { key: '28', day: 28, weekday: 'Mon' },
+        { key: '29', day: 29, weekday: 'Tue', today: true }, { key: '30', day: 30, weekday: 'Wed' },
+        { key: '1', day: 1, weekday: 'Thu' }, { key: '2', day: 2, weekday: 'Fri' }, { key: '3', day: 3, weekday: 'Sat' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

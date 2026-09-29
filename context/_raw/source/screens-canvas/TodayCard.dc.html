@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Today card</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: {{wpx}}; height: 188px; display: flex; border-radius: 28px; overflow: hidden; background: {{bg}}; color: var(--on-pastel); font-family: var(--font-sans)">
+<div style="flex-grow: 1; min-width: 0; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px">
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<span style="font-size: 12px; line-height: 16px; font-weight: 600; padding: 4px 10px; border-radius: 9999px; background: rgba(28,29,33,0.1)">{{category}}</span>
+<sc-if value="{{hasBadge}}" hint-placeholder-val="{{yes}}">
+<span style="font-size: 12px; line-height: 16px; font-weight: 600; padding: 4px 10px; border-radius: 9999px; background: var(--on-pastel); color: {{bg}}">{{badge}}</span>
+</sc-if>
+</div>
+<a href="DesktopTasks.dc.html" style="font-size: 21px; line-height: 27px; font-weight: 600; color: var(--on-pastel); text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{heading}}</a>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 500">
+<x-import component-from-global-scope="Zen.Icon" name="clock" size="{{s16}}"></x-import>
+<span>{{time}}</span>
+</div>
+<sc-if value="{{hasSub}}" hint-placeholder-val="{{yes}}">
+<div style="display: flex; align-items: center; gap: 10px">
+<div role="progressbar" aria-label="Subtasks done" aria-valuenow="{{pctNum}}" aria-valuemin="0" aria-valuemax="100" style="flex-grow: 1; height: 6px; border-radius: 9999px; background: rgba(28,29,33,0.14); overflow: hidden">
+<div style="width: {{pct}}; height: 100%; border-radius: 9999px; background: var(--on-pastel)"></div>
+</div>
+<span style="font-size: 12px; font-weight: 600; white-space: nowrap">{{sub}}</span>
+</div>
+</sc-if>
+</div>
+</div>
+<div style="width: 120px; flex-shrink: 0; background: rgba(255,255,255,0.38); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 28px">
+<button type="button" role="checkbox" aria-checked="false" aria-label="Mark done: {{heading}}" style="align-self: flex-end; margin-right: 16px; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--on-pastel); background: transparent; cursor: pointer; padding: 0"></button>
+<x-import component-from-global-scope="Zen.Icon" name="{{icon}}" size="{{s56}}" stroke-width="{{thin}}"></x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tone":{"editor":"enum","options":["accent","lavender","butter","mint","peach","sky"],"default":"accent"},"heading":{"editor":null,"default":"Submit HNG Stage 1"},"category":{"editor":null,"default":"Work"},"time":{"editor":null,"default":"18:00 to 23:30"},"badge":{"editor":null,"default":"Due today"},"done":{"editor":null,"default":3},"total":{"editor":null,"default":6},"icon":{"editor":null,"default":"flag"},"w":{"editor":null,"default":520},"$preview":{"width":520,"height":188}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const done = Number(p.done ?? 0), total = Number(p.total ?? 0);
+    const pctNum = total ? Math.round(done / total * 100) : 0;
+    const badge = p.badge ?? '';
+    return {
+      yes: true, s16: 16, s56: 56, thin: 1.25,
+      wpx: Number(p.w ?? 520) + 'px',
+      bg: 'var(--' + (p.tone ?? 'accent') + ')',
+      heading: p.heading ?? 'Submit HNG Stage 1',
+      category: p.category ?? 'Work',
+      time: p.time ?? '18:00 to 23:30',
+      badge: badge, hasBadge: badge !== '',
+      hasSub: total > 0, pct: pctNum + '%', pctNum: pctNum,
+      sub: done + ' of ' + total,
+      icon: p.icon ?? 'flag'
+    };
+  }
+}
+</script>
+</body>
+</html>

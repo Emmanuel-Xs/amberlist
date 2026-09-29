@@ -1,0 +1,18 @@
+<!-- @dsCard group="Feedback" height=120 subtitle="Click to hear and see" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Celebrate</title></head>
+<body>
+<div id="root" class="zn-demo" style="position:relative;min-height:100px"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+var root = document.getElementById('root');
+ReactDOM.createRoot(root).render(h(React.Fragment, null,
+  h(Z.Button, {icon:'check', onClick:function(){ Z.sound('complete'); }}, 'Complete'),
+  h(Z.Button, {variant:'secondary', icon:'undo', onClick:function(){ Z.sound('undo'); }}, 'Undo'),
+  h(Z.Button, {variant:'danger', icon:'trash', onClick:function(){ Z.sound('delete'); }}, 'Delete'),
+  h(Z.Button, {variant:'outline', icon:'alert', onClick:function(){ Z.sound('error'); }}, 'Error'),
+  h(Z.Button, {icon:'flame', onClick:function(){ Z.sound('celebrate'); Z.confetti({container: root}); }}, 'All done for today')));
+</script>
+</body>
+</html>

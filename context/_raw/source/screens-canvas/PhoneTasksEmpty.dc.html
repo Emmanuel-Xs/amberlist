@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tasks empty, phone</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="position: relative; width: 390px; height: 844px; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<main style="box-sizing: border-box; padding: 16px 16px 104px; display: flex; flex-direction: column; gap: 12px">
+<header style="display: flex; align-items: center; justify-content: space-between; height: 48px">
+<h1 class="display" style="margin: 0">Tasks</h1>
+<button type="button" aria-label="Search tasks" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0"><x-import component-from-global-scope="Zen.Icon" name="search" size="{{s20}}"></x-import></button>
+</header>
+<dc-import name="QuickAdd" w="358" filled="{{no}}" hint-size="358px,56px"></dc-import>
+<div style="margin-top: 40px">
+<x-import component-from-global-scope="Zen.EmptyState" illustration="tasks" title="No tasks yet" text="Type one above and press Enter. Try &quot;Read 20 pages tomorrow #study&quot;."></x-import>
+</div>
+</main>
+<x-import component-from-global-scope="Zen.Toast" icon="trash" message="Task deleted" action-label="Undo" style="position: absolute; left: 16px; right: 16px; bottom: 92px"></x-import>
+<x-import component-from-global-scope="Zen.AppNav" layout="bar" active="tasks" items="{{items}}" style="position: absolute; left: 0; bottom: 0; width: 390px"></x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      no: false, s20: 20,
+      items: [
+        { id: 'home', label: 'Home', icon: 'home' },
+        { id: 'tasks', label: 'Tasks', icon: 'tasks' },
+        { id: 'add', label: 'Add', icon: 'plus' },
+        { id: 'notes', label: 'Notes', icon: 'note' },
+        { id: 'habits', label: 'Habits', icon: 'flame' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<!-- @dsCard group="Navigation" height=400 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AppNav</title></head>
+<body>
+<div id="root" class=""></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{style:{display:'flex',gap:24,padding:16,alignItems:'flex-start'}},h('div',{style:{height:370}},h(Z.AppNav,{layout:'sidebar',brand:'Zen Todo',active:'tasks',items:[{id:'home',label:'Home',icon:'home'},{id:'tasks',label:'Tasks',icon:'tasks'},{id:'add',label:'Add',icon:'plus'},{id:'cal',label:'Calendar',icon:'calendar'},{id:'me',label:'Profile',icon:'user'}]})),h('div',{style:{height:370}},h(Z.AppNav,{layout:'rail',active:'tasks',items:[{id:'home',label:'Home',icon:'home'},{id:'tasks',label:'Tasks',icon:'tasks'},{id:'add',label:'Add',icon:'plus'},{id:'cal',label:'Calendar',icon:'calendar'},{id:'me',label:'Profile',icon:'user'}]})),h('div',{style:{width:360,alignSelf:'flex-end'}},h(Z.AppNav,{layout:'bar',active:'tasks',items:[{id:'home',label:'Home',icon:'home'},{id:'tasks',label:'Tasks',icon:'tasks'},{id:'add',label:'Add',icon:'plus'},{id:'cal',label:'Calendar',icon:'calendar'},{id:'me',label:'Profile',icon:'user'}]}))));
+</script>
+</body>
+</html>

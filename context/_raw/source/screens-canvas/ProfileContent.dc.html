@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile content</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: {{wpx}}; display: flex; flex-direction: {{dir}}; gap: 20px; align-items: flex-start; font-family: var(--font-sans); color: var(--ink)">
+<div style="flex: 1 1 0; min-width: 0; width: 100%; display: flex; flex-direction: column; gap: 20px">
+<section aria-label="Your profile" style="display: flex; align-items: center; gap: 16px; padding: 20px; border-radius: 28px; background: var(--surface)">
+<span style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; font-size: 28px; font-weight: 600">E</span>
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<span style="font-size: 20px; line-height: 28px; font-weight: 600">Emmanuel</span>
+<span style="font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 9999px; background: var(--surface-raised); color: var(--ink-muted)">Guest</span>
+</div>
+<span style="font-size: 13px; line-height: 19px; color: var(--ink-muted)">Everything is saved in this browser only.</span>
+</div>
+<x-import component-from-global-scope="Zen.Button" variant="ghost" size="sm" icon="pen" aria-label="Edit name"></x-import>
+</section>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<div style="padding: 16px; border-radius: 20px; background: var(--surface); display: flex; flex-direction: column; gap: 2px"><span style="font-size: 24px; line-height: 30px; font-weight: 600">24</span><span style="font-size: 12px; color: var(--ink-muted)">Tasks done this month</span></div>
+<div style="padding: 16px; border-radius: 20px; background: var(--surface); display: flex; flex-direction: column; gap: 2px"><span style="font-size: 24px; line-height: 30px; font-weight: 600; color: var(--accent-ink)">12 days</span><span style="font-size: 12px; color: var(--ink-muted)">Best streak</span></div>
+<div style="padding: 16px; border-radius: 20px; background: var(--surface); display: flex; flex-direction: column; gap: 2px"><span style="font-size: 24px; line-height: 30px; font-weight: 600">8</span><span style="font-size: 12px; color: var(--ink-muted)">Notes</span></div>
+</div>
+<section aria-labelledby="save-h" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 28px; background: var(--accent-soft)">
+<div style="display: flex; align-items: center; gap: 12px">
+<x-import component-from-global-scope="Zen.Illustration" name="folder" width="{{w80}}"></x-import>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 id="save-h" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Save your data</h2>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: var(--ink)">Sign in with Google to keep your tasks, notes and habits on every device. Nothing here is lost.</p>
+</div>
+</div>
+<x-import component-from-global-scope="Zen.Button" block="{{yes}}">Continue with Google</x-import>
+</section>
+</div>
+<div style="flex: 1 1 0; min-width: 0; width: 100%; display: flex; flex-direction: column; gap: 20px">
+<section aria-labelledby="set-h" style="display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 28px; background: var(--surface)">
+<h2 id="set-h" style="margin: 0 0 4px; font-size: 17px; line-height: 24px; font-weight: 600">Settings</h2>
+<span class="label" style="color: var(--ink-muted)">Theme</span>
+<div role="radiogroup" aria-label="Theme" style="display: flex; gap: 8px; margin-bottom: 8px">
+<x-import component-from-global-scope="Zen.Chip" selected="{{yes}}" icon="moon">Dark</x-import>
+<x-import component-from-global-scope="Zen.Chip" icon="sun">Light</x-import>
+<x-import component-from-global-scope="Zen.Chip">Match device</x-import>
+</div>
+<x-import component-from-global-scope="Zen.Switch" label="Show tips" icon="note" default-checked="{{yes}}"></x-import>
+<x-import component-from-global-scope="Zen.Switch" label="Sounds" icon="bell" default-checked="{{yes}}"></x-import>
+<x-import component-from-global-scope="Zen.Switch" label="Reduce motion" icon="play"></x-import>
+<x-import component-from-global-scope="Zen.Switch" label="Week starts on Monday" icon="calendar" default-checked="{{yes}}"></x-import>
+</section>
+<sc-if value="{{keys}}" hint-placeholder-val="{{yes}}">
+<section aria-labelledby="keys-h" style="display: flex; flex-direction: column; gap: 4px; padding: 20px; border-radius: 28px; background: var(--surface)">
+<h2 id="keys-h" style="margin: 0 0 8px; font-size: 17px; line-height: 24px; font-weight: 600">Keyboard shortcuts</h2>
+<sc-for list="{{shortcuts}}" as="k" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 36px; font-size: 14px">
+<span>{{k.label}}</span>
+<kbd style="font-family: var(--font-sans); font-size: 12px; font-weight: 600; color: var(--ink); padding: 2px 10px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 8px">{{k.key}}</kbd>
+</div>
+</sc-for>
+</section>
+</sc-if>
+<section aria-labelledby="data-h" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 28px; background: var(--surface)">
+<h2 id="data-h" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Your data</h2>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<x-import component-from-global-scope="Zen.Button" variant="outline" size="sm">Export as JSON</x-import>
+<x-import component-from-global-scope="Zen.Button" variant="danger" size="sm" icon="trash">Delete all my data</x-import>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 18px; color: var(--ink-muted)">Deleting removes every task, note and folder. We'll ask you to confirm first; it can't be undone.</p>
+</section>
+<p style="margin: 0; font-size: 12px; color: var(--ink-muted)">Amberlist 0.1 · <a href="#" style="color: var(--accent-ink)">Privacy</a> · Built for HNG 15</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"w":{"editor":null,"default":358},"cols":{"editor":"enum","options":["1","2"],"default":"1"},"keys":{"editor":"boolean","default":false},"$preview":{"width":358,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const two = String(p.cols ?? '1') === '2';
+    return {
+      yes: true, w80: 80,
+      wpx: Number(p.w ?? 358) + 'px',
+      dir: two ? 'row' : 'column',
+      keys: p.keys === true || p.keys === 'true',
+      shortcuts: [
+        { label: 'Quick add a task', key: 'Q' },
+        { label: 'Open the scratchpad', key: 'N' },
+        { label: 'Search', key: '/' },
+        { label: 'Go to Home, Tasks, Notes', key: 'G then H, T, N' },
+        { label: 'Show all shortcuts', key: '?' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

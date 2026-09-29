@@ -1,0 +1,14 @@
+<!-- @dsCard group="Overlays" height=110 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Tooltip</title></head>
+<body>
+<div id="root" class="zn-demo" style="padding:56px 60px 16px;gap:140px"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h(Z.Tooltip,{label:'Scratchpad', shortcut:'N'}, h(Z.Button,{variant:'secondary',icon:'scratch','aria-label':'Scratchpad'})),
+  h(Z.Tooltip,{label:'Quick add', shortcut:'Q'}, h(Z.Button,{icon:'plus','aria-label':'Quick add'}))));
+</script>
+</body>
+</html>

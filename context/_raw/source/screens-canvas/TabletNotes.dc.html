@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notes, tablet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/zen/tokens.css">
+<link rel="stylesheet" href="ds/zen/components/bundle.css">
+<script src="ds/zen/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div data-theme="dark" style="width: 820px; height: 1180px; display: flex; background: var(--bg); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<x-import component-from-global-scope="Zen.AppNav" layout="rail" active="notes" items="{{items}}" style="height: 1180px; flex-shrink: 0"></x-import>
+<main style="flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h1 class="display" style="margin: 0">Notes</h1>
+<x-import component-from-global-scope="Zen.Button" icon="plus">New note</x-import>
+</header>
+<x-import component-from-global-scope="Zen.SearchBar" placeholder="Search notes" on-filter="{{none}}"></x-import>
+<a href="#" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 20px; background: var(--accent-soft); color: var(--ink); text-decoration: none">
+<span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center"><x-import component-from-global-scope="Zen.Icon" name="scratch" size="{{s22}}"></x-import></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Scratchpad</span><span style="font-size: 12px; color: var(--ink-muted)">6 lines. Opens as a side sheet.</span></span>
+<span style="color: var(--accent-ink); display: inline-flex"><x-import component-from-global-scope="Zen.Icon" name="chevronRight" size="{{s20}}"></x-import></span>
+</a>
+<h2 style="margin: 4px 0 0; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600"><x-import component-from-global-scope="Zen.Icon" name="pin" size="{{s16}}"></x-import>Pinned</h2>
+<div style="display: flex; gap: 16px">
+<dc-import name="NoteCard" tone="butter" heading="Stage 1 checklist" body="{{n1}}" pinned="{{yes}}" linked="Submit HNG Stage 1" w="334" h="180" hint-size="334px,180px"></dc-import>
+<dc-import name="NoteCard" tone="lavender" heading="Reading list" body="{{n2}}" pinned="{{yes}}" linked="" updated="Edited yesterday" w="334" h="180" hint-size="334px,180px"></dc-import>
+</div>
+<h2 style="margin: 4px 0 0; font-size: 13px; font-weight: 600">All notes <span style="color: var(--ink-muted); font-weight: 500">8</span></h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<dc-import name="NoteCard" tone="surface" heading="Design review notes" body="{{n3}}" pinned="{{no}}" linked="Design review" w="220" h="190" hint-size="220px,190px"></dc-import>
+<dc-import name="NoteCard" tone="mint" heading="Groceries" body="{{n4}}" pinned="{{no}}" linked="Buy groceries" w="220" h="190" hint-size="220px,190px"></dc-import>
+<dc-import name="NoteCard" tone="surface" heading="Stage 2 ideas" body="{{n5}}" pinned="{{no}}" linked="" updated="2 days ago" w="220" h="190" hint-size="220px,190px"></dc-import>
+<dc-import name="NoteCard" tone="sky" heading="Portfolio" body="{{n6}}" pinned="{{no}}" linked="Portfolio redesign" w="220" h="190" hint-size="220px,190px"></dc-import>
+<dc-import name="NoteCard" tone="peach" heading="Client call" body="{{n7}}" pinned="{{no}}" linked="Send invoice" w="220" h="190" hint-size="220px,190px"></dc-import>
+<dc-import name="NoteCard" tone="surface" heading="Workout plan" body="{{n8}}" pinned="{{no}}" linked="" updated="Last week" w="220" h="190" hint-size="220px,190px"></dc-import>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { yes: true, no: false, none: null, s16: 16, s20: 20, s22: 22,
+      n1: 'Dates and subtasks\nNotes and scratchpad\nEndpoint tests\nDeploy and submit',
+      n2: 'Atomic Habits\nDeep Work\nThe Design of Everyday Things',
+      n3: 'Keep amber for fills only.\nFolder tabs need more contrast in light mode.',
+      n4: 'Rice, eggs, tomatoes, plantain, bread, milk',
+      n5: 'Habits with streaks\nGoogle sign in\nReminders',
+      n6: 'Add the Amberlist case study.\nNew hero photo.',
+      n7: 'Invoice sent Monday. Follow up if unpaid by Friday.',
+      n8: 'Mon, Wed, Fri: 5km run\nTue, Thu: strength',
+      items: [
+      { id: 'home', label: 'Home', icon: 'home', href: 'TabletHome.dc.html' },
+      { id: 'tasks', label: 'Tasks', icon: 'tasks', href: 'TabletTasks.dc.html' },
+      { id: 'notes', label: 'Notes', icon: 'note', href: 'TabletNotes.dc.html' },
+      { id: 'habits', label: 'Habits', icon: 'flame' },
+      { id: 'folders', label: 'Folders', icon: 'folder' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

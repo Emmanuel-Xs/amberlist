@@ -1,0 +1,12 @@
+<!-- @dsCard group="Inputs" height=240 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Input</title></head>
+<body>
+<div id="root" class="zn-stack"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(Z.Input,{id:'t',label:'Title',defaultValue:'Book reading'}),h(Z.Input,{id:'d',label:'Date',defaultValue:'10 July 2025',trailingIcon:'calendar'}),h(Z.Input,{id:'l',label:'Link',optional:true,placeholder:'https://',variant:'filled'})));
+</script>
+</body>
+</html>

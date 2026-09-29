@@ -1,0 +1,12 @@
+<!-- @dsCard group="Tasks" height=400 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>CategoryCard</title></head>
+<body>
+<div id="root" class="zn-demo"></div>
+<script>
+var Z = window.Zen, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:16,width:'100%'}},h(Z.CategoryCard,{title:'Projects & goals',count:8,tone:'lavender',icon:'target'}),h(Z.CategoryCard,{title:'Daily tasks',count:5,tone:'butter',icon:'sun'}),h(Z.CategoryCard,{title:'Self care',count:3,tone:'mint',icon:'droplet'}),h(Z.CategoryCard,{title:'Shopping',count:1,tone:'peach',icon:'cart'}),h(Z.CategoryCard,{title:'Study',count:4,tone:'sky',icon:'book'})));
+</script>
+</body>
+</html>
