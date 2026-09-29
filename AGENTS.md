@@ -4,7 +4,7 @@ Rules for any AI coding agent working in this repository. Read this file fully b
 
 ## What this is
 
-Amberlist is a calm task, notes and scratchpad app (HNG Internship 15, Stage 1). Guests use it without signing up; each browser gets an anonymous account. The product spec lives in the PRD; the look lives in the Zen Todo design system.
+Honeylist is a calm task, notes and scratchpad app (HNG Internship 15, Stage 1). Guests use it without signing up; each browser gets an anonymous account. The product spec lives in the PRD; the look lives in the Zen Todo design system.
 
 ## Stack (use only these)
 

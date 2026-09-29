@@ -44,6 +44,7 @@ export function Button({
         `zn-btn--${size}`,
         block && 'zn-btn--block',
         children == null && 'zn-btn--icon-only',
+        children != null && (icon || loading) && 'zn-btn--lead-icon',
         loading && 'is-loading',
         className,
       )}

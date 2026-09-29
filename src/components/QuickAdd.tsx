@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   useCategories,
   useCategoryMutations,
@@ -40,6 +40,15 @@ export function QuickAdd({
   const { create } = useTaskMutations()
   const catM = useCategoryMutations()
   const today = toISODate(new Date())
+  // Short hint on narrow phones so the placeholder never gets cut off.
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 519.98px)')
+    const sync = () => setNarrow(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const parsed = useMemo(() => {
     // Removing a chip puts its words back into the title.
@@ -155,7 +164,11 @@ export function QuickAdd({
             setText(e.target.value)
             setRemoved([])
           }}
-          placeholder='Add a task. Try "Read 20 pages tomorrow #study"'
+          placeholder={
+            narrow
+              ? 'Add a task, try "Gym tomorrow"'
+              : 'Add a task. Try "Read 20 pages tomorrow #study"'
+          }
           autoComplete="off"
           maxLength={300}
           style={{

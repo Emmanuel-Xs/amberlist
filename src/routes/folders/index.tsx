@@ -10,7 +10,7 @@ import { FolderCard } from '#/components/Cards'
 
 export const Route = createFileRoute('/folders/')({
   component: Folders,
-  head: () => ({ meta: [{ title: 'Folders · Amberlist' }] }),
+  head: () => ({ meta: [{ title: 'Folders · Honeylist' }] }),
 })
 
 export const FOLDER_COLORS = [

@@ -475,9 +475,18 @@ body {
     justify-content: flex-start !important;
   }
 }
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  .app-side .zn-nav--auto .zn-nav-brand {
-    display: none;
+/* Brand: mark only on the rail, mark plus name on the sidebar */
+.app-side .zn-nav--auto .app-brand {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 4px 0 20px;
+}
+@media (min-width: 1024px) {
+  .app-side .zn-nav--auto .app-brand {
+    justify-content: flex-start;
+    padding: var(--space-2) var(--space-3) var(--space-6);
   }
 }
 .home-grid.no-aside {
@@ -498,4 +507,14 @@ textarea:focus-visible,
 #scratch-body:focus,
 textarea#note-body:focus {
   box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Phones: no page scrollbar beside the bottom bar (touch scrolling needs none) */
+@media (max-width: 767.98px) {
+  html {
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
 }

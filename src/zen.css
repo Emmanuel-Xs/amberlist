@@ -95,6 +95,16 @@ body {
   width: 52px;
   padding: 0;
 }
+/* Optical centering: a leading icon carries its own inner space, so trim that side a little */
+.zn-btn--lead-icon.zn-btn--sm {
+  padding-inline-start: calc(var(--space-4) - 2px);
+}
+.zn-btn--lead-icon.zn-btn--md {
+  padding-inline-start: calc(var(--space-5) - 2px);
+}
+.zn-btn--lead-icon.zn-btn--lg {
+  padding-inline-start: calc(var(--space-6) - 2px);
+}
 .zn-btn--block {
   width: 100%;
 }

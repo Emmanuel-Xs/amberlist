@@ -1,6 +1,6 @@
 {
-  "name": "Amberlist",
-  "short_name": "Amberlist",
+  "name": "Honeylist",
+  "short_name": "Honeylist",
   "description": "Tasks, notes and a scratchpad in one calm place.",
   "start_url": "/",
   "display": "standalone",

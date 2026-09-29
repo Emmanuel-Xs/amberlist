@@ -9,12 +9,12 @@ import type { QueryClient } from '@tanstack/react-query'
 import { AppShell } from '#/components/AppShell'
 import appCss from '../styles.css?url'
 
-const TITLE = 'Amberlist: tasks, notes and habits in one calm place'
+const TITLE = 'Honeylist: tasks, notes and a scratchpad in one calm place'
 const DESCRIPTION =
   'A calm to-do app for students and young professionals. Plan your day, keep notes beside your tasks, and capture thoughts in a scratchpad. Works on phone, tablet and desktop.'
 
 // Applies the saved theme before first paint so there is no flash.
-const THEME_SCRIPT = `try{var t=localStorage.getItem('amberlist-theme')||'dark';if(t==='system'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t}catch(e){}`
+const THEME_SCRIPT = `try{var t=localStorage.getItem('honeylist-theme')||'dark';if(t==='system'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t}catch(e){}`
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
@@ -40,11 +40,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: TITLE },
         { property: 'og:description', content: DESCRIPTION },
-        { property: 'og:image', content: '/og.png' },
+        { property: 'og:image', content: 'https://honeylist.vercel.app/og.png' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: TITLE },
         { name: 'twitter:description', content: DESCRIPTION },
-        { name: 'twitter:image', content: '/og.png' },
+        { name: 'twitter:image', content: 'https://honeylist.vercel.app/og.png' },
       ],
       links: [
         { rel: 'stylesheet', href: appCss },
@@ -69,7 +69,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           children: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebApplication',
-            name: 'Amberlist',
+            name: 'Honeylist',
             applicationCategory: 'ProductivityApplication',
             operatingSystem: 'Any',
             description: DESCRIPTION,

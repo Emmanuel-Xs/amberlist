@@ -9,7 +9,7 @@ import { FolderDialog } from './index'
 
 export const Route = createFileRoute('/folders/$id')({
   component: FolderRoute,
-  head: () => ({ meta: [{ title: 'Folder · Amberlist' }] }),
+  head: () => ({ meta: [{ title: 'Folder · Honeylist' }] }),
 })
 
 function FolderRoute() {

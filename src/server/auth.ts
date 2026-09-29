@@ -28,9 +28,20 @@ function createAuth() {
       process.env.BETTER_AUTH_URL ||
       (process.env.VERCEL_PROJECT_PRODUCTION_URL &&
         `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`),
-    trustedOrigins: process.env.VERCEL_URL
-      ? [`https://${process.env.VERCEL_URL}`]
-      : [],
+    // Every hostname this deployment answers on. TRUSTED_ORIGINS adds more (comma separated).
+    trustedOrigins: [
+      process.env.VERCEL_URL,
+      process.env.VERCEL_BRANCH_URL,
+      process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    ]
+      .filter((h): h is string => !!h)
+      .map((h) => `https://${h}`)
+      .concat(
+        (process.env.TRUSTED_ORIGINS ?? '')
+          .split(',')
+          .map((o) => o.trim())
+          .filter(Boolean),
+      ),
     database: drizzleAdapter(getDb(), { provider: 'pg', schema }),
     socialProviders: google,
     session: { expiresIn: 60 * 60 * 24 * 365, updateAge: 60 * 60 * 24 },

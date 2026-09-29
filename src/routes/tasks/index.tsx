@@ -3,5 +3,5 @@ import { TasksPage } from '#/components/TasksPage'
 
 export const Route = createFileRoute('/tasks/')({
   component: () => <TasksPage />,
-  head: () => ({ meta: [{ title: 'Tasks · Amberlist' }] }),
+  head: () => ({ meta: [{ title: 'Tasks · Honeylist' }] }),
 })

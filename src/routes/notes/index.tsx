@@ -8,7 +8,7 @@ import { NoteCard } from '#/components/Cards'
 
 export const Route = createFileRoute('/notes/')({
   component: Notes,
-  head: () => ({ meta: [{ title: 'Notes · Amberlist' }] }),
+  head: () => ({ meta: [{ title: 'Notes · Honeylist' }] }),
 })
 
 function Notes() {

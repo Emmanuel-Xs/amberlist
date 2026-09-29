@@ -9,7 +9,7 @@ import { Button, Chip, ConfirmDialog, Input, Switch } from '#/ui/zen'
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
-  head: () => ({ meta: [{ title: 'Profile · Amberlist' }] }),
+  head: () => ({ meta: [{ title: 'Profile · Honeylist' }] }),
 })
 
 function Profile() {
@@ -44,7 +44,7 @@ function Profile() {
     )
     const a = document.createElement('a')
     a.href = url
-    a.download = `amberlist-export-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `honeylist-export-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -201,7 +201,7 @@ function Profile() {
               Save your data
             </h2>
             <p style={{ margin: 0, fontSize: 14, lineHeight: '20px' }}>
-              You're using Amberlist as a guest. Clearing your browser data
+              You're using Honeylist as a guest. Clearing your browser data
               removes your tasks. Sign in with Google to keep them on every
               device is coming next.
             </p>
@@ -316,7 +316,7 @@ function Profile() {
             </p>
           </section>
           <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-muted)' }}>
-            Amberlist 0.1 · Built with AI for HNG 15
+            Honeylist 0.1 · Built with AI for HNG 15
           </p>
         </div>
       </div>

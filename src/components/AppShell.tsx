@@ -15,6 +15,7 @@ import {
   ui,
 } from '#/lib/store'
 import { Icon } from '#/ui/icons'
+import { LogoMark } from '#/ui/logo'
 import type { IconName } from '#/ui/icons'
 import { Button, Modal, Skeleton } from '#/ui/zen'
 import { CreateTask } from './CreateTask'
@@ -58,10 +59,12 @@ function SideNav({ ready }: { ready: boolean }) {
       >
         <Link
           to="/"
-          className="zn-nav-brand"
+          className="zn-nav-brand app-brand"
+          aria-label="Honeylist home"
           style={{ color: 'var(--ink)', textDecoration: 'none' }}
         >
-          Amberlist
+          <LogoMark size={32} />
+          <span className="app-sidebar-extra">Honeylist</span>
         </Link>
         <ul className="zn-nav-list">
           {NAV.map((n) => (
@@ -381,7 +384,7 @@ function useTheme(ready: boolean) {
           : data.theme
       document.documentElement.dataset.theme = theme
       try {
-        localStorage.setItem('amberlist-theme', data.theme)
+        localStorage.setItem('honeylist-theme', data.theme)
       } catch {
         // Private mode: the server copy still holds the choice.
       }

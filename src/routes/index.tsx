@@ -22,10 +22,11 @@ import {
 } from '#/components/Cards'
 import { QuickAdd } from '#/components/QuickAdd'
 import { TaskRow } from '#/components/TaskRow'
+import { Logo } from '#/ui/logo'
 
 export const Route = createFileRoute('/')({
   component: Home,
-  head: () => ({ meta: [{ title: 'Home · Amberlist' }] }),
+  head: () => ({ meta: [{ title: 'Home · Honeylist' }] }),
 })
 
 function Home() {
@@ -76,6 +77,9 @@ function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className="only-phone" style={{ display: 'block', marginBottom: 12 }}>
+          <Logo size={28} />
+        </div>
         <p style={{ margin: 0, fontSize: 15, color: 'var(--ink-muted)' }}>
           {hello}
         </p>

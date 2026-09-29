@@ -1,8 +1,8 @@
-# Amberlist
+# Honeylist
 
 Tasks, notes and a scratchpad in one calm place. Built with AI for **HNG Internship 15, Stage 1**.
 
-**Live:** https://amberlist-one.vercel.app
+**Live:** https://honeylist.vercel.app
 
 Open it and start typing: there's no sign up. Every browser gets a private guest account.
 
