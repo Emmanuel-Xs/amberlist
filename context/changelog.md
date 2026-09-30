@@ -82,3 +82,6 @@ Notable commits, newest first (2026-09-29, times WAT). Add an entry with every c
 - Repeating tasks: picker (boards 17, 18), next task made server side on completion, skip, stop repeating, chips, tests.
 - Reminders: Remind me field, pre prompt, blocked help, Web Push (`public/sw.js`, `src/server/push.ts`), snooze, in app banners, reminder chips, Profile row, `push_subscription` table, GitHub Actions scheduler. New env vars `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`. New dependencies `web-push` and `@radix-ui/react-popover`.
 - Backlog statuses reconciled (habits, splash, motion, shadcn, Remind me switch).
+
+## 2026-09-30: sample data
+- "Load sample data" (Home empty state, Profile) fills the app with tasks, notes and habits; "Clear sample data" goes back to empty. Added for the HNG Stage 1 reviewers. Checked: the main domain is public (no Deployment Protection on it); per deployment URLs are protected.

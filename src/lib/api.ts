@@ -79,6 +79,8 @@ export interface Prefs {
   nudgeState: { task?: string; days?: string; notify?: string } | null
   /** IANA zone the reminders count in. */
   timezone: string | null
+  /** True while the rows from "Load sample data" are in the account. */
+  sampleLoaded: boolean
 }
 export type PrefsUpdate = Partial<
   Pick<Prefs, 'displayName' | 'theme' | 'sounds'>

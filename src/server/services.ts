@@ -143,6 +143,7 @@ async function withMe(db: Db, userId: string, p: typeof prefs.$inferSelect) {
     image: isGuest ? null : (account?.image ?? null),
     accountName: isGuest ? null : (account?.name ?? null),
     googleEnabled: googleEnabled(),
+    sampleLoaded: !!p.sampleIds,
     pendingMerge: await pendingMergeCounts(db, p.pendingMerge),
   }
 }
@@ -1253,5 +1254,197 @@ export async function deletePushSubscription(
         eq(pushSubscription.endpoint, endpoint),
       ),
     )
+  return { ok: true }
+}
+
+// ---------- Sample data ----------
+/** One click to see the app full: a spread of tasks, notes and habits. Tracked so it can be cleared. */
+export async function loadSampleData(db: Db, userId: string, today: string) {
+  const p = await getPrefs(db, userId)
+  if (p.sampleIds) throw new ValidationError('Sample data is already loaded.')
+  const cats = await listCategories(db, userId)
+  const folder = (name: string) => cats.find((c) => c.name === name)?.id ?? null
+  const day = (n: number) => addDays(today, n)
+  const tasks: z.infer<typeof taskCreate>[] = [
+    {
+      title: 'Submit HNG stage 1',
+      categoryId: folder('Work'),
+      startDate: day(0),
+      startTime: '18:00',
+      dueDate: day(0),
+      priority: 'high',
+      subtasks: [
+        'Deploy the app',
+        'Check it in a private window',
+        'Fill in the form',
+      ],
+    },
+    {
+      title: 'Reply to the design feedback',
+      categoryId: folder('Work'),
+      startDate: day(-2),
+      dueDate: day(-1),
+      priority: 'high',
+    },
+    {
+      title: 'Call mum',
+      categoryId: folder('Personal'),
+      startDate: day(0),
+      startTime: '17:00',
+      priority: 'medium',
+    },
+    {
+      title: 'Read 20 pages',
+      categoryId: folder('Study'),
+      startDate: day(1),
+      priority: 'low',
+      subtasks: ['Chapter 4', 'Write three notes'],
+    },
+    {
+      title: 'Plan the week',
+      categoryId: folder('Personal'),
+      startDate: day(2),
+      priority: 'medium',
+    },
+    {
+      title: 'Book a dentist appointment',
+      categoryId: folder('Personal'),
+      startDate: day(5),
+      priority: 'low',
+    },
+    {
+      title: 'Water the plants',
+      categoryId: folder('Personal'),
+      startDate: day(0),
+      priority: 'low',
+    },
+    {
+      title: 'Buy bread',
+      categoryId: folder('Personal'),
+      startDate: day(-1),
+      status: 'done',
+    },
+    {
+      title: 'Send the invoice',
+      categoryId: folder('Work'),
+      startDate: day(-3),
+      status: 'done',
+    },
+    {
+      title: 'Write the project outline',
+      categoryId: folder('Study'),
+      startDate: day(0),
+      status: 'in_progress',
+      priority: 'medium',
+    },
+  ]
+  const taskIds: string[] = []
+  for (const t of tasks) taskIds.push((await createTask(db, userId, t)).id)
+
+  const notes: z.infer<typeof noteCreate>[] = [
+    {
+      title: 'Ideas',
+      body: 'A calmer way to plan the day.\n\n- [ ] Sketch the home screen\n- [x] Pick a name\n- [ ] Try the scratchpad',
+      color: 'butter',
+      pinned: true,
+    },
+    {
+      title: 'Reading list',
+      body: '1. Deep Work\n2. The Design of Everyday Things\n3. Atomic Habits',
+      color: 'lavender',
+    },
+    {
+      title: 'Shopping',
+      body: '- Bread\n- Oat milk\n- Tomatoes',
+      color: 'mint',
+    },
+  ]
+  const noteIds: string[] = []
+  for (const n of notes) noteIds.push((await createNote(db, userId, n)).id)
+
+  const habits: [z.infer<typeof habitCreate>, number][] = [
+    [
+      {
+        name: 'Drink 8 glasses of water',
+        icon: 'droplet',
+        categoryId: folder('Personal'),
+        goalDays: 21,
+      },
+      12,
+    ],
+    [
+      {
+        name: 'Read for 20 minutes',
+        icon: 'book',
+        categoryId: folder('Study'),
+      },
+      5,
+    ],
+    [{ name: 'Stretch', icon: 'sun', frequency: 'weekdays' }, 3],
+  ]
+  const habitIds: string[] = []
+  for (const [h, streak] of habits) {
+    const row = await createHabit(db, userId, h)
+    habitIds.push(row.id)
+    for (let i = 0; i < streak; i++)
+      await toggleCheckin(db, userId, row.id, { date: day(-i), done: true })
+  }
+  await db
+    .update(prefs)
+    .set({
+      sampleIds: { tasks: taskIds, notes: noteIds, habits: habitIds },
+      updatedAt: now(),
+    })
+    .where(eq(prefs.userId, userId))
+  return {
+    ok: true,
+    tasks: taskIds.length,
+    notes: noteIds.length,
+    habits: habitIds.length,
+  }
+}
+
+/** Back to the empty state: removes only what "Load sample data" made. */
+export async function clearSampleData(db: Db, userId: string) {
+  const p = await getPrefs(db, userId)
+  const ids = p.sampleIds
+  if (!ids) throw new NotFoundError()
+  await db.transaction(async (tx) => {
+    if (ids.tasks.length) {
+      await tx
+        .delete(subtask)
+        .where(
+          and(eq(subtask.userId, userId), inArray(subtask.taskId, ids.tasks)),
+        )
+      await tx
+        .update(note)
+        .set({ taskId: null })
+        .where(and(eq(note.userId, userId), inArray(note.taskId, ids.tasks)))
+      await tx
+        .delete(task)
+        .where(and(eq(task.userId, userId), inArray(task.id, ids.tasks)))
+    }
+    if (ids.notes.length)
+      await tx
+        .delete(note)
+        .where(and(eq(note.userId, userId), inArray(note.id, ids.notes)))
+    if (ids.habits.length) {
+      await tx
+        .delete(habitCheckin)
+        .where(
+          and(
+            eq(habitCheckin.userId, userId),
+            inArray(habitCheckin.habitId, ids.habits),
+          ),
+        )
+      await tx
+        .delete(habit)
+        .where(and(eq(habit.userId, userId), inArray(habit.id, ids.habits)))
+    }
+    await tx
+      .update(prefs)
+      .set({ sampleIds: null, updatedAt: now() })
+      .where(eq(prefs.userId, userId))
+  })
   return { ok: true }
 }
