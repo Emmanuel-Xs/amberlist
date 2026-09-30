@@ -7,7 +7,8 @@ import { Icon } from '#/ui/icons'
 import type { IconName } from '#/ui/icons'
 import { deleteNoteWithUndo } from '#/lib/noteActions'
 import { Priority } from './TaskRow'
-import { useTaskActions } from './useTaskActions'
+import { TickFill } from './TickFill'
+import { useTaskActions, useTicked } from './useTaskActions'
 
 const TONES = ['accent', 'butter', 'lavender', 'mint', 'peach', 'sky'] as const
 
@@ -22,6 +23,8 @@ export function TodayCard({
   index: number
 }) {
   const { toggle } = useTaskActions()
+  const [ticked, setTicked] = useTicked(task)
+  const checked = task.status === 'done' || ticked
   const tone =
     index === 0 ? 'accent' : (category?.color ?? TONES[(index % 5) + 1])
   const bg = colorVar(tone)
@@ -169,10 +172,17 @@ export function TodayCard({
         <button
           type="button"
           role="checkbox"
-          aria-checked={task.status === 'done'}
-          aria-label={`Mark done: ${task.title}`}
-          onClick={() => toggle(task)}
+          aria-checked={checked}
+          aria-label={`${checked ? 'Mark not done' : 'Mark done'}: ${task.title}`}
+          data-task-check={task.id}
+          onClick={() => {
+            if (task.status !== 'done') setTicked(true)
+            toggle(task)
+          }}
           style={{
+            position: 'relative',
+            display: 'grid',
+            placeItems: 'center',
             alignSelf: 'flex-end',
             marginRight: 16,
             width: 36,
@@ -183,7 +193,17 @@ export function TodayCard({
             cursor: 'pointer',
             padding: 0,
           }}
-        />
+        >
+          {/* Honey on pastel cards; on the amber card the fill is ink so it still shows. */}
+          <TickFill
+            done={checked}
+            animate={ticked}
+            size={36}
+            checkSize={20}
+            fill={tone === 'accent' ? 'var(--on-pastel)' : 'var(--accent)'}
+            ink={tone === 'accent' ? 'var(--accent)' : 'var(--on-accent)'}
+          />
+        </button>
         <Icon
           name={(category?.icon as IconName | undefined) ?? 'flag'}
           size={52}
@@ -372,47 +392,6 @@ export function NoteCard({
       >
         <Icon name="trash" size={16} />
       </button>
-    </div>
-  )
-}
-
-export function DateStrip({
-  days,
-  value,
-  onChange,
-}: {
-  days: {
-    key: string
-    day: number
-    weekday: string
-    today: boolean
-    count?: number
-  }[]
-  value: string
-  onChange: (k: string) => void
-}) {
-  return (
-    <div className="zn-dates" role="listbox" aria-label="Pick a day">
-      {days.map((d) => (
-        <button
-          key={d.key}
-          type="button"
-          role="option"
-          aria-selected={d.key === value}
-          aria-label={`${d.weekday} ${d.day}${d.count ? `, ${d.count} tasks` : ''}`}
-          className={[
-            'zn-date',
-            d.key === value && 'is-selected',
-            d.today && 'is-today',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => onChange(d.key)}
-        >
-          <span className="zn-date-num">{d.day}</span>
-          <span className="zn-date-wd">{d.weekday}</span>
-        </button>
-      ))}
     </div>
   )
 }

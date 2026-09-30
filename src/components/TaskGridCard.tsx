@@ -5,8 +5,7 @@ import { dueLabel, formatTimeRange, toISODate } from '#/lib/dates'
 import { Icon } from '#/ui/icons'
 import { MenuButton } from '#/ui/zen'
 import { Priority, useTaskMenu } from './TaskRow'
-import { motion } from 'motion/react'
-import { SPRING_POP } from '#/lib/motion'
+import { TickFill } from './TickFill'
 import { useTaskActions, useTicked } from './useTaskActions'
 
 /** Grid view card: folder colour band, check and menu on top, title, then one meta line. */
@@ -50,21 +49,13 @@ export function TaskGridCard({
             aria-checked={done}
             aria-label={`${done ? 'Mark not done' : 'Mark done'}: ${task.title}`}
             className="zn-check"
+            data-task-check={task.id}
             onClick={() => {
               if (task.status !== 'done') setTicked(true)
               toggle(task)
             }}
           >
-            {done && (
-              <motion.span
-                initial={ticked ? { scale: 0.4, rotate: -20 } : false}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={SPRING_POP}
-                style={{ display: 'inline-flex' }}
-              >
-                <Icon name="check" size={14} strokeWidth={3} />
-              </motion.span>
-            )}
+            <TickFill done={done} animate={ticked} />
           </button>
           <MenuButton
             label={`More actions for ${task.title}`}

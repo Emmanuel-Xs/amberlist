@@ -15,6 +15,7 @@ import { sound } from '#/lib/feedback'
 import { parseQuickAdd } from '#/lib/parse'
 import { setScratch, toast, ui } from '#/lib/store'
 import { Button, Modal } from '#/ui/zen'
+import { AiExtract } from './AiExtract'
 
 /** One always-there quick note. Any line can become a task or a note. */
 export function Scratchpad() {
@@ -135,6 +136,7 @@ export function Scratchpad() {
               ? "Couldn't save. Keep typing and we'll retry."
               : ' '}
       </span>
+      <AiExtract text={body} />
       {lines.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span className="zn-field-label">Lines</span>

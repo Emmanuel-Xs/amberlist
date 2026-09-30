@@ -12,6 +12,7 @@ export function LogoMark({
   className,
   x,
   y,
+  drop = true,
 }: {
   size?: number
   animated?: boolean
@@ -19,6 +20,8 @@ export function LogoMark({
   /** Position when nested inside another svg (used by the empty state art). */
   x?: number
   y?: number
+  /** False hides the falling drop (the All done art shows it landed as a puddle). */
+  drop?: boolean
 }) {
   const clipId = `hl-${useId().replace(/:/g, '')}`
   const detail = size >= 28
@@ -49,7 +52,9 @@ export function LogoMark({
         strokeLinejoin="round"
       />
       <path d={STUB_PATH} fill="var(--accent)" />
-      <path d={DROP_PATH} fill="var(--accent)" className="logo-drop" />
+      {drop && (
+        <path d={DROP_PATH} fill="var(--accent)" className="logo-drop" />
+      )}
       <g clipPath={`url(#${clipId})`}>
         {CELLS.map((c) =>
           c.on ? (

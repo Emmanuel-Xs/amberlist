@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '@tanstack/react-store'
 import { useQueryClient } from '@tanstack/react-query'
 import { announceAdded } from '#/lib/announce'
+import { celebrateFirstTask, isFirstTask } from './Celebrate'
 import { useForm } from '@tanstack/react-form'
 import { useCategories, useTaskMutations } from '#/lib/api'
 import { toISODate } from '#/lib/dates'
@@ -34,6 +35,7 @@ export function CreateTask() {
       subtasks: [] as string[],
     },
     onSubmit: ({ value }) => {
+      const first = isFirstTask(qc)
       create.mutate(
         {
           title: value.title.trim(),
@@ -49,7 +51,8 @@ export function CreateTask() {
         {
           onSuccess: (created) => {
             sound('complete')
-            announceAdded(qc, created)
+            if (first) celebrateFirstTask(created.id)
+            else announceAdded(qc, created)
             closeCreate()
           },
           onError: (e) =>

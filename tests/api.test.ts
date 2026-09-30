@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resetDbForTests } from '../src/server/db'
-import { setUserResolver } from '../src/server/http'
+import { resetRateLimits, setUserResolver } from '../src/server/http'
 import * as h from '../src/server/handlers'
 
 // Every endpoint is tested for: success, bad input (400), no session (401) and another user's data (404).
@@ -42,6 +42,7 @@ async function call(
 }
 
 beforeEach(async () => {
+  resetRateLimits()
   await resetDbForTests()
 })
 
@@ -649,5 +650,651 @@ describe('custom colours for notes and folders', () => {
         })
       ).status,
     ).toBe(401)
+  })
+})
+
+// ---- AI (Phase 3): the model call is mocked; nothing leaves the machine ----
+const aiMock = vi.hoisted(() => ({ generateText: vi.fn() }))
+vi.mock('ai', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  generateText: aiMock.generateText,
+}))
+
+describe('ai', () => {
+  const keys = ['GROQ_API_KEY', 'GOOGLE_GENERATIVE_AI_API_KEY', 'XAI_API_KEY']
+  beforeEach(() => {
+    for (const k of keys) delete process.env[k]
+    process.env.GROQ_API_KEY = 'test-key'
+    aiMock.generateText.mockReset()
+  })
+  afterEach(() => {
+    for (const k of keys) delete process.env[k]
+  })
+  const reply = (output: unknown) =>
+    aiMock.generateText.mockResolvedValueOnce({ output })
+  const newTask = async (user: string, title: string) =>
+    (await call(h.tasks.POST, 'POST', { user, body: { title } })).body as {
+      id: string
+    }
+
+  it('needs a session on every AI endpoint', async () => {
+    for (const [fn, method] of [
+      [h.aiStatus.GET, 'GET'],
+      [h.aiBreakdown.POST, 'POST'],
+      [h.aiExtract.POST, 'POST'],
+    ] as [Handler, string][]) {
+      const r = await call(fn, method, {
+        user: null,
+        body: method === 'POST' ? { taskId: 'x', text: 'x' } : undefined,
+      })
+      expect(r.status).toBe(401)
+    }
+    expect(aiMock.generateText).not.toHaveBeenCalled()
+  })
+
+  it('reports whether AI is on and the calls left today', async () => {
+    let r = await call(h.aiStatus.GET, 'GET')
+    expect(r.body).toEqual({ enabled: true, limit: 20, remaining: 20 })
+    delete process.env.GROQ_API_KEY
+    r = await call(h.aiStatus.GET, 'GET')
+    expect(r.body.enabled).toBe(false)
+    process.env.XAI_API_KEY = 'x'
+    expect((await call(h.aiStatus.GET, 'GET')).body.enabled).toBe(true)
+  })
+
+  it('breaks a task into subtasks, sending only that task', async () => {
+    const t = await newTask('alice', 'Plan birthday party')
+    await call(h.taskSubtasks.POST, 'POST', {
+      params: { id: t.id },
+      body: { title: 'Pick a date' },
+    })
+    await newTask('alice', 'Secret other task')
+    reply({
+      subtasks: [
+        '1. Make a guest list',
+        'pick a date',
+        '- Book a venue',
+        '  ',
+        'Order the cake',
+        'Send invites',
+        'Buy decorations',
+        'Plan games',
+        'Make a playlist',
+        'Clean up',
+      ],
+    })
+    const r = await call(h.aiBreakdown.POST, 'POST', { body: { taskId: t.id } })
+    expect(r.status).toBe(200)
+    expect(r.body.subtasks).toEqual([
+      'Make a guest list',
+      'Book a venue',
+      'Order the cake',
+      'Send invites',
+      'Buy decorations',
+      'Plan games',
+      'Make a playlist',
+    ])
+    expect(r.body.remaining).toBe(19)
+    const sent = aiMock.generateText.mock.calls[0][0] as { prompt: string }
+    expect(sent.prompt).toContain('Plan birthday party')
+    expect(sent.prompt).toContain('Pick a date')
+    expect(sent.prompt).not.toContain('Secret other task')
+  })
+
+  it('rejects bad breakdown input and other users tasks', async () => {
+    for (const body of [{}, { taskId: '' }, { taskId: 'x', extra: 1 }, 'nope'])
+      expect((await call(h.aiBreakdown.POST, 'POST', { body })).status).toBe(
+        400,
+      )
+    const bobs = await newTask('bob', 'Bob task')
+    const r = await call(h.aiBreakdown.POST, 'POST', {
+      body: { taskId: bobs.id },
+    })
+    expect(r.status).toBe(404)
+    expect(aiMock.generateText).not.toHaveBeenCalled()
+    expect((await call(h.aiStatus.GET, 'GET')).body.remaining).toBe(20)
+  })
+
+  it('turns text into tasks with dates and priority', async () => {
+    reply({
+      tasks: [
+        { title: ' Email the tutor ', date: '2026-10-01', priority: null },
+        { title: 'Pay rent', date: 'Friday', priority: 'high' },
+        { title: '   ', date: null, priority: null },
+      ],
+    })
+    const r = await call(h.aiExtract.POST, 'POST', {
+      body: { text: 'email tutor tomorrow\nPAY RENT!!', today: '2026-09-30' },
+    })
+    expect(r.status).toBe(200)
+    expect(r.body.tasks).toEqual([
+      { title: 'Email the tutor', date: '2026-10-01' },
+      { title: 'Pay rent', priority: 'high' },
+    ])
+    const sent = aiMock.generateText.mock.calls[0][0] as {
+      prompt: string
+      system: string
+    }
+    expect(sent.prompt).toContain('email tutor tomorrow')
+    expect(sent.system).toContain('2026-09-30')
+  })
+
+  it('rejects bad extract input', async () => {
+    for (const body of [
+      {},
+      { text: '   ' },
+      { text: 'x'.repeat(4001) },
+      { text: 'ok', today: 'tomorrow' },
+      { text: 'ok', userId: 'bob' },
+    ])
+      expect((await call(h.aiExtract.POST, 'POST', { body })).status).toBe(400)
+    expect(aiMock.generateText).not.toHaveBeenCalled()
+  })
+
+  it('stops at 20 calls a day with a friendly 429', async () => {
+    const { getDb } = await import('../src/server/db')
+    const { aiUsage } = await import('../src/server/schema')
+    await getDb()
+      .insert(aiUsage)
+      .values({
+        userId: 'alice',
+        day: new Date().toISOString().slice(0, 10),
+        count: 20,
+      })
+    const t = await newTask('alice', 'Anything')
+    const r = await call(h.aiBreakdown.POST, 'POST', { body: { taskId: t.id } })
+    expect(r.status).toBe(429)
+    expect(r.body.error).toMatch(/tomorrow/)
+    expect(
+      (await call(h.aiExtract.POST, 'POST', { body: { text: 'x' } })).status,
+    ).toBe(429)
+    expect(aiMock.generateText).not.toHaveBeenCalled()
+    // Bob has his own allowance.
+    reply({ tasks: [{ title: 'Call mum', date: null, priority: null }] })
+    expect(
+      (
+        await call(h.aiExtract.POST, 'POST', {
+          user: 'bob',
+          body: { text: 'x' },
+        })
+      ).status,
+    ).toBe(200)
+  })
+
+  it('falls back to the next provider and refunds a failed call', async () => {
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'g'
+    aiMock.generateText.mockRejectedValueOnce(new Error('groq down'))
+    reply({ tasks: [{ title: 'Water plants', date: null, priority: null }] })
+    let r = await call(h.aiExtract.POST, 'POST', { body: { text: 'plants' } })
+    expect(r.status).toBe(200)
+    expect(aiMock.generateText).toHaveBeenCalledTimes(2)
+    aiMock.generateText.mockRejectedValue(new Error('all down'))
+    r = await call(h.aiExtract.POST, 'POST', { body: { text: 'plants' } })
+    expect(r.status).toBe(502)
+    expect((await call(h.aiStatus.GET, 'GET')).body.remaining).toBe(19)
+  })
+
+  it('is off without a key', async () => {
+    delete process.env.GROQ_API_KEY
+    const t = await newTask('alice', 'Anything')
+    expect(
+      (await call(h.aiBreakdown.POST, 'POST', { body: { taskId: t.id } }))
+        .status,
+    ).toBe(404)
+  })
+})
+
+describe('habits', () => {
+  const today = new Date().toISOString().slice(0, 10)
+  const daysAgo = (n: number) =>
+    new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10)
+
+  it('needs a session for every habit endpoint', async () => {
+    const endpoints: [Handler, string][] = [
+      [h.habits.GET, 'GET'],
+      [h.habits.POST, 'POST'],
+      [h.habitById.GET, 'GET'],
+      [h.habitById.PATCH, 'PATCH'],
+      [h.habitById.DELETE, 'DELETE'],
+      [h.habitCheckins.POST, 'POST'],
+    ]
+    for (const [fn, method] of endpoints) {
+      const r = await call(fn, method, {
+        user: null,
+        body: method === 'GET' || method === 'DELETE' ? undefined : {},
+        params: { id: 'x' },
+      })
+      expect(r.status, `${method} should need a session`).toBe(401)
+    }
+  })
+
+  it('creates, lists, reads, updates, archives and deletes a habit', async () => {
+    const created = await call(h.habits.POST, 'POST', {
+      body: { name: 'Read', icon: 'book', goalDays: 21 },
+    })
+    expect(created.status).toBe(201)
+    expect(created.body).toMatchObject({
+      name: 'Read',
+      icon: 'book',
+      frequency: 'daily',
+      goalDays: 21,
+      archived: false,
+      checkins: [],
+      daysOfWeek: null,
+      timesPerWeek: null,
+    })
+    const id = created.body.id
+
+    const list = await call(h.habits.GET, 'GET')
+    expect(list.status).toBe(200)
+    expect(list.body).toHaveLength(1)
+    expect(
+      (await call(h.habitById.GET, 'GET', { params: { id } })).body.name,
+    ).toBe('Read')
+
+    // Weekdays default to Monday to Friday; switching to x a week clears the days.
+    const weekdays = await call(h.habitById.PATCH, 'PATCH', {
+      params: { id },
+      body: { frequency: 'weekdays' },
+    })
+    expect(weekdays.status).toBe(200)
+    expect(weekdays.body.daysOfWeek).toEqual([1, 2, 3, 4, 5])
+    const mwf = await call(h.habitById.PATCH, 'PATCH', {
+      params: { id },
+      body: { daysOfWeek: [5, 1, 3, 3] },
+    })
+    expect(mwf.body.daysOfWeek).toEqual([1, 3, 5])
+    const weekly = await call(h.habitById.PATCH, 'PATCH', {
+      params: { id },
+      body: { frequency: 'x_per_week', timesPerWeek: 4, goalDays: null },
+    })
+    expect(weekly.body).toMatchObject({
+      frequency: 'x_per_week',
+      timesPerWeek: 4,
+      daysOfWeek: null,
+      goalDays: null,
+    })
+
+    const archived = await call(h.habitById.PATCH, 'PATCH', {
+      params: { id },
+      body: { archived: true },
+    })
+    expect(archived.body.archived).toBe(true)
+    expect((await call(h.habits.GET, 'GET')).body).toHaveLength(0)
+    expect(
+      (await call(h.habits.GET, 'GET', { query: 'archived=1' })).body,
+    ).toHaveLength(1)
+
+    expect(
+      (await call(h.habitById.DELETE, 'DELETE', { params: { id } })).status,
+    ).toBe(200)
+    expect(
+      (await call(h.habitById.GET, 'GET', { params: { id } })).status,
+    ).toBe(404)
+  })
+
+  it('toggles a check in per day and keeps one row per day', async () => {
+    const { body: habit } = await call(h.habits.POST, 'POST', {
+      body: { name: 'Water', icon: 'droplet' },
+    })
+    const params = { id: habit.id }
+    const on = await call(h.habitCheckins.POST, 'POST', {
+      params,
+      body: { date: today },
+    })
+    expect(on.status).toBe(200)
+    expect(on.body.checkins).toEqual([today])
+    // Tapping again the same day undoes it.
+    const off = await call(h.habitCheckins.POST, 'POST', {
+      params,
+      body: { date: today },
+    })
+    expect(off.body.checkins).toEqual([])
+    // Explicit done is idempotent.
+    for (let i = 0; i < 2; i++)
+      await call(h.habitCheckins.POST, 'POST', {
+        params,
+        body: { date: today, done: true },
+      })
+    for (const n of [1, 2]) {
+      await call(h.habitCheckins.POST, 'POST', {
+        params,
+        body: { date: daysAgo(n), done: true },
+      })
+    }
+    const read = await call(h.habitById.GET, 'GET', { params })
+    expect(read.body.checkins).toEqual([daysAgo(2), daysAgo(1), today])
+    const undo = await call(h.habitCheckins.POST, 'POST', {
+      params,
+      body: { date: daysAgo(1), done: false },
+    })
+    expect(undo.body.checkins).toEqual([daysAgo(2), today])
+    // Deleting the habit removes its check ins too.
+    await call(h.habitById.DELETE, 'DELETE', { params })
+    const again = await call(h.habits.POST, 'POST', { body: { name: 'Water' } })
+    expect(again.body.checkins).toEqual([])
+  })
+
+  it('validates habit and check in input', async () => {
+    const bad = [
+      {},
+      { name: '' },
+      { name: 'x'.repeat(81) },
+      { name: 'Run', frequency: 'hourly' },
+      { name: 'Run', icon: 'rocket' },
+      { name: 'Run', daysOfWeek: [] },
+      { name: 'Run', daysOfWeek: [0] },
+      { name: 'Run', timesPerWeek: 8 },
+      { name: 'Run', goalDays: 0 },
+      { name: 'Run', reminderTime: '25:00' },
+      { name: 'Run', color: '#000000' },
+      { name: 'Run', archived: true },
+      { name: 'Run', userId: 'bob' },
+    ]
+    for (const body of bad)
+      expect(
+        (await call(h.habits.POST, 'POST', { body })).status,
+        JSON.stringify(body),
+      ).toBe(400)
+    expect(
+      (await call(h.habits.POST, 'POST', { body: 'not json' })).status,
+    ).toBe(400)
+    expect(
+      (await call(h.habits.GET, 'GET', { query: 'archived=maybe' })).status,
+    ).toBe(400)
+
+    const { body: habit } = await call(h.habits.POST, 'POST', {
+      body: { name: 'Run' },
+    })
+    const params = { id: habit.id }
+    expect(
+      (await call(h.habitById.PATCH, 'PATCH', { params, body: { name: ' ' } }))
+        .status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.habitById.PATCH, 'PATCH', {
+          params,
+          body: { checkins: [] },
+        })
+      ).status,
+    ).toBe(400)
+    for (const body of [
+      {},
+      { date: 'today' },
+      { date: '2026-02-30' },
+      { date: '2999-01-01' },
+      { date: today, done: 'yes' },
+      { date: today, extra: 1 },
+    ])
+      expect(
+        (await call(h.habitCheckins.POST, 'POST', { params, body })).status,
+        JSON.stringify(body),
+      ).toBe(400)
+  })
+
+  it('refuses a folder that belongs to someone else, and clears a deleted folder', async () => {
+    const { body: bobFolder } = await call(h.categories.POST, 'POST', {
+      user: 'bob',
+      body: { name: 'Bob' },
+    })
+    expect(
+      (
+        await call(h.habits.POST, 'POST', {
+          body: { name: 'Run', categoryId: bobFolder.id },
+        })
+      ).status,
+    ).toBe(404)
+    const { body: folder } = await call(h.categories.POST, 'POST', {
+      body: { name: 'Health' },
+    })
+    const { body: habit } = await call(h.habits.POST, 'POST', {
+      body: { name: 'Run', categoryId: folder.id },
+    })
+    expect(habit.categoryId).toBe(folder.id)
+    await call(h.categoryById.DELETE, 'DELETE', { params: { id: folder.id } })
+    expect(
+      (await call(h.habitById.GET, 'GET', { params: { id: habit.id } })).body
+        .categoryId,
+    ).toBe(null)
+  })
+
+  it('never shows or changes another user’s habit', async () => {
+    const { body: habit } = await call(h.habits.POST, 'POST', {
+      body: { name: 'Mine' },
+    })
+    const params = { id: habit.id }
+    expect((await call(h.habits.GET, 'GET', { user: 'bob' })).body).toEqual([])
+    expect(
+      (await call(h.habitById.GET, 'GET', { user: 'bob', params })).status,
+    ).toBe(404)
+    expect(
+      (
+        await call(h.habitById.PATCH, 'PATCH', {
+          user: 'bob',
+          params,
+          body: { name: 'Hacked' },
+        })
+      ).status,
+    ).toBe(404)
+    expect(
+      (
+        await call(h.habitCheckins.POST, 'POST', {
+          user: 'bob',
+          params,
+          body: { date: today },
+        })
+      ).status,
+    ).toBe(404)
+    expect(
+      (await call(h.habitById.DELETE, 'DELETE', { user: 'bob', params }))
+        .status,
+    ).toBe(404)
+    const mine = await call(h.habitById.GET, 'GET', { params })
+    expect(mine.body).toMatchObject({ name: 'Mine', checkins: [] })
+  })
+
+  it('exports habits and wipes them with all data', async () => {
+    const { body: habit } = await call(h.habits.POST, 'POST', {
+      body: { name: 'Stretch' },
+    })
+    await call(h.habitCheckins.POST, 'POST', {
+      params: { id: habit.id },
+      body: { date: today },
+    })
+    await call(h.habits.POST, 'POST', {
+      user: 'bob',
+      body: { name: 'Bob habit' },
+    })
+    const exported = await call(h.meData.GET, 'GET')
+    expect(exported.body.habits).toHaveLength(1)
+    expect(exported.body.habits[0].checkins).toEqual([today])
+    await call(h.meData.DELETE, 'DELETE')
+    expect((await call(h.habits.GET, 'GET')).body).toEqual([])
+    expect(
+      (await call(h.habits.GET, 'GET', { user: 'bob' })).body,
+    ).toHaveLength(1)
+  })
+})
+
+describe('google sign in: linking and merging a guest', () => {
+  const day = new Date().toISOString().slice(0, 10)
+  async function seed(user: string, label: string) {
+    const { body: work } = await call(h.categories.GET, 'GET', { user })
+    const folder = work.find((c: { name: string }) => c.name === 'Work')
+    const { body: t } = await call(h.tasks.POST, 'POST', {
+      user,
+      body: { title: `${label} task`, categoryId: folder.id, subtasks: ['step'] },
+    })
+    await call(h.notes.POST, 'POST', { user, body: { title: `${label} note` } })
+    await call(h.scratchpad.PUT, 'PUT', { user, body: { body: `${label} pad` } })
+    const { body: habit } = await call(h.habits.POST, 'POST', {
+      user,
+      body: { name: `${label} habit` },
+    })
+    await call(h.habitCheckins.POST, 'POST', {
+      user,
+      params: { id: habit.id },
+      body: { date: day },
+    })
+    return t
+  }
+
+  it('mergeGuestData moves every row and dedupes folders by name', async () => {
+    const { getDb } = await import('../src/server/db')
+    const s = await import('../src/server/services')
+    await seed('alice', 'Account')
+    await call(h.me.PATCH, 'PATCH', { user: 'alice', body: { displayName: 'Alice' } })
+    const guestTask = await seed('guest', 'Guest')
+    await call(h.categories.POST, 'POST', { user: 'guest', body: { name: 'Gym' } })
+    await call(h.me.PATCH, 'PATCH', { user: 'guest', body: { displayName: 'G' } })
+
+    await s.mergeGuestData(getDb(), 'guest', 'alice')
+
+    const tasks = (await call(h.tasks.GET, 'GET')).body
+    expect(tasks.map((t: { title: string }) => t.title).sort()).toEqual([
+      'Account task',
+      'Guest task',
+    ])
+    const moved = tasks.find((t: { id: string }) => t.id === guestTask.id)
+    expect(moved.subtasks).toHaveLength(1)
+    const cats = (await call(h.categories.GET, 'GET')).body
+    const names = cats.map((c: { name: string }) => c.name)
+    expect(names.filter((n: string) => n === 'Work')).toHaveLength(1)
+    expect(names).toContain('Gym')
+    // The guest's task now points at the account's Work folder.
+    expect(moved.categoryId).toBe(
+      cats.find((c: { name: string }) => c.name === 'Work').id,
+    )
+    expect((await call(h.notes.GET, 'GET')).body).toHaveLength(2)
+    expect((await call(h.scratchpad.GET, 'GET')).body.body).toBe(
+      'Account pad\n\nGuest pad',
+    )
+    const habits = (await call(h.habits.GET, 'GET')).body
+    expect(habits).toHaveLength(2)
+    expect(habits.every((x: { checkins: string[] }) => x.checkins.length === 1)).toBe(true)
+    // Prefs: the account keeps its own.
+    expect((await call(h.me.GET, 'GET')).body.displayName).toBe('Alice')
+    // Nothing is left behind on the guest.
+    expect((await call(h.tasks.GET, 'GET', { user: 'guest' })).body).toHaveLength(0)
+    expect((await call(h.habits.GET, 'GET', { user: 'guest' })).body).toHaveLength(0)
+  })
+
+  it('a fresh account takes the guest data at once, prefs included', async () => {
+    const { getDb } = await import('../src/server/db')
+    const s = await import('../src/server/services')
+    await seed('guest', 'Guest')
+    await call(h.me.PATCH, 'PATCH', { user: 'guest', body: { displayName: 'Guesty' } })
+    expect(await s.linkGuestAccount(getDb(), 'guest', 'fresh')).toBe('merged')
+    const me = (await call(h.me.GET, 'GET', { user: 'fresh' })).body
+    expect(me.displayName).toBe('Guesty')
+    expect(me.pendingMerge).toBeNull()
+    expect((await call(h.tasks.GET, 'GET', { user: 'fresh' })).body).toHaveLength(1)
+    // Defaults are not seeded twice.
+    const cats = (await call(h.categories.GET, 'GET', { user: 'fresh' })).body
+    expect(cats.filter((c: { name: string }) => c.name === 'Work')).toHaveLength(1)
+  })
+
+  it('an empty guest is dropped without a prompt', async () => {
+    const { getDb } = await import('../src/server/db')
+    const s = await import('../src/server/services')
+    await seed('alice', 'Account')
+    await call(h.categories.GET, 'GET', { user: 'guest' })
+    expect(await s.linkGuestAccount(getDb(), 'guest', 'alice')).toBe('discarded')
+    expect((await call(h.me.GET, 'GET')).body.pendingMerge).toBeNull()
+  })
+
+  it('both sides with data: waits for the prompt, then merges', async () => {
+    const { getDb } = await import('../src/server/db')
+    const s = await import('../src/server/services')
+    await seed('alice', 'Account')
+    await seed('guest', 'Guest')
+    expect(await s.linkGuestAccount(getDb(), 'guest', 'alice')).toBe('pending')
+    const me = (await call(h.me.GET, 'GET')).body
+    expect(me.pendingMerge).toEqual({ tasks: 1, notes: 1 })
+    // Nothing moved yet.
+    expect((await call(h.tasks.GET, 'GET')).body).toHaveLength(1)
+
+    const r = await call(h.meMerge.POST, 'POST', { body: { choice: 'merge' } })
+    expect(r.status).toBe(200)
+    expect(r.body.pendingMerge).toBeNull()
+    expect((await call(h.tasks.GET, 'GET')).body).toHaveLength(2)
+    // Answered once: a second answer finds nothing waiting.
+    expect(
+      (await call(h.meMerge.POST, 'POST', { body: { choice: 'merge' } })).status,
+    ).toBe(404)
+  })
+
+  it('discard keeps only the account data', async () => {
+    const { getDb } = await import('../src/server/db')
+    const s = await import('../src/server/services')
+    await seed('alice', 'Account')
+    await seed('guest', 'Guest')
+    await s.linkGuestAccount(getDb(), 'guest', 'alice')
+    const r = await call(h.meMerge.POST, 'POST', { body: { choice: 'discard' } })
+    expect(r.status).toBe(200)
+    const titles = (await call(h.tasks.GET, 'GET')).body.map(
+      (t: { title: string }) => t.title,
+    )
+    expect(titles).toEqual(['Account task'])
+    expect((await call(h.tasks.GET, 'GET', { user: 'guest' })).body).toHaveLength(0)
+  })
+
+  it('POST /api/me/merge: 400 on bad input, 401 without a session, 404 for another user', async () => {
+    const { getDb } = await import('../src/server/db')
+    const s = await import('../src/server/services')
+    await seed('alice', 'Account')
+    await seed('guest', 'Guest')
+    await s.linkGuestAccount(getDb(), 'guest', 'alice')
+    expect(
+      (await call(h.meMerge.POST, 'POST', { body: { choice: 'keep' } })).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.meMerge.POST, 'POST', {
+          body: { choice: 'merge', fromUserId: 'guest' },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.meMerge.POST, 'POST', {
+          user: null,
+          body: { choice: 'merge' },
+        })
+      ).status,
+    ).toBe(401)
+    // Bob has nothing waiting, so he can't pull Alice's pending guest.
+    expect(
+      (
+        await call(h.meMerge.POST, 'POST', {
+          user: 'bob',
+          body: { choice: 'merge' },
+        })
+      ).status,
+    ).toBe(404)
+    expect((await call(h.tasks.GET, 'GET', { user: 'bob' })).body).toHaveLength(0)
+  })
+
+  it('GET /api/me says guest, and Google is off without the keys', async () => {
+    const me = (await call(h.me.GET, 'GET')).body
+    expect(me).toMatchObject({
+      isGuest: true,
+      isAnonymous: true,
+      email: null,
+      image: null,
+      googleEnabled: false,
+      pendingMerge: null,
+      nudgeState: null,
+    })
+  })
+
+  it('remembers a dismissed nudge', async () => {
+    const r = await call(h.me.PATCH, 'PATCH', { body: { nudgeDismissed: 'task' } })
+    expect(r.status).toBe(200)
+    expect(r.body.nudgeState.task).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+    expect(
+      (await call(h.me.PATCH, 'PATCH', { body: { nudgeDismissed: 'later' } })).status,
+    ).toBe(400)
   })
 })

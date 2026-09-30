@@ -10,7 +10,7 @@ import { ensureGuest } from '#/lib/auth-client'
 import { setSoundsEnabled } from '#/lib/feedback'
 import { openCreate, setScratch, setShortcuts, toast, ui } from '#/lib/store'
 import { visitInfo } from '#/lib/visits'
-import { Icon } from '#/ui/icons'
+import { Icon, NavIcon } from '#/ui/icons'
 import { LogoMark } from '#/ui/logo'
 import { Splash } from '#/components/Splash'
 import type { IconName } from '#/ui/icons'
@@ -18,16 +18,18 @@ import { Button, Modal, Skeleton, Tooltip } from '#/ui/zen'
 import { CreateTask } from './CreateTask'
 import { Scratchpad } from './Scratchpad'
 import { Welcome } from './Welcome'
+import { MergePrompt } from './MergePrompt'
 import { Toaster } from './Toaster'
 
 const NAV: {
-  to: '/' | '/tasks' | '/notes' | '/folders' | '/profile'
+  to: '/' | '/tasks' | '/notes' | '/habits' | '/folders' | '/profile'
   label: string
   icon: IconName
 }[] = [
   { to: '/', label: 'Home', icon: 'home' },
   { to: '/tasks', label: 'Tasks', icon: 'tasks' },
   { to: '/notes', label: 'Notes', icon: 'note' },
+  { to: '/habits', label: 'Habits', icon: 'flame' },
   { to: '/folders', label: 'Folders', icon: 'folder' },
 ]
 
@@ -78,7 +80,7 @@ function SideNav({ ready }: { ready: boolean }) {
                   .join(' ')}
                 aria-current={isActive(n.to) ? 'page' : undefined}
               >
-                <Icon name={n.icon} size={22} />
+                <NavIcon name={n.icon} active={isActive(n.to)} />
                 <span className="zn-nav-label">{n.label}</span>
               </Link>
             </li>
@@ -212,7 +214,7 @@ function SideNav({ ready }: { ready: boolean }) {
               justifyContent: 'center',
             }}
           >
-            <Icon name="user" size={22} />
+            <NavIcon name="user" active={isActive('/profile')} />
             <span className="app-sidebar-extra" style={{ flex: 1 }}>
               Profile
             </span>
@@ -244,6 +246,7 @@ function useHideOnScroll() {
 function BottomNav() {
   const isActive = useActive()
   const hidden = useHideOnScroll()
+  // PRD phone bar: Home, Tasks, +, Notes, Habits. Folders are reached from Home and the Tasks filters.
   const items = [NAV[0], NAV[1], null, NAV[2], NAV[3]]
   return (
     <nav
@@ -261,7 +264,7 @@ function BottomNav() {
                   .join(' ')}
                 aria-current={isActive(n.to) ? 'page' : undefined}
               >
-                <Icon name={n.icon} size={22} />
+                <NavIcon name={n.icon} active={isActive(n.to)} />
                 <span className="zn-nav-label">{n.label}</span>
               </Link>
             </li>
@@ -283,7 +286,7 @@ function BottomNav() {
                   style={{
                     width: 48,
                     height: 48,
-                    borderRadius: '50%',
+                    borderRadius: 16,
                     background: 'var(--accent)',
                     color: 'var(--on-accent)',
                     display: 'grid',
@@ -308,6 +311,7 @@ const SHORTCUTS = [
   ['Go to Home', 'G then H'],
   ['Go to Tasks', 'G then T'],
   ['Go to Notes', 'G then N'],
+  ['Go to Habits', 'G then B'],
   ['Show shortcuts', '?'],
   ['Close anything', 'Esc'],
 ]
@@ -489,6 +493,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useHotkeySequence(['G', 'H'], () => void navigate({ to: '/' }))
   useHotkeySequence(['G', 'T'], () => void navigate({ to: '/tasks' }))
   useHotkeySequence(['G', 'N'], () => void navigate({ to: '/notes' }))
+  useHotkeySequence(['G', 'B'], () => void navigate({ to: '/habits' }))
 
   return (
     <div className="app-shell">
@@ -544,6 +549,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Scratchpad />
           <Shortcuts />
           <Welcome />
+          <MergePrompt />
         </>
       )}
     </div>

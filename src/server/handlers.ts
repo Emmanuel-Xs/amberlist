@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { json, readBody, route } from './http'
+import * as ai from './ai'
 import * as s from './services'
 import * as v from './validation'
 
@@ -173,4 +174,82 @@ export const searchAll = {
       .parse(new URL(request.url).searchParams.get('q'))
     return json(await s.search(db, userId, q))
   }),
+}
+
+// ---- AI (Phase 3): the user taps to run; only the chosen task or text is sent ----
+export const aiStatus = {
+  GET: route(async ({ db, userId }) => json(await ai.aiStatus(db, userId))),
+}
+
+export const aiBreakdown = {
+  POST: route(async ({ db, userId, request }) => {
+    const { taskId } = await readBody(request, v.aiBreakdownInput)
+    return json(await ai.breakdownTask(db, userId, taskId))
+  }),
+}
+
+export const aiExtract = {
+  POST: route(async ({ db, userId, request }) => {
+    const { text, today } = await readBody(request, v.aiExtractInput)
+    return json(await ai.extractTasks(db, userId, text, today))
+  }),
+}
+
+export const meMerge = {
+  POST: route(async ({ db, userId, request }) => {
+    const { choice } = await readBody(request, v.mergeChoice)
+    return json(await s.resolvePendingMerge(db, userId, choice))
+  }),
+}
+
+// ---------- Habits (Phase 2) ----------
+const habitListQuery = z
+  .object({ archived: z.enum(['1', 'true']).optional() })
+  .strict()
+
+export const habits = {
+  GET: route(async ({ db, userId, request }) => {
+    const { archived } = habitListQuery.parse(
+      Object.fromEntries(new URL(request.url).searchParams),
+    )
+    return json(await s.listHabits(db, userId, { archived: !!archived }))
+  }),
+  POST: route(async ({ db, userId, request }) =>
+    json(
+      await s.createHabit(db, userId, await readBody(request, v.habitCreate)),
+      201,
+    ),
+  ),
+}
+
+export const habitById = {
+  GET: route(async ({ db, userId, params }) =>
+    json(await s.getHabit(db, userId, idParam(params))),
+  ),
+  PATCH: route(async ({ db, userId, request, params }) =>
+    json(
+      await s.updateHabit(
+        db,
+        userId,
+        idParam(params),
+        await readBody(request, v.habitUpdate),
+      ),
+    ),
+  ),
+  DELETE: route(async ({ db, userId, params }) =>
+    json(await s.deleteHabit(db, userId, idParam(params))),
+  ),
+}
+
+export const habitCheckins = {
+  POST: route(async ({ db, userId, request, params }) =>
+    json(
+      await s.toggleCheckin(
+        db,
+        userId,
+        idParam(params),
+        await readBody(request, v.habitCheckinToggle),
+      ),
+    ),
+  ),
 }

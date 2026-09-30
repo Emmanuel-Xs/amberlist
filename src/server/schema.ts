@@ -2,9 +2,12 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 
 // ---- Better Auth tables (names and columns match its Drizzle adapter) ----
@@ -136,8 +139,68 @@ export const prefs = pgTable('prefs', {
   sounds: boolean('sounds').notNull().default(true),
   // Set when the welcome screen is finished or skipped. Null means not seen yet.
   onboardedAt: timestamp('onboarded_at'),
+  // Save nudges: the ISO day each one was dismissed. Null means none dismissed yet.
+  nudgeState: jsonb('nudge_state').$type<NudgeState>(),
+  // Guest ids waiting for the merge prompt after a Google sign in (both sides had data).
+  pendingMerge: jsonb('pending_merge').$type<string[]>(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
+
+export interface NudgeState {
+  task?: string
+  days?: string
+}
+
+// AI calls per user per UTC day (Phase 3 limit: 20 a day).
+export const aiUsage = pgTable(
+  'ai_usage',
+  {
+    userId: text('user_id').notNull(),
+    day: text('day').notNull(),
+    count: integer('count').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.day] })],
+)
+
+// Habits (PRD Phase 2): routines with streaks. Frequency is daily, weekdays (days_of_week,
+// ISO 1 Mon to 7 Sun, default Mon to Fri) or x_per_week (times_per_week). goal_days null = ongoing.
+export const habit = pgTable(
+  'habit',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    name: text('name').notNull(),
+    icon: text('icon').notNull().default('flame'),
+    categoryId: text('category_id'),
+    color: text('color').notNull().default('butter'),
+    frequency: text('frequency').notNull().default('daily'),
+    daysOfWeek: jsonb('days_of_week').$type<number[]>(),
+    timesPerWeek: integer('times_per_week'),
+    goalDays: integer('goal_days'),
+    reminderTime: text('reminder_time'),
+    archived: boolean('archived').notNull().default(false),
+    position: integer('position').notNull().default(0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [index('habit_user_idx').on(t.userId)],
+)
+
+export const habitCheckin = pgTable(
+  'habit_checkin',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    habitId: text('habit_id').notNull(),
+    // Local YYYY-MM-DD of the person checking in.
+    date: text('date').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('habit_checkin_day_idx').on(t.habitId, t.date),
+    index('habit_checkin_user_idx').on(t.userId),
+  ],
+)
 
 // Idempotent DDL, run once per cold start. Kept beside the schema so they stay in step.
 export const DDL = `
@@ -155,6 +218,14 @@ create table if not exists "note" (id text primary key, user_id text not null, t
 create index if not exists note_user_idx on "note"(user_id);
 create table if not exists "prefs" (user_id text primary key, display_name text, theme text not null default 'dark', seeded boolean not null default false, sounds boolean not null default true, updated_at timestamp not null default now());
 alter table "prefs" add column if not exists onboarded_at timestamp;
+alter table "prefs" add column if not exists nudge_state jsonb;
+alter table "prefs" add column if not exists pending_merge jsonb;
+create table if not exists "ai_usage" (user_id text not null, day text not null, count integer not null default 0, primary key (user_id, day));
+create table if not exists "habit" (id text primary key, user_id text not null, name text not null, icon text not null default 'flame', category_id text, color text not null default 'butter', frequency text not null default 'daily', days_of_week jsonb, times_per_week integer, goal_days integer, reminder_time text, archived boolean not null default false, position integer not null default 0, created_at timestamp not null default now(), updated_at timestamp not null default now());
+create index if not exists habit_user_idx on "habit"(user_id);
+create table if not exists "habit_checkin" (id text primary key, user_id text not null, habit_id text not null, date text not null, created_at timestamp not null default now());
+create unique index if not exists habit_checkin_day_idx on "habit_checkin"(habit_id, date);
+create index if not exists habit_checkin_user_idx on "habit_checkin"(user_id);
 `
 
 export const schema = {
@@ -167,4 +238,7 @@ export const schema = {
   subtask,
   note,
   prefs,
+  aiUsage,
+  habit,
+  habitCheckin,
 }

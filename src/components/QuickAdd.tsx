@@ -11,6 +11,7 @@ import { parseQuickAdd } from '#/lib/parse'
 import { toast } from '#/lib/store'
 import { useQueryClient } from '@tanstack/react-query'
 import { announceAdded } from '#/lib/announce'
+import { celebrateFirstTask, isFirstTask } from './Celebrate'
 import { Icon } from '#/ui/icons'
 import type { IconName } from '#/ui/icons'
 
@@ -80,6 +81,7 @@ export function QuickAdd({
         categoryId = made.id
       }
     }
+    const first = isFirstTask(qc)
     create.mutate(
       {
         title: p.title,
@@ -93,7 +95,8 @@ export function QuickAdd({
       {
         onSuccess: (created) => {
           sound('complete')
-          announceAdded(qc, created)
+          if (first) celebrateFirstTask(created.id)
+          else announceAdded(qc, created)
           onAdded?.()
         },
         onError: (e) => {

@@ -3,10 +3,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { qk, useTaskMutations } from '#/lib/api'
 import type { Task } from '#/lib/api'
 import { groupOf, toISODate } from '#/lib/dates'
-import { confetti, sound } from '#/lib/feedback'
+import { sound } from '#/lib/feedback'
 import { TICK_HOLD_MS } from '#/lib/motion'
 import { doneMessage } from '#/lib/messages'
 import { toast } from '#/lib/store'
+import { celebrateAllDone } from './Celebrate'
+import { tickSound } from './TickFill'
 
 /** Complete and delete with Undo instead of confirm dialogs, plus the rare celebration. */
 export function useTaskActions() {
@@ -25,8 +27,10 @@ export function useTaskActions() {
       pending = false
       m.update.mutate({ id: t.id, status: 'done' })
     }, TICK_HOLD_MS)
+    let seal: ReturnType<typeof setTimeout> | undefined
     const undo = () => {
       sound('undo')
+      clearTimeout(seal)
       if (pending) {
         pending = false
         clearTimeout(timer)
@@ -43,19 +47,21 @@ export function useTaskActions() {
         x.status !== 'done' &&
         ['today', 'overdue'].includes(groupOf(x, today)),
     )
+    tickSound()
     if (wasToday && leftToday.length === 0) {
-      sound('celebrate')
-      confetti()
+      // Let the tick land, then seal the comb (it says "All done for today" and plays celebrate).
+      seal = setTimeout(celebrateAllDone, TICK_HOLD_MS)
       toast({
         tone: 'success',
         silent: true,
         badge: 'logo',
-        message: 'All done for today',
-        detail: 'Nice work. Rest, or pull something forward.',
+        message: 'Nice work',
+        detail: 'Rest, or pull something forward.',
+        actionLabel: 'Undo',
+        onAction: undo,
       })
       return
     }
-    sound('complete')
     toast({
       tone: 'success',
       silent: true,

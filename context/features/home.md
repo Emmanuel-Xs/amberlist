@@ -4,7 +4,7 @@
 Show what matters today and capture fast. Home grows with the user: sections appear only once used.
 
 ## Status
-Built. Habits row, nudges not built. Welcome screen and dynamic greeting done 2026-09-30.
+Built. Habits row not built. Save nudge card built 2026-09-30 (see [guest-auth-and-google](guest-auth-and-google.md)). Welcome screen and dynamic greeting done 2026-09-30.
 
 ## How it works now
 - Route `/` (`src/routes/index.tsx`).
@@ -23,7 +23,7 @@ Built. Habits row, nudges not built. Welcome screen and dynamic greeting done 20
 - Loading: skeletons.
 
 ## Planned per PRD
-- Habits row after the first habit; save your data nudge card; just in time tips; "+ Add a habit" foot link.
+- Habits row after the first habit; just in time tips; "+ Add a habit" foot link.
 - Desktop: Today cards in 2 columns, Habits and Recent notes side by side, folders 4 to 6 columns.
 - Duolingo style messages and first task bee (L7, design).
 

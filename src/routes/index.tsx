@@ -2,21 +2,23 @@ import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { meQuery, useCategories, useNotes, useTasks } from '#/lib/api'
-import { groupOf, isOnDay, sortTasks, toISODate, weekAround } from '#/lib/dates'
+import { groupOf, isOnDay, sortTasks, toISODate } from '#/lib/dates'
 import { greetingLine } from '#/lib/greeting'
 import { openCreate } from '#/lib/store'
 import { daysAway, visitInfo } from '#/lib/visits'
 import { Icon } from '#/ui/icons'
 import { EmptyState, Skeleton } from '#/ui/zen'
 import {
-  DateStrip,
   FolderCard,
   NoteCard,
   SectionHead,
   TodayCard,
 } from '#/components/Cards'
 import { QuickAdd } from '#/components/QuickAdd'
+import { SaveNudge } from '#/components/SaveNudge'
+import { DateWheel } from '#/components/DateWheel'
 import { TaskRow } from '#/components/TaskRow'
+import { AddHabitLink, HomeHabits } from '#/components/HomeHabits'
 import { Logo } from '#/ui/logo'
 
 export const Route = createFileRoute('/')({
@@ -58,13 +60,6 @@ function Home() {
   const overdue = open.filter((t) => groupOf(t, today) === 'overdue')
   const hasDated = tasks.some((t) => t.startDate || t.dueDate)
   const usedFolders = cats.filter((c) => c.taskCount > 0)
-  const days = weekAround(today).map((d) => ({
-    ...d,
-    count:
-      d.key === today
-        ? todayTasks.length
-        : open.filter((t) => isOnDay(t, d.key, today)).length,
-  }))
   const hello = greetingLine({
     now: new Date(),
     name: me?.displayName,
@@ -118,6 +113,7 @@ function Home() {
           }}
         >
           <QuickAdd />
+          <SaveNudge />
 
           {fresh && (
             <div style={{ borderRadius: 28, background: 'var(--surface)' }}>
@@ -131,7 +127,7 @@ function Home() {
             </div>
           )}
 
-          {hasDated && <DateStrip days={days} value={day} onChange={setDay} />}
+          {hasDated && <DateWheel value={day} onChange={setDay} />}
 
           {overdue.length > 0 && day === today && (
             <Link
@@ -269,6 +265,8 @@ function Home() {
         )}
       </div>
 
+      <HomeHabits />
+
       {usedFolders.length > 0 && (
         <section
           aria-labelledby="folders-h"
@@ -331,6 +329,7 @@ function Home() {
           <Icon name="plus" size={16} />
           New folder
         </Link>
+        <AddHabitLink />
       </div>
     </div>
   )

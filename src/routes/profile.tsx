@@ -7,10 +7,22 @@ import { setSoundsEnabled, sound } from '#/lib/feedback'
 import { setShortcuts, toast } from '#/lib/store'
 import { Button, Chip, ConfirmDialog, Input, Switch } from '#/ui/zen'
 import { LogoMark } from '#/ui/logo'
+import { AccountStatus, Avatar, SaveDataCard } from '#/components/Account'
+import { ensureGuest } from '#/lib/auth-client'
+import { holdWelcome } from '#/lib/welcomeHold'
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
-  head: () => ({ meta: [{ title: 'Profile · Honeylist' }] }),
+  head: () => ({
+    meta: [
+      { title: 'Profile · Honeylist' },
+      {
+        name: 'description',
+        content: 'Your name, theme, sounds, Google sign in and your data.',
+      },
+      { property: 'og:title', content: 'Profile · Honeylist' },
+    ],
+  }),
 })
 
 function Profile() {
@@ -37,8 +49,15 @@ function Profile() {
       }),
   }
   const wipe = useMutation({
-    mutationFn: () => api('/me/data', { method: 'DELETE' }),
-    onSuccess: () => {
+    mutationFn: () =>
+      api<{ ok: true; reset: boolean }>('/me/data', { method: 'DELETE' }),
+    onSuccess: async ({ reset }) => {
+      // Guests start over with a new guest session; a Google account is kept.
+      if (reset) {
+        holdWelcome()
+        await ensureGuest()
+        qc.clear()
+      }
       void qc.invalidateQueries()
       setConfirm(false)
       toast({ icon: 'trash', message: 'All your data was deleted' })
@@ -61,7 +80,6 @@ function Profile() {
   const doneThisMonth = tasks.filter(
     (t) => t.completedAt?.slice(0, 7) === thisMonth,
   ).length
-  const initial = (me?.displayName || 'G')[0].toUpperCase()
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -81,23 +99,7 @@ function Profile() {
               background: 'var(--surface)',
             }}
           >
-            <span
-              aria-hidden="true"
-              style={{
-                width: 72,
-                height: 72,
-                flexShrink: 0,
-                borderRadius: '50%',
-                background: 'var(--accent-soft)',
-                color: 'var(--accent-ink)',
-                display: 'grid',
-                placeItems: 'center',
-                fontSize: 28,
-                fontWeight: 600,
-              }}
-            >
-              {initial}
-            </span>
+            <Avatar me={me} />
             <div
               style={{
                 flex: 1,
@@ -141,21 +143,7 @@ function Profile() {
                   Save
                 </Button>
               </form>
-              <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: '2px 10px',
-                    borderRadius: 9999,
-                    background: 'var(--surface-raised)',
-                    marginRight: 8,
-                  }}
-                >
-                  Guest
-                </span>
-                Everything is saved to this browser's account.
-              </span>
+              <AccountStatus me={me} />
             </div>
           </section>
           <div
@@ -195,25 +183,7 @@ function Profile() {
               </div>
             ))}
           </div>
-          <section
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              padding: 20,
-              borderRadius: 28,
-              background: 'var(--accent-soft)',
-            }}
-          >
-            <h2 className="heading" style={{ margin: 0 }}>
-              Save your data
-            </h2>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: '20px' }}>
-              You're using Honeylist as a guest. Clearing your browser data
-              removes your tasks. Sign in with Google to keep them on every
-              device is coming next.
-            </p>
-          </section>
+          <SaveDataCard me={me} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <section
@@ -321,6 +291,7 @@ function Profile() {
               }}
             >
               Deleting removes every task, note and folder. It can't be undone.
+              {me && !me.isGuest && ' Your Google account stays signed in.'}
             </p>
           </section>
           <p
@@ -343,7 +314,11 @@ function Profile() {
         onClose={() => setConfirm(false)}
         onConfirm={() => wipe.mutate()}
         title="Delete all your data?"
-        text="Every task, note and folder will be removed for good. This cannot be undone."
+        text={
+          me && !me.isGuest
+            ? 'Every task, note and folder will be removed for good. Your Google account stays. This cannot be undone.'
+            : 'Every task, note and folder will be removed for good and this browser starts as a new guest. This cannot be undone.'
+        }
         confirmLabel="Delete everything"
         confirmText="DELETE"
       />

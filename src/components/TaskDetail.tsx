@@ -6,7 +6,9 @@ import { sound } from '#/lib/feedback'
 import { toast } from '#/lib/store'
 import { Icon } from '#/ui/icons'
 import { Button, Chip, Input, Switch } from '#/ui/zen'
+import { AiBreakdown } from './AiBreakdown'
 import { NoteCard } from './Cards'
+import { TickFill, tickSound } from './TickFill'
 import { useTaskActions } from './useTaskActions'
 
 export function TaskDetail({
@@ -25,6 +27,8 @@ export function TaskDetail({
   const navigate = useNavigate()
   const [title, setTitle] = useState(task.title)
   const [sub, setSub] = useState('')
+  // The subtask just ticked, so only it plays the honey fill.
+  const [tickedSub, setTickedSub] = useState<string>()
   useEffect(() => setTitle(task.title), [task.id, task.title])
 
   const save = (input: TaskInput) =>
@@ -346,16 +350,12 @@ export function TaskDetail({
               aria-checked={s.done}
               aria-label={s.title}
               className="zn-check"
-              style={
-                s.done
-                  ? {
-                      background: 'var(--accent)',
-                      borderColor: 'var(--accent-edge)',
-                    }
-                  : undefined
-              }
+              style={s.done ? { borderColor: 'var(--accent-edge)' } : undefined}
               onClick={() => {
-                if (!s.done) sound('complete')
+                if (!s.done) {
+                  tickSound()
+                  setTickedSub(s.id)
+                }
                 m.updateSubtask.mutate({
                   id: s.id,
                   taskId: task.id,
@@ -363,7 +363,7 @@ export function TaskDetail({
                 })
               }}
             >
-              {s.done && <Icon name="check" size={14} strokeWidth={3} />}
+              <TickFill done={s.done} animate={tickedSub === s.id} />
             </button>
             <span
               style={{
@@ -404,6 +404,7 @@ export function TaskDetail({
             onChange={(e) => setSub(e.target.value)}
           />
         </form>
+        <AiBreakdown key={task.id} task={task} />
       </section>
 
       <section

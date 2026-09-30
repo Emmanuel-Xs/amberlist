@@ -21,6 +21,7 @@ import { toast } from '#/lib/store'
 import { colorVar, NOTE_PRESET_COLORS } from '#/lib/colors'
 import { Icon } from '#/ui/icons'
 import { Button, EmptyState, IconButton, Skeleton } from '#/ui/zen'
+import { AiExtract } from '#/components/AiExtract'
 import { ColorPicker } from '#/components/ColorPicker'
 
 /** Tags each task checkbox with the source line of its list item, so a click can tick the right line. */
@@ -341,6 +342,8 @@ function Editor({ note }: { note: Note }) {
           </p>
         )}
       </div>
+
+      <AiExtract text={title.trim() ? `${title}\n${body}` : body} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <ColorPicker

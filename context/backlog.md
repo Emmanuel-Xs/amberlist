@@ -7,55 +7,56 @@ Sources: PRD = [prd.md](prd.md); L# = item # of Emmanuel's 22:38 list (2026-09-2
 | Item | Source | Status | Design | Notes |
 | --- | --- | --- | --- | --- |
 | **Phase 2 (PRD)** | | | | |
-| Google sign in (Better Auth Google provider, OAuth client, env vars) | PRD, L26 | Not built | yes | Provider is wired in `src/server/auth.ts` only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set; no UI. Options still to be looked into. See [features/guest-auth-and-google.md](features/guest-auth-and-google.md). |
-| Guest badge plus "Save your data with Google" action | PRD | Partly | no | Profile shows a Guest pill and a static "coming next" card. No action. |
-| Save nudges (after 2nd task, after 3 days) | PRD, D3 | Not built | yes | Home only, one per session, stops after sign in. Needs `nudgeState` pref. |
-| Link guest in place plus merge prompt (`mergeGuestData`) | PRD | Not built | no | Merge dialog is on the Overlays board. |
-| Habits (`/habits`, `/habits/$id`, check in, streaks, heatmap, Home row, goal confetti, tables) | PRD, L21 | Not built | yes | Only the HabitRow board and the habits illustration exist in design. |
+| Google sign in (Better Auth Google provider, OAuth client, env vars) | PRD, L26 | Done | approved | 2026-09-30: built, button shows only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set. **Owner:** create the OAuth client and add the env vars in Vercel (steps in [features/guest-auth-and-google.md](features/guest-auth-and-google.md)). Round trip not testable in the sandbox. |
+| Guest badge plus "Save your data with Google" action | PRD | Done | no | 2026-09-30: Profile board card with "Continue with Google"; signed in shows photo, email, Sign out. Calm note when Google isn't configured. |
+| Save nudges (after 2nd task, after 3 days) | PRD, D3 | Done | board | 2026-09-30: `SaveNudge` on Home, "You're a guest" warning Alert style. Never while typing, one per session, dismissal in `prefs.nudge_state`, stops after sign in. Days of use counted per browser. |
+| Link guest in place plus merge prompt (`mergeGuestData`) | PRD | Done | no | 2026-09-30: `onLinkAccount` + `linkGuestAccount`; prompt only when both sides have data (`prefs.pending_merge`), `POST /api/me/merge`. Discard asks to confirm. |
+| Habits (`/habits`, `/habits/$id`, check in, streaks, heatmap, Home row, goal confetti, tables) | PRD, L21 | Done (pages need design sign off) | HabitRow board; pages built from DS parts | 2026-09-30: tables `habit`, `habit_checkin`; `/api/habits`, `/api/habits/$id`, `/api/habits/$id/checkins` (tested); streak maths in `src/lib/streaks.ts` (tested); list, detail with 12 week heatmap, create/edit dialog, archive, delete with Undo, Home row, nav, `G B`. Goal reached plays celebrate plus a toast (no confetti: `confetti()` left feedback.ts in round 3). See [features/habits.md](features/habits.md). |
 | Repeating tasks (none, daily, weekdays, weekly, monthly) | PRD | Not built | yes | No `repeatRule` column yet. |
 | Reminders and notifications | PRD, L18 | Not built | yes | "Remind me" switch saves `task.remind`; nothing notifies. Ask permission only on first switch on. |
 | Welcome screen with name (and theme pick) | PRD, L1 | Done | approved | 2026-09-30: `src/components/Welcome.tsx`, full page on phones, dialog from 768. `prefs.onboarded_at`, `onboarded` in `GET/PATCH /api/me`. See [features/onboarding.md](features/onboarding.md). |
 | Just in time tips (quick add syntax, `- [ ]`, streaks, shortcuts) | PRD | Partly | yes | Shortcuts tip done (2026-09-30, toast, desktop, once per browser via localStorage). Others need `seenTips` pref. |
-| Keyboard shortcut sheet | PRD | Partly | no | `?` sheet exists, plus a one time desktop tip toast pointing to it. `/` search and `G F` are missing. |
+| Keyboard shortcut sheet | PRD | Partly | no | `?` sheet exists, plus a one time desktop tip toast pointing to it. `G B` (habits) added 2026-09-30. `/` search and `G F` are missing. |
 | Guest cleanup job (90 days inactive) | PRD | Not built | no | |
 | Privacy note in settings | PRD | Partly | no | "Your data" section explains delete; no note on what is stored. |
 | **Phase 3 (PRD)** | | | | |
-| AI break down task | PRD | Not built | yes | Groq free tier, Gemini Flash backup, Vercel AI SDK, 20 calls a day (D9). |
-| AI turn note or scratchpad into tasks | PRD | Not built | yes | Same review step. |
-| PWA install and offline read with "You're offline" banner | PRD | Partly | no | Manifest and icons exist; no service worker. Offline banner is designed. |
+| AI break down task | PRD | Done (verify with a real key) | yes (built from DS parts, screenshots to approve) | 2026-09-30: "Break it down" under Subtasks in task detail, checkable chips, Add selected. `POST /api/ai/breakdown`. Groq, Gemini, xAI via the AI SDK (D25). See [features/ai.md](features/ai.md). |
+| AI turn note or scratchpad into tasks | PRD | Done (verify with a real key) | yes (screenshots to approve) | 2026-09-30: "Turn into tasks" in the note editor and the scratchpad, review list (edit titles, untick), then creates. `POST /api/ai/extract`. |
+| PWA install and offline read with "You're offline" banner | PRD | Done (verify on the live site) | no | 2026-09-30: full manifest (maskable icons, shortcuts, screenshots, window controls overlay), `public/sw.js` (prod only), offline banner, safe area padding, `?new=task` shortcut. Offline reload shows the cached shell but no data (API is never cached). See [features/pwa.md](features/pwa.md). |
 | Polish pass | PRD | Not built | no | |
 | **Other PRD gaps** | | | | |
 | "Day 4 of 21" progress for long running tasks | PRD, D4 | Not built | no | Needs both dates. |
 | Move to folder from the task menu | PRD | Not built | no | Possible from task detail folder chips only. |
 | Quick add `#newfolder` confirm chip | PRD | Partly | no | Creates the folder silently on submit. |
 | Shared search across tasks and notes | PRD | Partly | yes | `GET /api/search` exists and is tested, but no UI uses it; Tasks and Notes filter locally. |
-| Folder page shows habits and notes | PRD | Partly | no | Tasks only; notes have no folder. |
+| Folder page shows habits and notes | PRD | Partly | no | Tasks only; notes have no folder. Habits have `categoryId` now, so the folder page can list them (not built yet). |
 | Reorder tasks (`reorderTasks`) | PRD | Not built | no | `position` column exists. |
 | Priority: show Low too, not only High | PRD, L17 | Done | approved | Board 7: High = flag + "High" in danger, Low = chevron + "Low" muted, Medium nothing. `Priority` in `TaskRow.tsx`, used by rows, grid cards and TodayCard (surface pill). |
-| "+ Add a habit" link at the foot of Home | PRD | Not built | no | Foot has "Full task form" and "New folder". |
+| "+ Add a habit" link at the foot of Home | PRD | Done | no | 2026-09-30: opens the habit dialog in place. |
 | View Transitions page crossfade | PRD | Not built | no | |
 | Tooltips on icon buttons | PRD, L14 | Done | approved | Board 7: `Tooltip` and `IconButton` in `zen.tsx`. On row Open/More, grid More, rail Scratchpad (N) and Profile, note pin/duplicate/delete, dialog Close (Esc). |
-| sitemap.xml | PRD | Not built | no | robots.txt exists. |
+| sitemap.xml | PRD | Done | no | 2026-09-30: `public/sitemap.xml` (only `/`, the one public page), linked from robots.txt. SEO head and JSON-LD SoftwareApplication with featureList updated in `__root.tsx`. |
 | Playwright e2e plus axe on every route | PRD | Not built | no | Plan in [testing.md](testing.md). |
 | Lighthouse 90+ on all four | PRD | Verify | no | |
 | CI: lint, e2e, `npm audit` | PRD | Partly | no | CI runs typecheck, test, build only. |
 | drizzle-kit migrations | PRD | Not built | no | Tables come from a DDL string in `src/server/db.ts`. |
 | TanStack Devtools in dev | PRD | Verify | no | Packages installed. |
+| Rename design canvas to "Honeylist Screens" (round 2 and 3 boards added as pages) and the PRD doc to "Honeylist PRD" | Rename | Done | no | 2026-09-30: canvas https://claude.ai/artifact/Q59DbcQdiSXB7p3KTYsmYn (pages Screens, Round 2, Round 3); PRD https://claude.ai/artifact/BM7ZxCREPS5oyh8zQJb7hK. Product name in both is now Honeylist. |
 | **Emmanuel's 22:38 list** | | | | |
 | L1 Name onboarding | L1 | Done | approved | Welcome screen plus dynamic Home greeting (`src/lib/greeting.ts`). |
 | L2 PRD gap review and keep `context/` updated | L2 | Done | no | This folder. Keep it current. |
 | L3 Revert honeycomb nav icons | L3 | Done | no | 1315e68. Revisiting icons is still open (O5). |
-| L3b Revisit icons (new or current, not alike) | L3 | Open | yes | O5. |
+| L3b Revisit icons (new or current, not alike) | L3 | Done | approved | 2026-09-30 board 14 option B: `NavIcon` in `src/ui/icons.tsx` (soft Home, Tasks with comb cell boxes and a shorter second line, lucide NotebookPen, Folder, User) fills with honey when active, label in ink; phone Add is a radius 16 square with a plain plus. |
 | L4 Back to the design illustrations | L4 | Done | no | 1315e68 restored DS art in `src/ui/zen.tsx`. |
 | L4b Show designs and get approval before changes | L4 | Ongoing | yes | README rule 1. |
 | L5 DELETE bold and red | L5 | Done | no | 1315e68, `.confirm-word`. |
 | L5b Confirmations for destructive actions (task delete, completion?) and folder delete flow | L5 | Open | yes | O2. Folder delete already confirms. Board 8: ConfirmDialog content now centred, buttons stacked full width on phones. |
 | L6 Overflow menu (three dots at the edge) | L6 | Done | approved | Board 7: 36px, radius 12 Open and More buttons inset 12px; hover or focus-within on desktop, always on touch. |
-| L7 Lively micro interactions, first task confetti plus bee, Duolingo style toasts for create, complete, overdue | L7 | Not built | yes | O7. Toasts today: "Added ...", "Task completed", "All done for today. Well played." |
+| L7 Lively micro interactions, first task confetti plus bee, Duolingo style toasts for create, complete, overdue | L7 | Partly | approved | 2026-09-30 board 13 built, no bee: honey tick with comb sparks, first task honey drop onto the new circle, all done comb seal into the logo (`Celebrate.tsx`, `TickFill.tsx`). See [features/feedback-toasts-sounds-confetti.md](features/feedback-toasts-sounds-confetti.md). First note treatment not built. |
 | L8 Toast placement rules | L8 | Open | yes | O4. |
 | L9 Splash transitions smoothly into the app | L9 | Not built | yes | Drop cycle finishes (b78d366); hand off still a plain fade. |
 | L10 Janky, too fast animations; motion library decision | L10 | Partly | yes | Row and page motion removed in 1315e68. O3. |
-| L11 DateStrip less rounded on desktop, bounded momentum scroll | L11 | Not built | yes | O6. Today it is a fixed Sun to Sat week. |
+| L11 Date wheel: 3D cylinder, speed sensitive spin, bounded range, month picker | L11 | Done | no | Round 3 board 16 approved 2026-09-30 with two fixes (spacious phone picker sheet, tap centres the card). `src/components/DateWheel.tsx`, `dw-` styles in `src/styles.css`. See [date-strip.md](features/date-strip.md). |
 | L12 shadcn components where available | L12 | Open | no | O1 (approach decision, then per component). |
 | L13 Double outline on inputs and icons; glaring notes textarea outline | L13 | Partly | no | Note editor now has one quiet frame (1315e68). Recheck other inputs and icon buttons. |
 | L14 Styled tooltips on icon hover | L14 | Done | approved | See Tooltips row. |
@@ -67,13 +68,13 @@ Sources: PRD = [prd.md](prd.md); L# = item # of Emmanuel's 22:38 list (2026-09-2
 | L20 Home "See all" links and max 6 per section | L20 | Partly | no | 1315e68: tasks capped at 6 with "See all N tasks"; notes show 3 with "All notes". Folders row is not capped. |
 | L21 Habits | L21 | Not built | yes | See Habits above. |
 | L22 Desktop UI broken; Q hard to discover; quick add looks like search | L22 | Partly | approved | 2026-09-30: quick add redesigned (amber Add pill on the right, no Q box, desktop hint line), shortcuts tip. Rest of the desktop list still needs screenshots. |
-| L23 Button below empty state illustrations | L23 | Partly | yes | Notes and Folders empty states have buttons; Home, Tasks, folder page and detail pane do not. Reflect in design first. |
+| L23 Button below empty state illustrations | L23 | Partly | yes | Notes and Folders empty states have buttons; Home, Tasks, folder page and detail pane do not. Reflect in design first. 2026-09-30 board 15 art built: 'tasks' art has the logo as the ticked box, 'done' art is the big logo with the drop landed as a puddle and comb cell bits (buttons still to add). |
 | L24 Scrollbar floating off | L24 | Done | no | 1315e68: task detail pane scrollbar sits inside the rounded card. Verify on other panels. |
 | L25 Task list vs grid toggle | L25 | Done | approved | Board 7: List/Grid segmented control beside the title, `localStorage` `honeylist-task-view`; `TaskGridCard.tsx`, 1/2/3 columns. |
-| L26 Google OAuth options | L26 | Open | yes | See Google sign in above. |
+| L26 Google OAuth options | L26 | Done | no | Went with Better Auth's built in Google provider (no extra package). See Google sign in above. |
 | **Known bugs** | | | | |
 | Plain bullet mixed into a checklist shows no bullet marker | Bug | Open | no | Note preview CSS. |
-| Home nav item stays amber | Bug | Verify | no | Seen before the icon revert. |
+| Home nav item stays amber | Bug | Verify | no | Seen before the icon revert. 2026-09-30: active state is now the honey filled icon (NavIcon) and only the current route's item gets it. |
 | Task detail renders twice at `/tasks/$id` (pane and mobile copy, one hidden by CSS), so ids like `title-{taskId}` are duplicated | Review | Open | no | `src/components/TasksPage.tsx`. Playwright must filter to visible elements. |
 | Rail (768 to 1023): Profile link and Scratchpad button have no accessible name (their text uses `.app-sidebar-extra`, display none) | Review | Open | no | Add `aria-label`. Verify with axe. |
 | Deleted task or note comes back if the page reloads within the 4.2s Undo window | Review | Open | no | Server delete is deferred until the toast ends. |

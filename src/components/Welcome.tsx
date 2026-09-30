@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { welcomeHeld } from '#/lib/welcomeHold'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { meQuery, qk, useUpdateMe } from '#/lib/api'
@@ -23,7 +24,7 @@ export function Welcome() {
   const save = useUpdateMe()
   const [name, setName] = useState('')
   const [closed, setClosed] = useState(false)
-  const open = !!me && !me.onboarded && !closed
+  const open = !!me && !me.onboarded && !closed && !welcomeHeld()
 
   const finish = (withName: boolean) => {
     const displayName = name.trim()

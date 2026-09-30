@@ -1,3 +1,4 @@
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import {
   cloneElement,
   useEffect,
@@ -15,6 +16,7 @@ import type {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from './icons'
+import { LogoMark } from './logo'
 import type { IconName } from './icons'
 
 const cx = (...c: Array<string | false | null | undefined>) =>
@@ -281,6 +283,8 @@ const Ground = () => (
     style={{ fill: 'var(--surface-raised)' }}
   />
 )
+// One comb cell on a 24 grid (the logo's cell), for pastel bits.
+const COMB_CELL = 'M12 2.4 20.31 7.2v9.6L12 21.6 3.69 16.8V7.2Z'
 const ILLOS: Record<string, () => ReactNode> = {
   tasks: () => (
     <>
@@ -304,17 +308,26 @@ const ILLOS: Record<string, () => ReactNode> = {
         height={18}
         rx={7}
       />
-      <circle {...S} {...f('accent')} cx={80} cy={60} r={8} />
-      <path {...S} fill="none" d="M76 60l3 3 5-6M96 60h30" />
+      {/* The ticked box is the logo: a promise of what done looks like here. */}
+      <LogoMark x={66} y={45} size={30} />
+      <path {...S} fill="none" d="M96 60h30" />
       <circle {...S} {...f('paper')} cx={80} cy={84} r={8} />
       <path {...S} fill="none" d="M96 84h24" />
       <circle {...S} {...f('paper')} cx={80} cy={108} r={8} />
       <path {...S} fill="none" d="M96 108h28" />
     </>
   ),
+  // The day is sealed: the big logo, its drop landed as a honey puddle, comb cell bits around.
   done: () => (
     <>
       <Ground />
+      <ellipse
+        cx={100}
+        cy={134}
+        rx={16}
+        ry={3.2}
+        style={{ fill: 'var(--accent)' }}
+      />
       <rect
         {...S}
         {...f('mint')}
@@ -335,26 +348,19 @@ const ILLOS: Record<string, () => ReactNode> = {
         rx={5}
         transform="rotate(25 158 35)"
       />
-      <rect
+      <path
         {...S}
         {...f('sky')}
-        x={150}
-        y={98}
-        width={26}
-        height={10}
-        rx={5}
-        transform="rotate(-10 163 103)"
+        d={COMB_CELL}
+        transform="translate(150 94) scale(1.05)"
       />
-      <circle {...S} {...f('peach')} cx={42} cy={104} r={6} />
-      <circle {...S} {...f('accent')} cx={100} cy={74} r={42} />
       <path
-        d="M80 74l14 14 26-28"
-        fill="none"
-        stroke="var(--on-pastel)"
-        strokeWidth={6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        {...S}
+        {...f('peach')}
+        d={COMB_CELL}
+        transform="translate(34 94) scale(.7)"
       />
+      <LogoMark x={52} y={8} size={100} drop={false} />
     </>
   ),
   notes: () => (
@@ -455,6 +461,41 @@ const ILLOS: Record<string, () => ReactNode> = {
       />
     </>
   ),
+  habits: () => (
+    <>
+      <Ground />
+      <circle cx={150} cy={38} r={14} style={{ fill: 'var(--accent)' }} />
+      <path {...S} stroke="var(--ink)" fill="none" d="M100 100V54" />
+      <ellipse
+        {...S}
+        {...f('mint')}
+        cx={84}
+        cy={62}
+        rx={18}
+        ry={9}
+        transform="rotate(-30 84 62)"
+      />
+      <ellipse
+        {...S}
+        {...f('mint')}
+        cx={116}
+        cy={74}
+        rx={18}
+        ry={9}
+        transform="rotate(30 116 74)"
+      />
+      <path {...S} {...f('peach')} d="M72 98h56l-8 34H80z" />
+      <rect
+        {...S}
+        {...f('peach')}
+        x={66}
+        y={92}
+        width={68}
+        height={12}
+        rx={4}
+      />
+    </>
+  ),
   offline: () => (
     <>
       <Ground />
@@ -473,7 +514,7 @@ const ILLOS: Record<string, () => ReactNode> = {
   ),
 }
 export type IllustrationName =
-  'tasks' | 'done' | 'notes' | 'folder' | 'search' | 'offline'
+  'tasks' | 'done' | 'notes' | 'folder' | 'habits' | 'search' | 'offline'
 export function Illustration({
   name,
   width = 180,
@@ -752,115 +793,52 @@ export function MenuButton({
   tip?: string
   triggerClassName?: string
 }) {
-  const [open, setOpen] = useState(false)
-  const [pos, setPos] = useState<{
-    top?: number
-    bottom?: number
-    right: number
-  } | null>(null)
-  const ref = useRef<HTMLDivElement>(null)
-  const btn = useRef<HTMLButtonElement>(null)
-  const menu = useRef<HTMLDivElement>(null)
-  const place = () => {
-    const r = btn.current?.getBoundingClientRect()
-    if (!r) return
-    const right = Math.max(8, window.innerWidth - r.right)
-    // Open upward when there isn't room below.
-    setPos(
-      window.innerHeight - r.bottom < 280
-        ? { bottom: window.innerHeight - r.top + 6, right }
-        : { top: r.bottom + 6, right },
-    )
-  }
-  useEffect(() => {
-    if (!open) return
-    place()
-    const close = (e: MouseEvent) => {
-      const t = e.target as Node
-      if (!ref.current?.contains(t) && !menu.current?.contains(t))
-        setOpen(false)
-    }
-    const reflow = () => setOpen(false)
-    window.addEventListener('scroll', reflow, true)
-    window.addEventListener('resize', reflow)
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('mousedown', close)
-    document.addEventListener('keydown', esc)
-    requestAnimationFrame(() =>
-      menu.current
-        ?.querySelector<HTMLButtonElement>('[role=menuitem]')
-        ?.focus(),
-    )
-    return () => {
-      document.removeEventListener('mousedown', close)
-      document.removeEventListener('keydown', esc)
-      window.removeEventListener('scroll', reflow, true)
-      window.removeEventListener('resize', reflow)
-    }
-  }, [open])
-  const onKey = (e: React.KeyboardEvent) => {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-    e.preventDefault()
-    const els = Array.from(
-      menu.current?.querySelectorAll<HTMLButtonElement>('[role=menuitem]') ??
-        [],
-    )
-    const i = els.indexOf(document.activeElement as HTMLButtonElement)
-    els.at((i + (e.key === 'ArrowDown' ? 1 : -1)) % els.length)?.focus()
-  }
+  // shadcn/ui DropdownMenu (Radix): portal, collision flip, roving focus, typeahead, Esc.
+  // Styled with our own zn-menu classes, so it looks exactly like the approved design.
   const trigger = (
-    <button
-      ref={btn}
-      type="button"
-      className={cx('zn-icon-btn', triggerClassName)}
-      aria-label={label}
-      aria-haspopup="menu"
-      aria-expanded={open}
-      onClick={() => setOpen((o) => !o)}
-    >
-      <Icon name="more" />
-    </button>
+    <DropdownMenu.Trigger asChild>
+      <button
+        type="button"
+        className={cx('zn-icon-btn', triggerClassName)}
+        aria-label={label}
+      >
+        <Icon name="more" />
+      </button>
+    </DropdownMenu.Trigger>
   )
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <DropdownMenu.Root modal={false}>
       {tip ? <Tooltip label={tip}>{trigger}</Tooltip> : trigger}
-      {open &&
-        pos &&
-        createPortal(
-          <div
-            ref={menu}
-            className="zn-menu"
-            role="menu"
-            aria-label={label}
-            onKeyDown={onKey}
-            style={{ position: 'fixed', ...pos, zIndex: 60 }}
-          >
-            {items.map((it, i) =>
-              it.separator ? (
-                <div key={`s${i}`} className="zn-menu-sep" role="separator" />
-              ) : (
-                <button
-                  key={it.label}
-                  type="button"
-                  role="menuitem"
-                  className={cx('zn-menu-item', it.danger && 'is-danger')}
-                  onClick={() => {
-                    setOpen(false)
-                    it.onSelect?.()
-                  }}
-                >
-                  {it.icon && <Icon name={it.icon} size={18} />}
-                  <span>{it.label}</span>
-                  {it.shortcut && (
-                    <kbd className="zn-menu-kbd">{it.shortcut}</kbd>
-                  )}
-                </button>
-              ),
-            )}
-          </div>,
-          document.body,
-        )}
-    </div>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="zn-menu"
+          aria-label={label}
+          align="end"
+          side="bottom"
+          sideOffset={6}
+          collisionPadding={8}
+          style={{ zIndex: 60 }}
+        >
+          {items.map((it, i) =>
+            it.separator ? (
+              <DropdownMenu.Separator key={`s${i}`} className="zn-menu-sep" />
+            ) : (
+              <DropdownMenu.Item
+                key={it.label}
+                className={cx('zn-menu-item', it.danger && 'is-danger')}
+                onSelect={() => it.onSelect?.()}
+              >
+                {it.icon && <Icon name={it.icon} size={18} />}
+                <span>{it.label}</span>
+                {it.shortcut && (
+                  <kbd className="zn-menu-kbd">{it.shortcut}</kbd>
+                )}
+              </DropdownMenu.Item>
+            ),
+          )}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   )
 }
 

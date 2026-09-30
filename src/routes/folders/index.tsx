@@ -12,7 +12,13 @@ import { PRESET_COLORS } from '#/lib/colors'
 
 export const Route = createFileRoute('/folders/')({
   component: Folders,
-  head: () => ({ meta: [{ title: 'Folders · Honeylist' }] }),
+  head: () => ({
+    meta: [
+      { title: 'Folders · Honeylist' },
+      { name: 'description', content: 'Group tasks and notes into simple colour coded folders.' },
+      { property: 'og:title', content: 'Folders · Honeylist' },
+    ],
+  }),
 })
 
 export const FOLDER_ICONS: IconName[] = [

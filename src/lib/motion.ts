@@ -21,3 +21,5 @@ export const SPRING_GLIDE: Transition = {
 }
 /** Hold after a tick before the row moves away, so the check is seen (Things 3 does ~500 ms). */
 export const TICK_HOLD_MS = 450
+/** When the check lands inside a tick (honey rises first); the complete sound plays here. */
+export const TICK_CHECK_MS = 200

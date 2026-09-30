@@ -11,7 +11,7 @@ Honeylist is a calm task, notes and scratchpad app (HNG Internship 15, Stage 1).
 Start every task with [`context/README.md`](context/README.md): it gives the reading order for the backlog, decisions, design system, per feature notes and the Playwright test plan.
 
 - **Design approval:** any UI change that departs from the approved design (Zen Todo DS plus the Amberlist Screens canvas) needs Emmanuel's approval first, shown as a design. Pending proposals are listed in `context/design-system.md`.
-- **shadcn check:** before creating a UI component, check whether shadcn/ui has one and use it styled with our tokens. The adoption approach is still an open decision (`context/decisions.md` O1); confirm it before the first install.
+- **shadcn check:** before creating a UI component, check whether shadcn/ui has one and use it styled with our tokens. Adopted 2026-09-30 (D28): Radix based shadcn primitives styled with our own `zn-` classes and tokens, so nothing changes visually. `MenuButton` is on `DropdownMenu`; `cn` lives in `src/lib/utils.ts`; `components.json` is set for `npx shadcn add`. Never let a shadcn default style override the Zen design.
 - **Keep docs updated:** update the relevant files in `context/` (feature status, backlog, decisions, changelog) in the same commit as the change. Never edit `context/_raw/`.
 
 ## Stack (use only these)

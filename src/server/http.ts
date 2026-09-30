@@ -30,6 +30,10 @@ export function setUserResolver(fn: UserResolver | null) {
 
 // Simple per-user write limit: 120 writes a minute per instance.
 const writes = new Map<string, { n: number; reset: number }>()
+/** Tests only: the suite makes more writes a minute than a person would. */
+export function resetRateLimits() {
+  writes.clear()
+}
 function rateLimit(userId: string) {
   const t = Date.now()
   const w = writes.get(userId)

@@ -1,31 +1,64 @@
 {
-  "name": "Honeylist",
+  "id": "/",
+  "name": "Honeylist: tasks, notes and a scratchpad",
   "short_name": "Honeylist",
-  "description": "Tasks, notes and a scratchpad in one calm place.",
-  "start_url": "/",
+  "description": "A calm to do app. Plan tasks with subtasks and dates, keep notes beside them, dump thoughts in a scratchpad, build habits, sort everything into folders, and let AI break a task into steps. Works offline once installed.",
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
   "background_color": "#1c1d21",
   "theme_color": "#1c1d21",
+  "categories": ["productivity"],
+  "prefer_related_applications": false,
   "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "shortcuts": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "name": "Add task",
+      "short_name": "Add task",
+      "description": "Open the new task form",
+      "url": "/?new=task&source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "name": "Notes",
+      "short_name": "Notes",
+      "description": "Your notes and the scratchpad",
+      "url": "/notes?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "name": "Habits",
+      "short_name": "Habits",
+      "description": "Check in on today's habits",
+      "url": "/habits?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/wide.png",
+      "sizes": "1440x900",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Honeylist on desktop: today's tasks, folders and notes"
     },
     {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "src": "/screenshots/narrow.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Honeylist on a phone: today at a glance"
     }
   ]
 }

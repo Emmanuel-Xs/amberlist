@@ -57,10 +57,23 @@ export interface Prefs {
   onboardedAt: string | null
   /** When the account was made (ISO), used for the "Welcome" greeting on day one. */
   joinedAt: string | null
+  /** True for an anonymous guest; false once signed in with Google. */
+  isGuest: boolean
+  isAnonymous: boolean
+  /** Google account details, null for guests. */
+  email: string | null
+  image: string | null
+  accountName: string | null
+  /** False when the Google keys are missing on the server: hide the sign in button. */
+  googleEnabled: boolean
+  /** Set after a Google sign in when this device and the account both had data. */
+  pendingMerge: { tasks: number; notes: number } | null
+  /** The day (ISO) each save nudge was dismissed. */
+  nudgeState: { task?: string; days?: string } | null
 }
 export type PrefsUpdate = Partial<
   Pick<Prefs, 'displayName' | 'theme' | 'sounds'>
-> & { onboarded?: true }
+> & { onboarded?: true; nudgeDismissed?: 'task' | 'days' }
 export type TaskInput = Partial<
   Omit<Task, 'id' | 'subtasks' | 'noteCount' | 'createdAt' | 'completedAt'>
 > & { subtasks?: string[] }
@@ -294,4 +307,110 @@ export function useCategoryMutations() {
       onSettled: settle,
     }),
   }
+}
+
+// ---------- Habits (Phase 2) ----------
+export type HabitFrequency = 'daily' | 'weekdays' | 'x_per_week'
+export interface Habit {
+  id: string
+  name: string
+  icon: string
+  categoryId: string | null
+  /** A preset token name or a soft custom `#rrggbb`. */
+  color: PresetColor | HexColor
+  frequency: HabitFrequency
+  /** ISO weekdays, 1 Mon to 7 Sun, for 'weekdays'. */
+  daysOfWeek: number[] | null
+  timesPerWeek: number | null
+  goalDays: number | null
+  reminderTime: string | null
+  archived: boolean
+  createdAt: string
+  /** Every check in, local YYYY-MM-DD, ascending. */
+  checkins: string[]
+}
+export type HabitInput = Partial<Omit<Habit, 'id' | 'createdAt' | 'checkins'>>
+
+export const habitKeys = {
+  all: ['habits'] as const,
+  archived: ['habits', 'archived'] as const,
+}
+export const habitsQuery = queryOptions({
+  queryKey: habitKeys.all,
+  queryFn: () => api<Habit[]>('/habits'),
+})
+/** Every habit, archived ones included (the Habits page lists them at the bottom). */
+export const allHabitsQuery = queryOptions({
+  queryKey: habitKeys.archived,
+  queryFn: () => api<Habit[]>('/habits?archived=1'),
+})
+export const useHabits = () => useQuery(habitsQuery)
+
+/** Habit mutations. Check ins patch the cache first so the tick feels instant. */
+export function useHabitMutations() {
+  const qc = useQueryClient()
+  const settle = () => void qc.invalidateQueries({ queryKey: habitKeys.all })
+  const patchAll = (id: string, fn: (h: Habit) => Habit) => {
+    const prev = {
+      active: qc.getQueryData<Habit[]>(habitKeys.all),
+      all: qc.getQueryData<Habit[]>(habitKeys.archived),
+    }
+    const map = (list?: Habit[]) => list?.map((h) => (h.id === id ? fn(h) : h))
+    if (prev.active) qc.setQueryData(habitKeys.all, map(prev.active))
+    if (prev.all) qc.setQueryData(habitKeys.archived, map(prev.all))
+    return prev
+  }
+  const restore = (prev?: { active?: Habit[]; all?: Habit[] }) => {
+    if (prev?.active) qc.setQueryData(habitKeys.all, prev.active)
+    if (prev?.all) qc.setQueryData(habitKeys.archived, prev.all)
+  }
+  const replace = (h: Habit) => patchAll(h.id, () => h)
+
+  const create = useMutation({
+    mutationFn: (input: HabitInput & { name: string }) =>
+      api<Habit>('/habits', { method: 'POST', json: input }),
+    onSuccess: (h) =>
+      qc.setQueryData<Habit[]>(habitKeys.all, (old) => [...(old ?? []), h]),
+    onSettled: settle,
+  })
+  const update = useMutation({
+    mutationFn: ({ id, ...input }: HabitInput & { id: string }) =>
+      api<Habit>(`/habits/${id}`, { method: 'PATCH', json: input }),
+    onMutate: ({ id, ...input }) => ({
+      prev: patchAll(id, (h) => ({ ...h, ...input })),
+    }),
+    onError: (_e, _v, ctx) => restore(ctx?.prev),
+    onSuccess: replace,
+    onSettled: settle,
+  })
+  const remove = useMutation({
+    mutationFn: (id: string) => api(`/habits/${id}`, { method: 'DELETE' }),
+    onSettled: settle,
+  })
+  const checkin = useMutation({
+    mutationFn: ({
+      id,
+      date,
+      done,
+    }: {
+      id: string
+      date: string
+      done: boolean
+    }) =>
+      api<Habit>(`/habits/${id}/checkins`, {
+        method: 'POST',
+        json: { date, done },
+      }),
+    onMutate: ({ id, date, done }) => ({
+      prev: patchAll(id, (h) => ({
+        ...h,
+        checkins: done
+          ? [...new Set([...h.checkins, date])].sort()
+          : h.checkins.filter((d) => d !== date),
+      })),
+    }),
+    onError: (_e, _v, ctx) => restore(ctx?.prev),
+    onSuccess: replace,
+  })
+  return { create, update, remove, checkin }
 }

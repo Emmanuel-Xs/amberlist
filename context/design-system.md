@@ -90,8 +90,8 @@ Zen namespace: Alert, AppNav, AppShell, Button, CategoryCard, Celebrate (sound p
 
 Original DS art: pastel shapes with 2px round on-pastel outlines, 200x150 viewBox, ground ellipse in surface-raised, decorative (`aria-hidden`). Implemented in `src/ui/zen.tsx` (`Illustration`, `EmptyState`) after the 1315e68 revert.
 
-- **tasks:** lavender clipboard with a butter clip, three check circles (first amber with a tick, others paper) with lines, amber sun top right. "Nothing planned today" / "Add a task above, or press Q anywhere." CTA Add a task.
-- **done:** big amber circle with a thick check, pastel confetti bits (mint, lavender, sky pills, peach dot). "All done for today" / "Nice work. Tomorrow has 2 tasks waiting." CTA See tomorrow.
+- **tasks:** lavender clipboard with a butter clip, three rows: the first ticked box is a mini LogoMark (board 15, built 2026-09-30), the others paper circles, with lines; amber sun top right. "Nothing planned today" / "Add a task above, or press Q anywhere." CTA Add a task.
+- **done:** (board 15, built 2026-09-30) the big logo without its falling drop, the drop landed as a small honey puddle on the ground, mint and lavender pills plus sky and peach comb cells (`LogoMark drop={false}`). "All done for today" / "Nice work. Tomorrow has 2 tasks waiting." CTA See tomorrow.
 - **notes:** two stacked tilted notes (butter, lavender) with lines, a peach pencil. "No notes yet" / "Capture ideas, meeting notes and checklists. Markdown works." CTA New note.
 - **folder:** butter folder back, dashed paper sheet, amber folder front. "This folder is empty" / "Move tasks here from their menu, or type #work when you add one." CTA Add a task.
 - **habits:** a sprout, ink stem with two mint leaves in a peach pot, amber sun. "Build your first habit" / "Pick something small you want to do most days. We'll track the streak." CTA Add a habit. (Not in the app yet.)
@@ -102,13 +102,14 @@ Original DS art: pastel shapes with 2px round on-pastel outlines, 200x150 viewBo
 ## Icons
 
 - lucide-react, 24 grid, stroke 1.75 (1.25 at 44+), round caps. Sizes: 16 chips and toasts, 18 menus and fields, 20 rows and buttons, 22 nav, 24 to 56 cards.
-- Map: home House, tasks ListTodo, note NotebookPen, flame Flame (habits), folder Folder, plus CirclePlus, search, sliders SlidersHorizontal, more EllipsisVertical, x, calendar, clock, flag (due and priority), bell (reminders), inbox, check, play (start), pin, link, scratch PencilLine, trash Trash2, alert TriangleAlert, refresh RotateCw, undo Undo2, download, copy, logout, arrowLeft, chevronRight and Down, user, moon, sun, book BookOpen, pen PenTool, droplet, target, cart ShoppingCart, menu.
+- **Nav icons (board 14 option B, built 2026-09-30):** `NavIcon` in `src/ui/icons.tsx`, used by the sidebar, rail and phone bar. Home is a soft rounded house; Tasks is two comb cell boxes (the top one holds the check) with lines 8 and 5 units long; Notes, Folders and Profile are lucide NotebookPen, Folder, User. Inactive: outline in ink-muted. Active: the shape fills with accent, edges accent-ink, inner marks on-accent (the Notes pen is outlined on-accent so it reads in dark where accent-ink equals accent), label ink 600. Icons without a drawn glyph (Habits flame) fall back to lucide. The phone Add button is a 48px accent square, radius 16, plain Plus.
+- Map (Icon): home House, tasks ListTodo, note NotebookPen, flame Flame (habits), folder Folder, plus CirclePlus, search, sliders SlidersHorizontal, more EllipsisVertical, x, calendar, clock, flag (due and priority), bell (reminders), inbox, check, play (start), pin, link, scratch PencilLine, trash Trash2, alert TriangleAlert, refresh RotateCw, undo Undo2, download, copy, logout, arrowLeft, chevronRight and Down, user, moon, sun, book BookOpen, pen PenTool, droplet, target, cart ShoppingCart, menu.
 - Icon only buttons need an `aria-label` and a Tooltip (with its shortcut when there is one).
 
 ## Motion
 
 - 150 to 200ms ease out for hovers, switch thumb, date pill growth; press scale 0.98.
-- Completing: circle fills amber with a check draw (200ms), then the row slides into Completed (250ms).
+- Completing: see Celebrations below (honey fill, check pop, comb sparks), then the 450 ms hold and the row glides into Completed.
 - Sheets 250ms slide plus fade; dialogs 200ms fade plus scale from 0.96; toasts slide up 200ms; page View Transitions crossfade 200ms; habit check in pop 250ms.
 - Nothing over 300ms, no loops, no parallax, no autoplay. `prefers-reduced-motion`: instant or a plain fade.
 - State now: row and page animations were removed in 1315e68 (janky on phones). Emmanuel wants motion that is slower and visible (O3).
@@ -117,7 +118,11 @@ Original DS art: pastel shapes with 2px round on-pastel outlines, 200x150 viewBo
 
 - **Toast:** one line, Undo when undoable, neutral, success and error tones, 3px countdown bar, 4s, pauses on hover or focus, max 3 stacked, bottom center above the nav on phones, bottom left beside the sidebar on desktop, errors stay until dismissed, polite live region. (The component readme says one at a time, new replaces old; the app stacks up to 3.)
 - **Sounds** (synthesized, about 6% volume, only after a user action, never on load, Profile switch): complete (task, subtask, habit), undo, delete, error, celebrate (all of today done, habit goal), tap.
-- **Confetti:** rare. The last task due today, a long running task done, a habit goal (21 of 21). Never for a single ordinary task. Skipped under reduced motion.
+- **Celebrations (board 13, built 2026-09-30, replace confetti; no bee):** `src/components/TickFill.tsx`, `src/components/Celebrate.tsx`. Particles are comb cells in amber plus pastels with on-pastel outlines. Non blocking, tap or key skips.
+  - Every tick (0.6 s): honey rises in the circle with a wave, check draws and pops at 200 ms with `complete`, six comb sparks flick out and fade. Reduced motion: filled at once.
+  - First task ever (once: empty task list plus a localStorage flag): honey drop falls onto the new row's circle, squash, ring, comb cells burst with gravity, toast "Your first task is in" (1.7 s). Circle stays unticked. Reduced motion: toast only.
+  - All done for today (last open Today or Overdue task): centred seal, the check's five cells fill one by one, the hexagon blooms and the cells turn on-accent (the logo), `celebrate` plays, honey tears from the hex bottom tip and drops (2.3 s), live region "All done for today". Reduced motion: the final logo and the toast.
+  - `confetti()` is gone (no callers).
 
 ## Destructive actions and errors
 
@@ -165,16 +170,16 @@ From his 22:38 list on 2026-09-29. Nothing here may be coded before a design is 
 | Onboarding name screen | Greeting without a name looks weird; ask "What should we call you?" | PRD: one welcome screen, name plus theme pick, skippable, no tour. |
 | Quick add redesign | Desktop quick add looks like search because the + is on the left; Q is hard to discover | Move or restyle the +, clear focus state, visible shortcut hint. |
 | Toast system and Duolingo style messages | Encouraging toasts for create, complete, overdue; tell the user what happened on completion; rules for modal vs top vs left vs right | Decide placement rules (O4) and a copy set. |
-| First task celebration with a bee | Confetti plus a bee animation on the very first task | Bee style (O7). Must respect reduced motion. |
+| First task celebration with a bee | Confetti plus a bee animation on the very first task | Superseded: board 13 honey drop approved and built 2026-09-30, no bee. |
 | DateStrip radius and bounded momentum scroll | Less rounded pills on desktop; smooth, speed sensitive scroll limited to the last task date plus about 3 days | O6. |
 | Confirmations | Confirm destructive actions, maybe task delete and complete; folder delete flow | Conflicts with "Undo instead of confirmations" (O2). |
 | Note and folder color picker with custom colors | Easier on the eyes, good contrast, let people add their own colors | O8. |
-| Icon set | New icons from scratch or keep lucide; nav icons must not look alike | O5. The honeycomb set was reverted. |
+| Icon set | New icons from scratch or keep lucide; nav icons must not look alike | Done: board 14 option B built 2026-09-30 (see Icons). |
 | Splash to app transition | The splash must hand off smoothly into the app | Today it fades out after the drop finishes. |
 | Motion library | Slower, visible, non janky motion; Motion library vs CSS | O3. |
 | Button below empty state illustrations | Reflect it in the design first | DS rule already says every empty state has a button; check the canvas. |
 
-### Round 3 proposals (2026-09-30, awaiting approval, canvas page "Round 3")
+### Round 3 proposals (2026-09-30, canvas page "Round 3"; 13, 14 B and 15 approved and built 2026-09-30)
 - 13 Celebrations: every tick = honey fills the circle, check pops, six comb cell sparks (0.6 s); first task ever = honey drop falls and splashes into comb cells, then toast (1.6 s); all done today = the check's five cells fill one by one and seal into the logo, drop lets go (2.2 s). No bee.
 - 14 Icons v2: plain plus (no circle), Tasks list with a comb cell check, soft Home, open folder with files; active state A soft pill or B honey fill (recommended B).
 - 15 Empty states: logo as the ticked box in "Add your first task"; "All done" is the big logo with the drop landed as a honey puddle.

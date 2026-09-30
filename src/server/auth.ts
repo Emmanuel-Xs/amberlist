@@ -4,6 +4,7 @@ import { anonymous } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { getDb } from './db'
 import { schema } from './schema'
+import { linkGuestAccount } from './services'
 
 const google =
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -50,7 +51,17 @@ function createAuth() {
       useSecureCookies: process.env.NODE_ENV === 'production',
       ipAddress: { ipAddressHeaders: ['x-forwarded-for', 'x-real-ip'] },
     },
-    plugins: [anonymous(), tanstackStartCookies()],
+    plugins: [
+      anonymous({
+        // Signing in with Google from a guest session keeps the guest's data. If the Google
+        // account already has data, the account waits for the merge prompt instead.
+        // The plugin then deletes the guest user row; app rows have no foreign key to it.
+        onLinkAccount: async ({ anonymousUser, newUser }) => {
+          await linkGuestAccount(getDb(), anonymousUser.user.id, newUser.user.id)
+        },
+      }),
+      tanstackStartCookies(),
+    ],
   })
 }
 

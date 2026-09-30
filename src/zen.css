@@ -386,8 +386,8 @@ body {
   inset: -11px;
 }
 .zn-task.is-done .zn-check {
-  background: var(--accent);
-  border-color: var(--accent);
+  /* The honey inside comes from TickFill so it can rise. */
+  border-color: var(--accent-edge);
 }
 .zn-task-body {
   flex: 1;
@@ -671,7 +671,9 @@ body {
   color: var(--ink);
 }
 .zn-nav-item.is-active {
-  color: var(--accent-ink);
+  /* The icon carries the honey (NavIcon); the label stays ink. */
+  color: var(--ink);
+  font-weight: 600;
 }
 .zn-nav-brand {
   display: none;

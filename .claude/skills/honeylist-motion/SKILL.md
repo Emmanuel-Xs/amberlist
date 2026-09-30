@@ -37,9 +37,24 @@ Approved timings (design board 11, 2026-09-30): tick 350 ms, row glide 400 ms, p
 8. Test on a phone viewport (390, touch). If it stutters there, cut it.
 9. Any new motion that changes the approved design needs Emmanuel's approval first (see `context/README.md`).
 
+## Celebrations (design board 13, built)
+
+Built from the logo: honey, comb cells, the drop. Particles are comb cells (amber plus pastels, on-pastel outline). All are non blocking (`pointer-events: none`) and a tap or key press skips the big two.
+
+| Moment | Where | Spec |
+|---|---|---|
+| Every tick | `TickFill` in `src/components/TickFill.tsx`, inside every `.zn-check` (rows, grid cards, subtasks, Today cards) | Honey (svg wave, 200% wide) rises 0 to 300 ms clipped to the circle; check `pathLength` 0 to 1 plus scale 0.55 to 1 with `SPRING_POP` at `TICK_CHECK_MS` (200); six comb sparks at -90, -30, 30, 90, 150, 210 deg fly out ~1.15x the circle size from 230 ms and fade by ~600 ms. `tickSound()` plays `complete` at 200 ms. Then `TICK_HOLD_MS` and the glide. |
+| First task ever | `celebrateFirstTask(id)` in `src/components/Celebrate.tsx`, from `QuickAdd` and `CreateTask` when `isFirstTask(qc)` | Canvas. Waits for `[data-task-check=id]` on screen, +220 ms. Drop forms 240 px above the circle (0 to 220 ms), hangs, falls ease-in (320 to 820 ms) stretching, tracking the circle live; lands just inside the circle top: squash 120 ms, ring to 3.2r in 400 ms, 10 cells burst (gravity 1500 px/s², fade over the last 45%). Toast at 1.1 s, end 1.7 s. Circle stays unticked. |
+| All done today | `celebrateAllDone()` then `CelebrateHost` (in `Toaster`) | Seconds: cells fill 0.12 + i x 0.17 (order: short stroke, then up the long one, `SPRING_POP` scaleY from the bottom); seal 1.05: hex scale 0.4 to 1 (spring bounce 0.45), comb lattice fades in, cells cross fade to on-accent, `sound('celebrate')`; tear 1.3 to 1.85: one path from the hex bottom tip (32, 50) grows a neck and drop, pinches off at 75% leaving `STUB_PATH`, the detached drop settles 3.6 units into `DROP_PATH`; close 2.05, fade 0.25. `role="status"` "All done for today". |
+
+- Reduced motion: tick fills at once, no sparks; first task shows only the toast; all done shows the final logo still, then closes. Sounds stay.
+- Gotcha: `<AnimatePresence initial={false}>` passes `initial: false` down through PresenceContext for as long as the child lives, so a motion element mounted later inside a list row skips its `initial`. Wrap such late mounts in `<PresenceContext.Provider value={null}>` (see `TickFill`).
+- Never generic confetti for tasks; `confetti()` was removed.
+
 ## Where things live
 
 - Splash hand off: `src/components/Splash.tsx` (logo flies to `.app-brand .logo-mark` or `.phone-header .logo-mark`).
 - Toasts: `src/components/Toaster.tsx`.
-- Tick and glide: `useTicked` in `src/components/useTaskActions.ts`, `layoutId` wrappers in `src/components/TasksPage.tsx`.
+- Tick and glide: `TickFill` (`src/components/TickFill.tsx`), `useTicked` in `src/components/useTaskActions.ts`, `layoutId` wrappers in `src/components/TasksPage.tsx`.
+- Celebrations: `src/components/Celebrate.tsx` (first task canvas, all done seal and its host).
 - Page transitions: `src/router.tsx` plus the `::view-transition-*` rules at the end of `src/styles.css`.

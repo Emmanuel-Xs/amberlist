@@ -15,20 +15,29 @@ import { Route as ApiScratchpadRouteImport } from './routes/api/scratchpad'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as FoldersIndexRouteImport } from './routes/folders/index'
 import { Route as FoldersIdRouteImport } from './routes/folders/$id'
+import { Route as HabitsIndexRouteImport } from './routes/habits/index'
+import { Route as HabitsIdRouteImport } from './routes/habits/$id'
 import { Route as NotesIndexRouteImport } from './routes/notes/index'
 import { Route as NotesIdRouteImport } from './routes/notes/$id'
 import { Route as TasksIndexRouteImport } from './routes/tasks/index'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
+import { Route as ApiAiBreakdownRouteImport } from './routes/api/ai/breakdown'
+import { Route as ApiAiExtractRouteImport } from './routes/api/ai/extract'
+import { Route as ApiAiStatusRouteImport } from './routes/api/ai/status'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
+import { Route as ApiHabitsIndexRouteImport } from './routes/api/habits/index'
+import { Route as ApiHabitsIdRouteImport } from './routes/api/habits/$id'
 import { Route as ApiMeIndexRouteImport } from './routes/api/me/index'
 import { Route as ApiMeDataRouteImport } from './routes/api/me/data'
+import { Route as ApiMeMergeRouteImport } from './routes/api/me/merge'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiSubtasksIdRouteImport } from './routes/api/subtasks/$id'
 import { Route as ApiTasksIndexRouteImport } from './routes/api/tasks/index'
 import { Route as ApiTasksIdRouteImport } from './routes/api/tasks/$id'
+import { Route as ApiHabitsIdCheckinsRouteImport } from './routes/api/habits/$id.checkins'
 import { Route as ApiTasksIdSubtasksRouteImport } from './routes/api/tasks/$id.subtasks'
 
 const IndexRoute = IndexRouteImport.update({
@@ -61,6 +70,16 @@ const FoldersIdRoute = FoldersIdRouteImport.update({
   path: '/folders/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HabitsIndexRoute = HabitsIndexRouteImport.update({
+  id: '/habits/',
+  path: '/habits/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HabitsIdRoute = HabitsIdRouteImport.update({
+  id: '/habits/$id',
+  path: '/habits/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NotesIndexRoute = NotesIndexRouteImport.update({
   id: '/notes/',
   path: '/notes/',
@@ -81,6 +100,21 @@ const TasksIdRoute = TasksIdRouteImport.update({
   path: '/tasks/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiBreakdownRoute = ApiAiBreakdownRouteImport.update({
+  id: '/api/ai/breakdown',
+  path: '/api/ai/breakdown',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiExtractRoute = ApiAiExtractRouteImport.update({
+  id: '/api/ai/extract',
+  path: '/api/ai/extract',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
+  id: '/api/ai/status',
+  path: '/api/ai/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -96,6 +130,16 @@ const ApiCategoriesIdRoute = ApiCategoriesIdRouteImport.update({
   path: '/api/categories/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHabitsIndexRoute = ApiHabitsIndexRouteImport.update({
+  id: '/api/habits/',
+  path: '/api/habits/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHabitsIdRoute = ApiHabitsIdRouteImport.update({
+  id: '/api/habits/$id',
+  path: '/api/habits/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMeIndexRoute = ApiMeIndexRouteImport.update({
   id: '/api/me/',
   path: '/api/me/',
@@ -104,6 +148,11 @@ const ApiMeIndexRoute = ApiMeIndexRouteImport.update({
 const ApiMeDataRoute = ApiMeDataRouteImport.update({
   id: '/api/me/data',
   path: '/api/me/data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMeMergeRoute = ApiMeMergeRouteImport.update({
+  id: '/api/me/merge',
+  path: '/api/me/merge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiNotesIndexRoute = ApiNotesIndexRouteImport.update({
@@ -131,6 +180,11 @@ const ApiTasksIdRoute = ApiTasksIdRouteImport.update({
   path: '/api/tasks/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHabitsIdCheckinsRoute = ApiHabitsIdCheckinsRouteImport.update({
+  id: '/checkins',
+  path: '/checkins',
+  getParentRoute: () => ApiHabitsIdRoute,
+} as any)
 const ApiTasksIdSubtasksRoute = ApiTasksIdSubtasksRouteImport.update({
   id: '/subtasks',
   path: '/subtasks',
@@ -143,21 +197,30 @@ export interface FileRoutesByFullPath {
   '/api/scratchpad': typeof ApiScratchpadRoute
   '/api/search': typeof ApiSearchRoute
   '/folders/$id': typeof FoldersIdRoute
+  '/habits/$id': typeof HabitsIdRoute
   '/notes/$id': typeof NotesIdRoute
   '/tasks/$id': typeof TasksIdRoute
   '/folders/': typeof FoldersIndexRoute
+  '/habits/': typeof HabitsIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/tasks/': typeof TasksIndexRoute
+  '/api/ai/breakdown': typeof ApiAiBreakdownRoute
+  '/api/ai/extract': typeof ApiAiExtractRoute
+  '/api/ai/status': typeof ApiAiStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
+  '/api/me/merge': typeof ApiMeMergeRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/subtasks/$id': typeof ApiSubtasksIdRoute
   '/api/tasks/$id': typeof ApiTasksIdRouteWithChildren
   '/api/categories/': typeof ApiCategoriesIndexRoute
+  '/api/habits/': typeof ApiHabitsIndexRoute
   '/api/me/': typeof ApiMeIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/tasks/': typeof ApiTasksIndexRoute
+  '/api/habits/$id/checkins': typeof ApiHabitsIdCheckinsRoute
   '/api/tasks/$id/subtasks': typeof ApiTasksIdSubtasksRoute
 }
 export interface FileRoutesByTo {
@@ -166,21 +229,30 @@ export interface FileRoutesByTo {
   '/api/scratchpad': typeof ApiScratchpadRoute
   '/api/search': typeof ApiSearchRoute
   '/folders/$id': typeof FoldersIdRoute
+  '/habits/$id': typeof HabitsIdRoute
   '/notes/$id': typeof NotesIdRoute
   '/tasks/$id': typeof TasksIdRoute
   '/folders': typeof FoldersIndexRoute
+  '/habits': typeof HabitsIndexRoute
   '/notes': typeof NotesIndexRoute
   '/tasks': typeof TasksIndexRoute
+  '/api/ai/breakdown': typeof ApiAiBreakdownRoute
+  '/api/ai/extract': typeof ApiAiExtractRoute
+  '/api/ai/status': typeof ApiAiStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
+  '/api/me/merge': typeof ApiMeMergeRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/subtasks/$id': typeof ApiSubtasksIdRoute
   '/api/tasks/$id': typeof ApiTasksIdRouteWithChildren
   '/api/categories': typeof ApiCategoriesIndexRoute
+  '/api/habits': typeof ApiHabitsIndexRoute
   '/api/me': typeof ApiMeIndexRoute
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/tasks': typeof ApiTasksIndexRoute
+  '/api/habits/$id/checkins': typeof ApiHabitsIdCheckinsRoute
   '/api/tasks/$id/subtasks': typeof ApiTasksIdSubtasksRoute
 }
 export interface FileRoutesById {
@@ -190,21 +262,30 @@ export interface FileRoutesById {
   '/api/scratchpad': typeof ApiScratchpadRoute
   '/api/search': typeof ApiSearchRoute
   '/folders/$id': typeof FoldersIdRoute
+  '/habits/$id': typeof HabitsIdRoute
   '/notes/$id': typeof NotesIdRoute
   '/tasks/$id': typeof TasksIdRoute
   '/folders/': typeof FoldersIndexRoute
+  '/habits/': typeof HabitsIndexRoute
   '/notes/': typeof NotesIndexRoute
   '/tasks/': typeof TasksIndexRoute
+  '/api/ai/breakdown': typeof ApiAiBreakdownRoute
+  '/api/ai/extract': typeof ApiAiExtractRoute
+  '/api/ai/status': typeof ApiAiStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
+  '/api/me/merge': typeof ApiMeMergeRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/subtasks/$id': typeof ApiSubtasksIdRoute
   '/api/tasks/$id': typeof ApiTasksIdRouteWithChildren
   '/api/categories/': typeof ApiCategoriesIndexRoute
+  '/api/habits/': typeof ApiHabitsIndexRoute
   '/api/me/': typeof ApiMeIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/tasks/': typeof ApiTasksIndexRoute
+  '/api/habits/$id/checkins': typeof ApiHabitsIdCheckinsRoute
   '/api/tasks/$id/subtasks': typeof ApiTasksIdSubtasksRoute
 }
 export interface FileRouteTypes {
@@ -215,21 +296,30 @@ export interface FileRouteTypes {
     | '/api/scratchpad'
     | '/api/search'
     | '/folders/$id'
+    | '/habits/$id'
     | '/notes/$id'
     | '/tasks/$id'
     | '/folders/'
+    | '/habits/'
     | '/notes/'
     | '/tasks/'
+    | '/api/ai/breakdown'
+    | '/api/ai/extract'
+    | '/api/ai/status'
     | '/api/auth/$'
     | '/api/categories/$id'
+    | '/api/habits/$id'
     | '/api/me/data'
+    | '/api/me/merge'
     | '/api/notes/$id'
     | '/api/subtasks/$id'
     | '/api/tasks/$id'
     | '/api/categories/'
+    | '/api/habits/'
     | '/api/me/'
     | '/api/notes/'
     | '/api/tasks/'
+    | '/api/habits/$id/checkins'
     | '/api/tasks/$id/subtasks'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -238,21 +328,30 @@ export interface FileRouteTypes {
     | '/api/scratchpad'
     | '/api/search'
     | '/folders/$id'
+    | '/habits/$id'
     | '/notes/$id'
     | '/tasks/$id'
     | '/folders'
+    | '/habits'
     | '/notes'
     | '/tasks'
+    | '/api/ai/breakdown'
+    | '/api/ai/extract'
+    | '/api/ai/status'
     | '/api/auth/$'
     | '/api/categories/$id'
+    | '/api/habits/$id'
     | '/api/me/data'
+    | '/api/me/merge'
     | '/api/notes/$id'
     | '/api/subtasks/$id'
     | '/api/tasks/$id'
     | '/api/categories'
+    | '/api/habits'
     | '/api/me'
     | '/api/notes'
     | '/api/tasks'
+    | '/api/habits/$id/checkins'
     | '/api/tasks/$id/subtasks'
   id:
     | '__root__'
@@ -261,21 +360,30 @@ export interface FileRouteTypes {
     | '/api/scratchpad'
     | '/api/search'
     | '/folders/$id'
+    | '/habits/$id'
     | '/notes/$id'
     | '/tasks/$id'
     | '/folders/'
+    | '/habits/'
     | '/notes/'
     | '/tasks/'
+    | '/api/ai/breakdown'
+    | '/api/ai/extract'
+    | '/api/ai/status'
     | '/api/auth/$'
     | '/api/categories/$id'
+    | '/api/habits/$id'
     | '/api/me/data'
+    | '/api/me/merge'
     | '/api/notes/$id'
     | '/api/subtasks/$id'
     | '/api/tasks/$id'
     | '/api/categories/'
+    | '/api/habits/'
     | '/api/me/'
     | '/api/notes/'
     | '/api/tasks/'
+    | '/api/habits/$id/checkins'
     | '/api/tasks/$id/subtasks'
   fileRoutesById: FileRoutesById
 }
@@ -285,18 +393,26 @@ export interface RootRouteChildren {
   ApiScratchpadRoute: typeof ApiScratchpadRoute
   ApiSearchRoute: typeof ApiSearchRoute
   FoldersIdRoute: typeof FoldersIdRoute
+  HabitsIdRoute: typeof HabitsIdRoute
   NotesIdRoute: typeof NotesIdRoute
   TasksIdRoute: typeof TasksIdRoute
   FoldersIndexRoute: typeof FoldersIndexRoute
+  HabitsIndexRoute: typeof HabitsIndexRoute
   NotesIndexRoute: typeof NotesIndexRoute
   TasksIndexRoute: typeof TasksIndexRoute
+  ApiAiBreakdownRoute: typeof ApiAiBreakdownRoute
+  ApiAiExtractRoute: typeof ApiAiExtractRoute
+  ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
+  ApiHabitsIdRoute: typeof ApiHabitsIdRouteWithChildren
   ApiMeDataRoute: typeof ApiMeDataRoute
+  ApiMeMergeRoute: typeof ApiMeMergeRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
   ApiSubtasksIdRoute: typeof ApiSubtasksIdRoute
   ApiTasksIdRoute: typeof ApiTasksIdRouteWithChildren
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
+  ApiHabitsIndexRoute: typeof ApiHabitsIndexRoute
   ApiMeIndexRoute: typeof ApiMeIndexRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiTasksIndexRoute: typeof ApiTasksIndexRoute
@@ -346,6 +462,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoldersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/habits/': {
+      id: '/habits/'
+      path: '/habits'
+      fullPath: '/habits/'
+      preLoaderRoute: typeof HabitsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/habits/$id': {
+      id: '/habits/$id'
+      path: '/habits/$id'
+      fullPath: '/habits/$id'
+      preLoaderRoute: typeof HabitsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/notes/': {
       id: '/notes/'
       path: '/notes'
@@ -374,6 +504,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/breakdown': {
+      id: '/api/ai/breakdown'
+      path: '/api/ai/breakdown'
+      fullPath: '/api/ai/breakdown'
+      preLoaderRoute: typeof ApiAiBreakdownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/extract': {
+      id: '/api/ai/extract'
+      path: '/api/ai/extract'
+      fullPath: '/api/ai/extract'
+      preLoaderRoute: typeof ApiAiExtractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/status': {
+      id: '/api/ai/status'
+      path: '/api/ai/status'
+      fullPath: '/api/ai/status'
+      preLoaderRoute: typeof ApiAiStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -395,6 +546,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCategoriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/habits/': {
+      id: '/api/habits/'
+      path: '/api/habits'
+      fullPath: '/api/habits/'
+      preLoaderRoute: typeof ApiHabitsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/habits/$id': {
+      id: '/api/habits/$id'
+      path: '/api/habits/$id'
+      fullPath: '/api/habits/$id'
+      preLoaderRoute: typeof ApiHabitsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/me/': {
       id: '/api/me/'
       path: '/api/me'
@@ -407,6 +572,13 @@ declare module '@tanstack/react-router' {
       path: '/api/me/data'
       fullPath: '/api/me/data'
       preLoaderRoute: typeof ApiMeDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/me/merge': {
+      id: '/api/me/merge'
+      path: '/api/me/merge'
+      fullPath: '/api/me/merge'
+      preLoaderRoute: typeof ApiMeMergeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/notes/': {
@@ -444,6 +616,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTasksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/habits/$id/checkins': {
+      id: '/api/habits/$id/checkins'
+      path: '/checkins'
+      fullPath: '/api/habits/$id/checkins'
+      preLoaderRoute: typeof ApiHabitsIdCheckinsRouteImport
+      parentRoute: typeof ApiHabitsIdRoute
+    }
     '/api/tasks/$id/subtasks': {
       id: '/api/tasks/$id/subtasks'
       path: '/subtasks'
@@ -453,6 +632,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface ApiHabitsIdRouteChildren {
+  ApiHabitsIdCheckinsRoute: typeof ApiHabitsIdCheckinsRoute
+}
+
+const ApiHabitsIdRouteChildren: ApiHabitsIdRouteChildren = {
+  ApiHabitsIdCheckinsRoute: ApiHabitsIdCheckinsRoute,
+}
+
+const ApiHabitsIdRouteWithChildren = ApiHabitsIdRoute._addFileChildren(
+  ApiHabitsIdRouteChildren,
+)
 
 interface ApiTasksIdRouteChildren {
   ApiTasksIdSubtasksRoute: typeof ApiTasksIdSubtasksRoute
@@ -472,18 +663,26 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScratchpadRoute: ApiScratchpadRoute,
   ApiSearchRoute: ApiSearchRoute,
   FoldersIdRoute: FoldersIdRoute,
+  HabitsIdRoute: HabitsIdRoute,
   NotesIdRoute: NotesIdRoute,
   TasksIdRoute: TasksIdRoute,
   FoldersIndexRoute: FoldersIndexRoute,
+  HabitsIndexRoute: HabitsIndexRoute,
   NotesIndexRoute: NotesIndexRoute,
   TasksIndexRoute: TasksIndexRoute,
+  ApiAiBreakdownRoute: ApiAiBreakdownRoute,
+  ApiAiExtractRoute: ApiAiExtractRoute,
+  ApiAiStatusRoute: ApiAiStatusRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
+  ApiHabitsIdRoute: ApiHabitsIdRouteWithChildren,
   ApiMeDataRoute: ApiMeDataRoute,
+  ApiMeMergeRoute: ApiMeMergeRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
   ApiSubtasksIdRoute: ApiSubtasksIdRoute,
   ApiTasksIdRoute: ApiTasksIdRouteWithChildren,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
+  ApiHabitsIndexRoute: ApiHabitsIndexRoute,
   ApiMeIndexRoute: ApiMeIndexRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiTasksIndexRoute: ApiTasksIndexRoute,

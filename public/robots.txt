@@ -4,4 +4,7 @@ Disallow: /api/
 Disallow: /tasks
 Disallow: /notes
 Disallow: /folders
+Disallow: /habits
 Disallow: /profile
+
+Sitemap: https://honeylist.vercel.app/sitemap.xml
