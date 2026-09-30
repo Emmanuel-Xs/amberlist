@@ -2,6 +2,10 @@
 
 Notable commits, newest first (2026-09-29, times WAT). Add an entry with every commit that changes behavior or looks.
 
+## 2026-09-30: phone bar glitch and nav animation
+- The phone bar no longer vanishes when a bottom nav link is tapped. `useHideOnScroll` kept its scroll baseline from mount, so the router's scroll restoration read as a large downward jump and the bar stayed translated off screen. The baseline is now a ref re-read on every navigation, and a new page always starts with the bar shown.
+- The phone bar now has the sliding honey pill (`NavPill`, `SPRING_GLIDE`) the sidebar has, so switching sections animates like desktop. Bar items got the `position: relative; isolation: isolate` the sidebar already had, which is what the absolutely positioned pill needs.
+
 ## 2026-09-30: privacy and terms pages
 - Public `/privacy` and `/terms` (`src/components/LegalPage.tsx`) with the logo, needed for Google's consent screen. They render without the guest session, splash, welcome or nav, are in the sitemap, and are linked from the Profile footer.
 

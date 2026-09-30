@@ -243,17 +243,29 @@ function SideNav({ ready }: { ready: boolean }) {
   )
 }
 
-/** Hides while scrolling down, comes back on any scroll up or at the top. */
+/**
+ * Hides while scrolling down, comes back on any scroll up or at the top.
+ *
+ * The baseline has to be re-read on every navigation. Scroll restoration jumps the page
+ * without the person scrolling, and that jump used to be read as a big downward delta, so the
+ * bar stayed hidden (and mid-transition) after a nav tap.
+ */
 function useHideOnScroll() {
   const [hidden, setHidden] = useState(false)
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const lastRef = useRef(0)
   useEffect(() => {
-    let last = window.scrollY
+    lastRef.current = window.scrollY
+  }, [])
+  // A new page starts with the bar showing, whatever the previous page was doing.
+  useEffect(() => setHidden(false), [pathname])
+  useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY
-      const dy = y - last
+      const dy = y - lastRef.current
       if (y < 48 || dy < -6) setHidden(false)
       else if (dy > 6) setHidden(true)
-      last = y
+      lastRef.current = y
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -282,6 +294,7 @@ function BottomNav() {
                   .join(' ')}
                 aria-current={isActive(n.to) ? 'page' : undefined}
               >
+                {isActive(n.to) && <NavPill />}
                 <NavIcon name={n.icon} active={isActive(n.to)} />
                 <span className="zn-nav-label">{n.label}</span>
               </Link>

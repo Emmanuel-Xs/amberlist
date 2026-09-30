@@ -788,7 +788,8 @@ body {
 .zn-nav-item:hover .nav-icon .nav-icon-on {
   display: inline;
 }
-.app-side .zn-nav-item {
+.app-side .zn-nav-item,
+.app-bottom .zn-nav-item {
   position: relative;
   isolation: isolate;
 }
