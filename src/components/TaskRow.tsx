@@ -4,6 +4,7 @@ import { dueLabel, formatTimeRange, toISODate } from '#/lib/dates'
 import { Icon } from '#/ui/icons'
 import { MenuButton, Tooltip } from '#/ui/zen'
 import type { MenuItem } from '#/ui/zen'
+import { RepeatChip, ReminderChip } from './TaskChips'
 import { TickFill } from './TickFill'
 import { useTaskActions, useTicked } from './useTaskActions'
 
@@ -35,7 +36,8 @@ export function Priority({
 
 /** The row and grid card share one menu: Open, Start, Duplicate, then Delete. */
 export function useTaskMenu(task: Task): MenuItem[] {
-  const { remove, duplicate, start } = useTaskActions()
+  const { remove, duplicate, start, skip, askStopRepeat, askSnooze } =
+    useTaskActions()
   const navigate = useNavigate()
   return [
     {
@@ -48,6 +50,33 @@ export function useTaskMenu(task: Task): MenuItem[] {
       ? [{ label: 'Start', icon: 'play' as const, onSelect: () => start(task) }]
       : []),
     { label: 'Duplicate', icon: 'copy', onSelect: () => duplicate(task) },
+    ...(task.remindOffset !== null && task.status !== 'done'
+      ? [
+          {
+            label: 'Snooze',
+            icon: 'bell' as const,
+            onSelect: () => askSnooze(task),
+          },
+        ]
+      : []),
+    ...(task.repeatRule && task.status !== 'done'
+      ? [
+          ...(task.repeatEnd?.kind === 'after' && task.repeatEnd.count <= 1
+            ? []
+            : [
+                {
+                  label: 'Skip this one',
+                  icon: 'skip' as const,
+                  onSelect: () => skip(task),
+                },
+              ]),
+          {
+            label: 'Stop repeating',
+            icon: 'repeat' as const,
+            onSelect: () => askStopRepeat(task),
+          },
+        ]
+      : []),
     { separator: true },
     {
       label: 'Delete task',
@@ -129,6 +158,8 @@ export function TaskRow({
               {due}
             </span>
           )}
+          <RepeatChip task={task} />
+          <ReminderChip task={task} />
           {category && <span className="zn-task-tag">{category.name}</span>}
           {!done && <Priority priority={task.priority} />}
           {task.subtasks.length > 0 && (

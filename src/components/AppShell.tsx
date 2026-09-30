@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { motion } from 'motion/react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useStore } from '@tanstack/react-store'
@@ -8,6 +9,7 @@ import { categoriesQuery, meQuery } from '#/lib/api'
 import { colorVar } from '#/lib/colors'
 import { ensureGuest } from '#/lib/auth-client'
 import { setSoundsEnabled } from '#/lib/feedback'
+import { SPRING_GLIDE } from '#/lib/motion'
 import { openCreate, setScratch, setShortcuts, toast, ui } from '#/lib/store'
 import { visitInfo } from '#/lib/visits'
 import { Icon, NavIcon } from '#/ui/icons'
@@ -19,6 +21,7 @@ import { CreateTask } from './CreateTask'
 import { Scratchpad } from './Scratchpad'
 import { Welcome } from './Welcome'
 import { MergePrompt } from './MergePrompt'
+import { TaskDialogs, useReminderRuntime } from './ReminderUi'
 import { Toaster } from './Toaster'
 
 const NAV: {
@@ -39,6 +42,19 @@ const RAIL = '(min-width: 768px) and (max-width: 1023.98px)'
 function useActive() {
   const path = useRouterState({ select: (s) => s.location.pathname })
   return (to: string) => (to === '/' ? path === '/' : path.startsWith(to))
+}
+
+/** The honey pill behind the current item. One shared layoutId, so it glides between items. */
+function NavPill() {
+  return (
+    <motion.span
+      layoutId="nav-pill"
+      className="zn-nav-pill"
+      aria-hidden="true"
+      style={{ borderRadius: 14 }}
+      transition={SPRING_GLIDE}
+    />
+  )
 }
 
 function SideNav({ ready }: { ready: boolean }) {
@@ -80,6 +96,7 @@ function SideNav({ ready }: { ready: boolean }) {
                   .join(' ')}
                 aria-current={isActive(n.to) ? 'page' : undefined}
               >
+                {isActive(n.to) && <NavPill />}
                 <NavIcon name={n.icon} active={isActive(n.to)} />
                 <span className="zn-nav-label">{n.label}</span>
               </Link>
@@ -214,6 +231,7 @@ function SideNav({ ready }: { ready: boolean }) {
               justifyContent: 'center',
             }}
           >
+            {isActive('/profile') && <NavPill />}
             <NavIcon name="user" active={isActive('/profile')} />
             <span className="app-sidebar-extra" style={{ flex: 1 }}>
               Profile
@@ -463,6 +481,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [])
 
   useTheme(ready)
+  useReminderRuntime(ready)
   const { data: me } = useQuery({
     ...meQuery,
     staleTime: 60_000,
@@ -550,6 +569,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Shortcuts />
           <Welcome />
           <MergePrompt />
+          <TaskDialogs />
         </>
       )}
     </div>

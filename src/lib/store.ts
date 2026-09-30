@@ -1,6 +1,7 @@
 import { Store } from '@tanstack/react-store'
 import { playedRecently, sound } from './feedback'
 import type { IconName } from '#/ui/icons'
+import type { Task } from './api'
 
 export type ToastBadge = 'logo' | 'check' | 'trash' | 'alert' | 'flame'
 
@@ -27,6 +28,9 @@ export const ui = new Store({
   scratchOpen: false,
   shortcutsOpen: false,
   toasts: [] as ToastItem[],
+  /** Tasks waiting on a dialog: stop repeating (confirm) and snooze (choices). */
+  stopRepeat: null as Task | null,
+  snoozeTask: null as Task | null,
 })
 
 let seq = 0
@@ -49,3 +53,7 @@ export const setScratch = (open: boolean) =>
   ui.setState((s) => ({ ...s, scratchOpen: open }))
 export const setShortcuts = (open: boolean) =>
   ui.setState((s) => ({ ...s, shortcutsOpen: open }))
+export const askStopRepeat = (t: Task | null) =>
+  ui.setState((s) => ({ ...s, stopRepeat: t }))
+export const askSnooze = (t: Task | null) =>
+  ui.setState((s) => ({ ...s, snoozeTask: t }))

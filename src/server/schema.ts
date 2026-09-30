@@ -9,6 +9,7 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
+import type { RepeatEnd, RepeatRule } from '../lib/repeat'
 
 // ---- Better Auth tables (names and columns match its Drizzle adapter) ----
 export const user = pgTable('user', {
@@ -93,11 +94,20 @@ export const task = pgTable(
     status: text('status').notNull().default('todo'),
     completedAt: timestamp('completed_at'),
     remind: boolean('remind').notNull().default(false),
+    // Repeating tasks: one open task per series, finishing it makes the next.
+    repeatRule: jsonb('repeat_rule').$type<RepeatRule>(),
+    repeatEnd: jsonb('repeat_end').$type<RepeatEnd>(),
+    // Reminders: minutes before the start (null off), and the exact moment to fire (null once sent).
+    remindOffset: integer('remind_offset'),
+    remindAt: timestamp('remind_at'),
     position: integer('position').notNull().default(0),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  (t) => [index('task_user_idx').on(t.userId)],
+  (t) => [
+    index('task_user_idx').on(t.userId),
+    index('task_remind_at_idx').on(t.remindAt),
+  ],
 )
 
 export const subtask = pgTable(
@@ -143,13 +153,32 @@ export const prefs = pgTable('prefs', {
   nudgeState: jsonb('nudge_state').$type<NudgeState>(),
   // Guest ids waiting for the merge prompt after a Google sign in (both sides had data).
   pendingMerge: jsonb('pending_merge').$type<string[]>(),
+  // IANA name such as Africa/Lagos; reminders count in it.
+  timezone: text('timezone'),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
 export interface NudgeState {
   task?: string
   days?: string
+  /** The day the reminders pre prompt was last dismissed (7 day rest). */
+  notify?: string
 }
+
+// One row per browser that turned on reminders. Removed when the push service says it's gone.
+export const pushSubscription = pgTable(
+  'push_subscription',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    endpoint: text('endpoint').notNull().unique(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [index('push_subscription_user_idx').on(t.userId)],
+)
 
 // AI calls per user per UTC day (Phase 3 limit: 20 a day).
 export const aiUsage = pgTable(
@@ -226,6 +255,15 @@ create index if not exists habit_user_idx on "habit"(user_id);
 create table if not exists "habit_checkin" (id text primary key, user_id text not null, habit_id text not null, date text not null, created_at timestamp not null default now());
 create unique index if not exists habit_checkin_day_idx on "habit_checkin"(habit_id, date);
 create index if not exists habit_checkin_user_idx on "habit_checkin"(user_id);
+alter table "task" add column if not exists repeat_rule jsonb;
+alter table "task" add column if not exists repeat_end jsonb;
+alter table "task" add column if not exists remind_offset integer;
+alter table "task" add column if not exists remind_at timestamp;
+update "task" set remind_offset = 0 where remind = true and remind_offset is null;
+create index if not exists task_remind_at_idx on "task"(remind_at);
+alter table "prefs" add column if not exists timezone text;
+create table if not exists "push_subscription" (id text primary key, user_id text not null, endpoint text not null unique, p256dh text not null, auth text not null, user_agent text, created_at timestamp not null default now());
+create index if not exists push_subscription_user_idx on "push_subscription"(user_id);
 `
 
 export const schema = {
@@ -241,4 +279,5 @@ export const schema = {
   aiUsage,
   habit,
   habitCheckin,
+  pushSubscription,
 }

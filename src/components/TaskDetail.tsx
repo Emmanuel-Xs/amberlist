@@ -5,7 +5,11 @@ import type { Task, TaskInput } from '#/lib/api'
 import { sound } from '#/lib/feedback'
 import { toast } from '#/lib/store'
 import { Icon } from '#/ui/icons'
-import { Button, Chip, Input, Switch } from '#/ui/zen'
+import { Button, Chip, Input } from '#/ui/zen'
+import { describeRepeat, nextOccurrence, nextLabel } from '#/lib/repeat'
+import { RemindField } from './RemindPicker'
+import { RepeatFields } from './RepeatPicker'
+import { toISODate } from '#/lib/dates'
 import { AiBreakdown } from './AiBreakdown'
 import { NoteCard } from './Cards'
 import { TickFill, tickSound } from './TickFill'
@@ -271,12 +275,32 @@ export function TaskDetail({
         </div>
       </div>
 
-      <Switch
-        label="Remind me when it starts"
-        icon="bell"
-        checked={task.remind}
-        onChange={(v) => save({ remind: v })}
-      />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '16px 20px',
+        }}
+      >
+        <RepeatFields
+          value={{ rule: task.repeatRule, end: task.repeatEnd }}
+          startDate={task.startDate ?? ''}
+          onStartDate={(d) => save({ startDate: d })}
+          onChange={(r) => save({ repeatRule: r.rule, repeatEnd: r.end })}
+          between={
+            <RemindField
+              value={task.remindOffset}
+              timing={{
+                startDate: task.startDate ?? '',
+                startTime: task.startTime ?? '',
+                dueDate: task.dueDate ?? '',
+              }}
+              onChange={(o) => save({ remindOffset: o })}
+            />
+          }
+        />
+      </div>
+      <RepeatNote task={task} />
 
       <section
         aria-labelledby={`st-${task.id}`}
@@ -471,5 +495,33 @@ export function TaskDetail({
         )}
       </span>
     </div>
+  )
+}
+
+/** "Done on the 1st creates the next one for 1 Nov." plus where Skip and Stop live. */
+function RepeatNote({ task }: { task: Task }) {
+  if (!task.repeatRule || !task.startDate) return null
+  const today = toISODate(new Date())
+  const occ = nextOccurrence(
+    task.repeatRule,
+    task.repeatEnd,
+    task.startDate,
+    today,
+  )
+  return (
+    <p
+      style={{
+        margin: 0,
+        fontSize: 13,
+        lineHeight: '19px',
+        color: 'var(--ink-muted)',
+      }}
+    >
+      {describeRepeat(task.repeatRule, task.repeatEnd, task.startDate)}{' '}
+      {occ
+        ? `Marking it done makes the next one for ${nextLabel(occ.date, today)}.`
+        : 'This is the last one, so marking it done makes no new task.'}{' '}
+      Skip this one and Stop repeating are in the menu on the task list.
+    </p>
   )
 }

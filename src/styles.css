@@ -2023,6 +2023,17 @@ select:-webkit-autofill {
   display: grid;
   place-items: center;
 }
+.habit-row-icon svg {
+  transition:
+    fill 0.18s ease-out,
+    stroke 0.18s ease-out;
+}
+/* Hover previews the filled honey icon, like the nav. */
+.habit-row:hover .habit-row-icon svg,
+.habit-row-link:focus-visible .habit-row-icon svg {
+  fill: var(--accent);
+  stroke: var(--accent-ink);
+}
 .habit-row-body {
   flex: 1;
   min-width: 0;
@@ -2589,4 +2600,173 @@ select:-webkit-autofill {
 }
 .legal-meta {
   font-size: 13px;
+}
+
+/* Repeat and Remind me pickers (Round 4, boards 17 to 19) */
+.pk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.pk-label {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+.pk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pk-days {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.pk-day {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+.pk-day[aria-checked='true'] {
+  background: var(--accent);
+  border: 1.5px solid var(--accent-edge);
+  color: var(--on-accent);
+}
+.pk-day:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.pk-error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--danger);
+}
+.pk-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.pk-note-icon {
+  color: var(--accent-ink);
+  padding-top: 2px;
+  display: inline-flex;
+}
+.pk-note-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 500;
+}
+.pk-note-text small {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+.pk-inline {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.pk-inline .zn-field {
+  width: 96px;
+}
+.pk-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.pk-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 -6px;
+}
+.pk-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+.pk-opt:hover {
+  background: var(--line);
+}
+.pk-opt:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.pk-opt[aria-checked='true'] {
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+.pk-opt-main {
+  flex: 1;
+  min-width: 0;
+}
+.pk-opt-side {
+  font-size: 12px;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+.pk-opt-check {
+  color: var(--accent-ink);
+  display: inline-flex;
+  width: 18px;
+  justify-content: center;
+}
+.pk-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+/* Chips that sit beside a task's date: repeat first, then reminder. */
+.task-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.task-chip--soft {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.task-chip--warn {
+  color: var(--ink-muted);
 }

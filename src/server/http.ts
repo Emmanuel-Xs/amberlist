@@ -3,7 +3,7 @@ import type { ZodType } from 'zod'
 import { ensureSchema, getDb } from './db'
 import type { Db } from './db'
 import { getAuth } from './auth'
-import { NotFoundError } from './services'
+import { NotFoundError, ValidationError } from './services'
 
 export class HttpError extends Error {
   constructor(
@@ -105,10 +105,39 @@ export function route(fn: (ctx: Ctx) => Promise<Response>) {
         )
       if (err instanceof NotFoundError)
         return json({ error: 'Not found.' }, 404)
+      if (err instanceof ValidationError)
+        return json({ error: err.message }, 400)
       if (err instanceof HttpError)
         return json({ error: err.message }, err.status)
       console.error(err)
       return json({ error: 'Something went wrong.' }, 500)
     }
   }
+}
+
+/**
+ * For the scheduler only (GitHub Actions calling /api/cron/*): no session, a shared secret in the
+ * Authorization header instead. Fails closed when CRON_SECRET is not set.
+ */
+export function cronRoute(fn: (db: Db) => Promise<Response>) {
+  return async ({ request }: { request: Request }) => {
+    const secret = process.env.CRON_SECRET
+    const given = request.headers.get('authorization') ?? ''
+    if (!secret || !safeEqual(given, `Bearer ${secret}`))
+      return json({ error: 'Not allowed.' }, 401)
+    try {
+      await ensureSchema()
+      return await fn(getDb())
+    } catch (err) {
+      console.error(err)
+      return json({ error: 'Something went wrong.' }, 500)
+    }
+  }
+}
+
+function safeEqual(a: string, b: string) {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
 }

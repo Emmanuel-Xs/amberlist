@@ -2,9 +2,11 @@
  * - Hashed /assets/* files: cache first (they never change). Icons and manifest: stale while revalidate.
  * - Page navigations: network first, falling back to the cached page, then the cached home shell.
  * - /api/* is never cached or touched: data stays live and private.
+ * - Push: shows the reminder (Done and Snooze buttons where the browser has them), or tells a
+ *   focused Honeylist tab so it can show its own banner.
  * Bump VERSION to drop old caches on the next visit.
  */
-const VERSION = 'v1'
+const VERSION = 'v2'
 const SHELL = `honeylist-shell-${VERSION}`
 const STATIC = `honeylist-static-${VERSION}`
 const PAGES = ['/', '/tasks', '/notes', '/folders', '/habits', '/profile']
@@ -136,4 +138,88 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(cacheFirst(request))
   else if (isStatic(url))
     event.respondWith(staleWhileRevalidate(request, event))
+})
+
+// ---------- Reminders (Web Push) ----------
+const SNOOZE_MINUTES = 10
+
+self.addEventListener('push', (event) => {
+  let data = {}
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch {
+    data = { title: 'Honeylist', body: event.data ? event.data.text() : '' }
+  }
+  event.waitUntil(
+    (async () => {
+      const clients = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      })
+      const focused = clients.find((c) => c.focused && c.visibilityState === 'visible')
+      // The app is open in front of them: it shows its own banner, no system notification.
+      if (focused && data.taskId) {
+        focused.postMessage({ type: 'reminder', ...data })
+        return
+      }
+      await self.registration.showNotification(data.title || 'Honeylist', {
+        body: data.body || '',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        // One notification per task: a repeat or a snooze replaces it instead of stacking.
+        tag: data.tag || data.taskId || 'honeylist',
+        renotify: true,
+        data: { taskId: data.taskId, url: data.url || '/' },
+        actions: data.taskId
+          ? [
+              { action: 'done', title: 'Done' },
+              { action: 'snooze', title: 'Snooze' },
+            ]
+          : [],
+      })
+    })(),
+  )
+})
+
+async function callApi(path, init) {
+  try {
+    await fetch(path, {
+      ...init,
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+    })
+  } catch {
+    // Offline: nothing to do, the reminder can be handled in the app.
+  }
+}
+
+self.addEventListener('notificationclick', (event) => {
+  const { taskId, url } = event.notification.data || {}
+  event.notification.close()
+  event.waitUntil(
+    (async () => {
+      if (taskId && event.action === 'done')
+        return callApi(`/api/tasks/${taskId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'done' }),
+        })
+      if (taskId && event.action === 'snooze')
+        return callApi(`/api/tasks/${taskId}/snooze`, {
+          method: 'POST',
+          body: JSON.stringify({ minutes: SNOOZE_MINUTES }),
+        })
+      const target = url || '/'
+      const clients = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      })
+      const open = clients.find((c) => new URL(c.url).origin === self.location.origin)
+      if (open) {
+        await open.focus()
+        if ('navigate' in open) return open.navigate(target).catch(() => undefined)
+        return undefined
+      }
+      return self.clients.openWindow(target)
+    })(),
+  )
 })

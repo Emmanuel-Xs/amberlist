@@ -7,6 +7,7 @@ import { setSoundsEnabled, sound } from '#/lib/feedback'
 import { setShortcuts, toast } from '#/lib/store'
 import { Button, Chip, ConfirmDialog, Input, Switch } from '#/ui/zen'
 import { LogoMark } from '#/ui/logo'
+import { NotifySettings } from '#/components/NotifySettings'
 import { AccountStatus, Avatar, SaveDataCard } from '#/components/Account'
 import { ensureGuest } from '#/lib/auth-client'
 import { holdWelcome } from '#/lib/welcomeHold'
@@ -240,6 +241,7 @@ function Profile() {
                 update.mutate({ sounds: v })
               }}
             />
+            <NotifySettings />
             <Button
               variant="ghost"
               size="sm"

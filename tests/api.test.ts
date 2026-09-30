@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { resetDbForTests } from '../src/server/db'
+import { getDb as liveDb, resetDbForTests } from '../src/server/db'
 import { resetRateLimits, setUserResolver } from '../src/server/http'
 import * as h from '../src/server/handlers'
+import { sendDueReminders, setPushSender } from '../src/server/push'
 
 // Every endpoint is tested for: success, bad input (400), no session (401) and another user's data (404).
 setUserResolver(async (req) => req.headers.get('x-test-user'))
@@ -73,6 +74,12 @@ describe('auth', () => {
       [h.meData.GET, 'GET'],
       [h.meData.DELETE, 'DELETE'],
       [h.searchAll.GET, 'GET'],
+      [h.taskSkip.POST, 'POST'],
+      [h.taskSnooze.POST, 'POST'],
+      [h.pushConfig.GET, 'GET'],
+      [h.pushSubscriptionRoute.POST, 'POST'],
+      [h.pushSubscriptionRoute.DELETE, 'DELETE'],
+      [h.pushTest.POST, 'POST'],
     ]
     for (const [fn, method] of endpoints) {
       const r = await call(fn, method, {
@@ -1124,10 +1131,17 @@ describe('google sign in: linking and merging a guest', () => {
     const folder = work.find((c: { name: string }) => c.name === 'Work')
     const { body: t } = await call(h.tasks.POST, 'POST', {
       user,
-      body: { title: `${label} task`, categoryId: folder.id, subtasks: ['step'] },
+      body: {
+        title: `${label} task`,
+        categoryId: folder.id,
+        subtasks: ['step'],
+      },
     })
     await call(h.notes.POST, 'POST', { user, body: { title: `${label} note` } })
-    await call(h.scratchpad.PUT, 'PUT', { user, body: { body: `${label} pad` } })
+    await call(h.scratchpad.PUT, 'PUT', {
+      user,
+      body: { body: `${label} pad` },
+    })
     const { body: habit } = await call(h.habits.POST, 'POST', {
       user,
       body: { name: `${label} habit` },
@@ -1144,10 +1158,19 @@ describe('google sign in: linking and merging a guest', () => {
     const { getDb } = await import('../src/server/db')
     const s = await import('../src/server/services')
     await seed('alice', 'Account')
-    await call(h.me.PATCH, 'PATCH', { user: 'alice', body: { displayName: 'Alice' } })
+    await call(h.me.PATCH, 'PATCH', {
+      user: 'alice',
+      body: { displayName: 'Alice' },
+    })
     const guestTask = await seed('guest', 'Guest')
-    await call(h.categories.POST, 'POST', { user: 'guest', body: { name: 'Gym' } })
-    await call(h.me.PATCH, 'PATCH', { user: 'guest', body: { displayName: 'G' } })
+    await call(h.categories.POST, 'POST', {
+      user: 'guest',
+      body: { name: 'Gym' },
+    })
+    await call(h.me.PATCH, 'PATCH', {
+      user: 'guest',
+      body: { displayName: 'G' },
+    })
 
     await s.mergeGuestData(getDb(), 'guest', 'alice')
 
@@ -1172,27 +1195,40 @@ describe('google sign in: linking and merging a guest', () => {
     )
     const habits = (await call(h.habits.GET, 'GET')).body
     expect(habits).toHaveLength(2)
-    expect(habits.every((x: { checkins: string[] }) => x.checkins.length === 1)).toBe(true)
+    expect(
+      habits.every((x: { checkins: string[] }) => x.checkins.length === 1),
+    ).toBe(true)
     // Prefs: the account keeps its own.
     expect((await call(h.me.GET, 'GET')).body.displayName).toBe('Alice')
     // Nothing is left behind on the guest.
-    expect((await call(h.tasks.GET, 'GET', { user: 'guest' })).body).toHaveLength(0)
-    expect((await call(h.habits.GET, 'GET', { user: 'guest' })).body).toHaveLength(0)
+    expect(
+      (await call(h.tasks.GET, 'GET', { user: 'guest' })).body,
+    ).toHaveLength(0)
+    expect(
+      (await call(h.habits.GET, 'GET', { user: 'guest' })).body,
+    ).toHaveLength(0)
   })
 
   it('a fresh account takes the guest data at once, prefs included', async () => {
     const { getDb } = await import('../src/server/db')
     const s = await import('../src/server/services')
     await seed('guest', 'Guest')
-    await call(h.me.PATCH, 'PATCH', { user: 'guest', body: { displayName: 'Guesty' } })
+    await call(h.me.PATCH, 'PATCH', {
+      user: 'guest',
+      body: { displayName: 'Guesty' },
+    })
     expect(await s.linkGuestAccount(getDb(), 'guest', 'fresh')).toBe('merged')
     const me = (await call(h.me.GET, 'GET', { user: 'fresh' })).body
     expect(me.displayName).toBe('Guesty')
     expect(me.pendingMerge).toBeNull()
-    expect((await call(h.tasks.GET, 'GET', { user: 'fresh' })).body).toHaveLength(1)
+    expect(
+      (await call(h.tasks.GET, 'GET', { user: 'fresh' })).body,
+    ).toHaveLength(1)
     // Defaults are not seeded twice.
     const cats = (await call(h.categories.GET, 'GET', { user: 'fresh' })).body
-    expect(cats.filter((c: { name: string }) => c.name === 'Work')).toHaveLength(1)
+    expect(
+      cats.filter((c: { name: string }) => c.name === 'Work'),
+    ).toHaveLength(1)
   })
 
   it('an empty guest is dropped without a prompt', async () => {
@@ -1200,7 +1236,9 @@ describe('google sign in: linking and merging a guest', () => {
     const s = await import('../src/server/services')
     await seed('alice', 'Account')
     await call(h.categories.GET, 'GET', { user: 'guest' })
-    expect(await s.linkGuestAccount(getDb(), 'guest', 'alice')).toBe('discarded')
+    expect(await s.linkGuestAccount(getDb(), 'guest', 'alice')).toBe(
+      'discarded',
+    )
     expect((await call(h.me.GET, 'GET')).body.pendingMerge).toBeNull()
   })
 
@@ -1221,7 +1259,8 @@ describe('google sign in: linking and merging a guest', () => {
     expect((await call(h.tasks.GET, 'GET')).body).toHaveLength(2)
     // Answered once: a second answer finds nothing waiting.
     expect(
-      (await call(h.meMerge.POST, 'POST', { body: { choice: 'merge' } })).status,
+      (await call(h.meMerge.POST, 'POST', { body: { choice: 'merge' } }))
+        .status,
     ).toBe(404)
   })
 
@@ -1231,13 +1270,17 @@ describe('google sign in: linking and merging a guest', () => {
     await seed('alice', 'Account')
     await seed('guest', 'Guest')
     await s.linkGuestAccount(getDb(), 'guest', 'alice')
-    const r = await call(h.meMerge.POST, 'POST', { body: { choice: 'discard' } })
+    const r = await call(h.meMerge.POST, 'POST', {
+      body: { choice: 'discard' },
+    })
     expect(r.status).toBe(200)
     const titles = (await call(h.tasks.GET, 'GET')).body.map(
       (t: { title: string }) => t.title,
     )
     expect(titles).toEqual(['Account task'])
-    expect((await call(h.tasks.GET, 'GET', { user: 'guest' })).body).toHaveLength(0)
+    expect(
+      (await call(h.tasks.GET, 'GET', { user: 'guest' })).body,
+    ).toHaveLength(0)
   })
 
   it('POST /api/me/merge: 400 on bad input, 401 without a session, 404 for another user', async () => {
@@ -1273,7 +1316,9 @@ describe('google sign in: linking and merging a guest', () => {
         })
       ).status,
     ).toBe(404)
-    expect((await call(h.tasks.GET, 'GET', { user: 'bob' })).body).toHaveLength(0)
+    expect((await call(h.tasks.GET, 'GET', { user: 'bob' })).body).toHaveLength(
+      0,
+    )
   })
 
   it('GET /api/me says guest, and Google is off without the keys', async () => {
@@ -1290,11 +1335,535 @@ describe('google sign in: linking and merging a guest', () => {
   })
 
   it('remembers a dismissed nudge', async () => {
-    const r = await call(h.me.PATCH, 'PATCH', { body: { nudgeDismissed: 'task' } })
+    const r = await call(h.me.PATCH, 'PATCH', {
+      body: { nudgeDismissed: 'task' },
+    })
     expect(r.status).toBe(200)
     expect(r.body.nudgeState.task).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     expect(
-      (await call(h.me.PATCH, 'PATCH', { body: { nudgeDismissed: 'later' } })).status,
+      (await call(h.me.PATCH, 'PATCH', { body: { nudgeDismissed: 'later' } }))
+        .status,
     ).toBe(400)
+  })
+})
+
+// ---------- Repeating tasks ----------
+const ymd = (offsetDays = 0) =>
+  new Date(Date.now() + offsetDays * 86_400_000).toISOString().slice(0, 10)
+
+describe('repeating tasks', () => {
+  const make = async (body: Record<string, unknown>, user = 'alice') =>
+    call(h.tasks.POST, 'POST', {
+      user,
+      body: {
+        title: 'Standup',
+        startDate: ymd(0),
+        startTime: '09:30',
+        ...body,
+      },
+    })
+
+  it('needs a start date and a sane rule', async () => {
+    const noDate = await call(h.tasks.POST, 'POST', {
+      body: { title: 'x', repeatRule: { kind: 'daily' } },
+    })
+    expect(noDate.status).toBe(400)
+    const noDays = await make({ repeatRule: { kind: 'weekly', days: [] } })
+    expect(noDays.status).toBe(400)
+    const junk = await make({ repeatRule: { kind: 'yearly' } })
+    expect(junk.status).toBe(400)
+    const extra = await make({ repeatRule: { kind: 'daily', nope: 1 } })
+    expect(extra.status).toBe(400)
+  })
+
+  it('creates the next task in the same request when a repeat is completed', async () => {
+    const created = await make({
+      repeatRule: { kind: 'daily' },
+      dueDate: ymd(0),
+      priority: 'high',
+      subtasks: ['Prep', 'Send'],
+    })
+    expect(created.status).toBe(201)
+    expect(created.body.repeatRule).toEqual({ kind: 'daily' })
+    const id = created.body.id
+    const sub = created.body.subtasks[0].id
+    await call(h.subtaskById.PATCH, 'PATCH', {
+      params: { id: sub },
+      body: { done: true },
+    })
+
+    const done = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id },
+      body: { status: 'done' },
+    })
+    expect(done.status).toBe(200)
+    expect(done.body.status).toBe('done')
+    expect(done.body.next).toMatchObject({
+      title: 'Standup',
+      status: 'todo',
+      startDate: ymd(1),
+      dueDate: ymd(1),
+      startTime: '09:30',
+      priority: 'high',
+    })
+    expect(
+      done.body.next.subtasks.map((x: { done: boolean }) => x.done),
+    ).toEqual([false, false])
+    // One open task per series.
+    const open = (await call(h.tasks.GET, 'GET', { query: 'status=todo' })).body
+    expect(open).toHaveLength(1)
+
+    // Undo: reopen, and delete the new one.
+    const reopened = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id },
+      body: { status: 'todo' },
+    })
+    expect(reopened.body.next).toBeNull()
+    await call(h.taskById.DELETE, 'DELETE', {
+      params: { id: done.body.next.id },
+    })
+    expect((await call(h.tasks.GET, 'GET')).body).toHaveLength(1)
+  })
+
+  it('counts down "after N times" and stops on the last one', async () => {
+    const created = await make({
+      repeatRule: { kind: 'daily' },
+      repeatEnd: { kind: 'after', count: 2 },
+    })
+    const first = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: created.body.id },
+      body: { status: 'done' },
+    })
+    expect(first.body.next.repeatEnd).toEqual({ kind: 'after', count: 1 })
+    const last = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: first.body.next.id },
+      body: { status: 'done' },
+    })
+    expect(last.body.next).toBeNull()
+  })
+
+  it('makes no new task after the end date or once repeating is stopped', async () => {
+    const ended = await make({
+      repeatRule: { kind: 'daily' },
+      repeatEnd: { kind: 'on', date: ymd(0) },
+    })
+    expect(
+      (
+        await call(h.taskById.PATCH, 'PATCH', {
+          params: { id: ended.body.id },
+          body: { status: 'done' },
+        })
+      ).body.next,
+    ).toBeNull()
+
+    const stopped = await make({ repeatRule: { kind: 'daily' } })
+    const off = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: stopped.body.id },
+      body: { repeatRule: null, repeatEnd: null },
+    })
+    expect(off.body.repeatRule).toBeNull()
+    expect(
+      (
+        await call(h.taskById.PATCH, 'PATCH', {
+          params: { id: stopped.body.id },
+          body: { status: 'done' },
+        })
+      ).body.next,
+    ).toBeNull()
+  })
+
+  it('jumps past today when the task was overdue', async () => {
+    const created = await make({
+      startDate: ymd(-3),
+      dueDate: ymd(-3),
+      repeatRule: { kind: 'daily' },
+    })
+    const done = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: created.body.id },
+      body: { status: 'done' },
+    })
+    expect(done.body.next.startDate).toBe(ymd(1))
+    expect(done.body.next.dueDate).toBe(ymd(1))
+  })
+
+  it('a monthly rule remembers its day of the month', async () => {
+    const created = await make({
+      startDate: '2027-01-31',
+      repeatRule: { kind: 'monthly' },
+    })
+    expect(created.body.repeatRule).toEqual({ kind: 'monthly', day: 31 })
+  })
+
+  it('skips to the next day without completing', async () => {
+    const created = await make({
+      repeatRule: { kind: 'daily' },
+      repeatEnd: { kind: 'after', count: 3 },
+    })
+    const id = created.body.id
+    const skipped = await call(h.taskSkip.POST, 'POST', { params: { id } })
+    expect(skipped.status).toBe(200)
+    expect(skipped.body).toMatchObject({
+      status: 'todo',
+      startDate: ymd(1),
+      completedAt: null,
+      repeatEnd: { kind: 'after', count: 2 },
+    })
+    expect(
+      (await call(h.tasks.GET, 'GET', { query: 'status=done' })).body,
+    ).toHaveLength(0)
+  })
+
+  it('refuses to skip a plain task or the last one, and other people’s tasks', async () => {
+    const plain = await make({})
+    expect(
+      (await call(h.taskSkip.POST, 'POST', { params: { id: plain.body.id } }))
+        .status,
+    ).toBe(400)
+    const last = await make({
+      repeatRule: { kind: 'daily' },
+      repeatEnd: { kind: 'after', count: 1 },
+    })
+    expect(
+      (await call(h.taskSkip.POST, 'POST', { params: { id: last.body.id } }))
+        .status,
+    ).toBe(400)
+    const mine = await make({ repeatRule: { kind: 'daily' } })
+    expect(
+      (
+        await call(h.taskSkip.POST, 'POST', {
+          user: 'bob',
+          params: { id: mine.body.id },
+        })
+      ).status,
+    ).toBe(404)
+    expect(
+      (await call(h.taskSkip.POST, 'POST', { params: { id: 'missing' } }))
+        .status,
+    ).toBe(404)
+  })
+})
+
+// ---------- Reminders and push ----------
+describe('reminders', () => {
+  it('works out when to fire from the start time, offset and time zone', async () => {
+    await call(h.me.PATCH, 'PATCH', { body: { timezone: 'Africa/Lagos' } })
+    const t = await call(h.tasks.POST, 'POST', {
+      body: {
+        title: 'Call bank',
+        startDate: ymd(2),
+        startTime: '10:00',
+        remindOffset: 10,
+      },
+    })
+    expect(t.status).toBe(201)
+    expect(t.body).toMatchObject({ remind: true, remindOffset: 10 })
+    expect(new Date(t.body.remindAt).toISOString()).toBe(
+      `${ymd(2)}T08:50:00.000Z`,
+    )
+
+    const off = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: t.body.id },
+      body: { remindOffset: null },
+    })
+    expect(off.body).toMatchObject({
+      remind: false,
+      remindOffset: null,
+      remindAt: null,
+    })
+  })
+
+  it('uses 09:00 without a time, and accepts the old on/off switch', async () => {
+    const t = await call(h.tasks.POST, 'POST', {
+      body: { title: 'No time', startDate: ymd(3), remind: true },
+    })
+    expect(t.body.remindOffset).toBe(0)
+    expect(new Date(t.body.remindAt).toISOString()).toBe(
+      `${ymd(3)}T09:00:00.000Z`,
+    )
+  })
+
+  it('never arms a reminder for a done task, an undated task or the past', async () => {
+    const done = await call(h.tasks.POST, 'POST', {
+      body: { title: 'a', startDate: ymd(2), remindOffset: 0, status: 'done' },
+    })
+    expect(done.body.remindAt).toBeNull()
+    const undated = await call(h.tasks.POST, 'POST', {
+      body: { title: 'b', remindOffset: 0 },
+    })
+    expect(undated.body.remindAt).toBeNull()
+    const past = await call(h.tasks.POST, 'POST', {
+      body: { title: 'c', startDate: ymd(-2), remindOffset: 0 },
+    })
+    expect(past.body.remindAt).toBeNull()
+  })
+
+  it('moves the reminder with the task and clears it when done', async () => {
+    const t = await call(h.tasks.POST, 'POST', {
+      body: {
+        title: 'x',
+        startDate: ymd(2),
+        startTime: '10:00',
+        remindOffset: 60,
+      },
+    })
+    const moved = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: t.body.id },
+      body: { startDate: ymd(4) },
+    })
+    expect(new Date(moved.body.remindAt).toISOString()).toBe(
+      `${ymd(4)}T09:00:00.000Z`,
+    )
+    const done = await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: t.body.id },
+      body: { status: 'done' },
+    })
+    expect(done.body.remindAt).toBeNull()
+  })
+
+  it('validates the offset and the time zone', async () => {
+    expect(
+      (
+        await call(h.tasks.POST, 'POST', {
+          body: { title: 'x', remindOffset: -5 },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.tasks.POST, 'POST', {
+          body: { title: 'x', remindOffset: 1.5 },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (await call(h.me.PATCH, 'PATCH', { body: { timezone: 'Mars/Base' } }))
+        .status,
+    ).toBe(400)
+    expect(
+      (await call(h.me.PATCH, 'PATCH', { body: { timezone: 'Europe/London' } }))
+        .status,
+    ).toBe(200)
+  })
+
+  it('snoozes a task', async () => {
+    const t = await call(h.tasks.POST, 'POST', { body: { title: 'x' } })
+    const id = t.body.id
+    const r = await call(h.taskSnooze.POST, 'POST', {
+      params: { id },
+      body: { minutes: 10 },
+    })
+    expect(r.status).toBe(200)
+    const gap = new Date(r.body.remindAt).getTime() - Date.now()
+    expect(gap).toBeGreaterThan(9 * 60_000)
+    expect(gap).toBeLessThan(11 * 60_000)
+    expect(r.body.remind).toBe(true)
+
+    expect(
+      (
+        await call(h.taskSnooze.POST, 'POST', {
+          params: { id },
+          body: { minutes: 0 },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.taskSnooze.POST, 'POST', {
+          params: { id },
+          body: { minutes: 5, extra: 1 },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.taskSnooze.POST, 'POST', {
+          user: 'bob',
+          params: { id },
+          body: { minutes: 10 },
+        })
+      ).status,
+    ).toBe(404)
+    await call(h.taskById.PATCH, 'PATCH', {
+      params: { id },
+      body: { status: 'done' },
+    })
+    expect(
+      (
+        await call(h.taskSnooze.POST, 'POST', {
+          params: { id },
+          body: { minutes: 10 },
+        })
+      ).status,
+    ).toBe(404)
+  })
+})
+
+describe('push subscriptions and delivery', () => {
+  const sub = (n = 1) => ({
+    endpoint: `https://push.example.com/send/${n}`,
+    keys: { p256dh: 'p256dh-key', auth: 'auth-key' },
+  })
+  const sent: { endpoint: string; title: string; body: string }[] = []
+  beforeEach(() => {
+    sent.length = 0
+    setPushSender(async (target, payload) => {
+      sent.push({
+        endpoint: target.endpoint,
+        title: payload.title,
+        body: payload.body,
+      })
+      return !target.endpoint.endsWith('/gone')
+    })
+  })
+  afterEach(() => setPushSender(null))
+
+  it('saves and removes a subscription', async () => {
+    expect(
+      (await call(h.pushSubscriptionRoute.POST, 'POST', { body: sub() }))
+        .status,
+    ).toBe(201)
+    expect(
+      (await call(h.pushSubscriptionRoute.POST, 'POST', { body: sub() }))
+        .status,
+    ).toBe(201)
+    expect((await call(h.pushTest.POST, 'POST')).body.reached).toBe(1)
+    expect(
+      (
+        await call(h.pushSubscriptionRoute.DELETE, 'DELETE', {
+          body: { endpoint: sub().endpoint },
+        })
+      ).status,
+    ).toBe(200)
+    expect((await call(h.pushTest.POST, 'POST')).body.reached).toBe(0)
+  })
+
+  it('validates a subscription', async () => {
+    expect(
+      (await call(h.pushSubscriptionRoute.POST, 'POST', { body: {} })).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.pushSubscriptionRoute.POST, 'POST', {
+          body: { endpoint: 'not a url', keys: { p256dh: 'a', auth: 'b' } },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.pushSubscriptionRoute.DELETE, 'DELETE', {
+          body: { endpoint: 5 },
+        })
+      ).status,
+    ).toBe(400)
+  })
+
+  it('does not let one person remove another person’s subscription', async () => {
+    await call(h.pushSubscriptionRoute.POST, 'POST', { body: sub() })
+    await call(h.pushSubscriptionRoute.DELETE, 'DELETE', {
+      user: 'bob',
+      body: { endpoint: sub().endpoint },
+    })
+    expect((await call(h.pushTest.POST, 'POST')).body.reached).toBe(1)
+  })
+
+  it('reports whether push is configured', async () => {
+    const r = await call(h.pushConfig.GET, 'GET')
+    expect(r.status).toBe(200)
+    expect(r.body).toHaveProperty('enabled')
+  })
+
+  it('sends a due reminder once, only to people with a subscribed browser', async () => {
+    const mk = (user: string, title: string) =>
+      call(h.tasks.POST, 'POST', {
+        user,
+        body: {
+          title,
+          startDate: ymd(1),
+          startTime: '18:00',
+          remindOffset: 10,
+        },
+      })
+    const mine = await mk('alice', 'Submit HNG stage 1')
+    const bobs = await mk('bob', 'Bob task')
+    await call(h.pushSubscriptionRoute.POST, 'POST', { body: sub(1) })
+
+    const db = liveDb()
+    const later = new Date(Date.now() + 3 * 86_400_000)
+    expect(await sendDueReminders(db, later)).toEqual({ claimed: 1, sent: 1 })
+    expect(sent).toEqual([
+      {
+        endpoint: sub(1).endpoint,
+        title: 'Submit HNG stage 1',
+        body: 'Starts in 10 minutes, at 18:00.',
+      },
+    ])
+    // Claimed, so a second run has nothing left.
+    expect(await sendDueReminders(db, later)).toEqual({ claimed: 0, sent: 0 })
+    expect(
+      (await call(h.taskById.GET, 'GET', { params: { id: mine.body.id } })).body
+        .remindAt,
+    ).toBeNull()
+    // Bob has no subscription, so his reminder stays for the in-app banner.
+    expect(
+      (
+        await call(h.taskById.GET, 'GET', {
+          user: 'bob',
+          params: { id: bobs.body.id },
+        })
+      ).body.remindAt,
+    ).not.toBeNull()
+  })
+
+  it('skips done tasks and drops a subscription the push service says is gone', async () => {
+    const t = await call(h.tasks.POST, 'POST', {
+      body: { title: 'x', startDate: ymd(1), remindOffset: 0 },
+    })
+    await call(h.pushSubscriptionRoute.POST, 'POST', {
+      body: { ...sub(), endpoint: 'https://push.example.com/gone' },
+    })
+    const later = new Date(Date.now() + 3 * 86_400_000)
+    await sendDueReminders(liveDb(), later)
+    expect((await call(h.pushTest.POST, 'POST')).body.reached).toBe(0)
+
+    const t2 = await call(h.tasks.POST, 'POST', {
+      body: { title: 'y', startDate: ymd(1), remindOffset: 0 },
+    })
+    await call(h.pushSubscriptionRoute.POST, 'POST', { body: sub(2) })
+    await call(h.taskById.PATCH, 'PATCH', {
+      params: { id: t2.body.id },
+      body: { status: 'done' },
+    })
+    sent.length = 0
+    expect(await sendDueReminders(liveDb(), later)).toEqual({
+      claimed: 0,
+      sent: 0,
+    })
+    expect(sent).toHaveLength(0)
+    expect(t.status).toBe(201)
+  })
+
+  describe('the scheduler endpoint', () => {
+    const cron = (auth?: string) =>
+      h.cronReminders.POST({
+        request: new Request('http://test.local/api/cron/reminders', {
+          method: 'POST',
+          headers: auth ? { authorization: auth } : {},
+        }),
+      })
+
+    afterEach(() => vi.unstubAllEnvs())
+
+    it('refuses without the secret, and when no secret is set', async () => {
+      expect((await cron()).status).toBe(401)
+      vi.stubEnv('CRON_SECRET', 'letmein')
+      expect((await cron()).status).toBe(401)
+      expect((await cron('Bearer wrong!')).status).toBe(401)
+      expect((await cron('Bearer letmein')).status).toBe(200)
+    })
+
+    it('fails closed when CRON_SECRET is empty', async () => {
+      vi.stubEnv('CRON_SECRET', '')
+      expect((await cron('Bearer ')).status).toBe(401)
+    })
   })
 })

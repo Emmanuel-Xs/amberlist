@@ -144,7 +144,8 @@ body {
 .zn-btn-label {
   display: block;
   line-height: 20px;
-  transform: translateY(0.5px);
+  /* Poppins sits its lowercase low in the line box; a 1px bottom pad lifts the text half a pixel so it reads centered. */
+  padding-bottom: 1px;
 }
 .zn-btn--sm .zn-btn-label {
   line-height: 18px;
@@ -767,6 +768,30 @@ body {
   background: var(--accent-soft);
   font-weight: 600;
 }
+/* The active background is a shared-layout pill (NavPill) that slides between items. */
+.zn-nav-pill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+}
+/* Nav icons carry an outline layer and a honey layer; hover previews the honey one. */
+.nav-icon .nav-icon-on {
+  display: none;
+}
+.zn-nav-item.is-active .nav-icon .nav-icon-off,
+.zn-nav-item:hover .nav-icon .nav-icon-off {
+  display: none;
+}
+.zn-nav-item.is-active .nav-icon .nav-icon-on,
+.zn-nav-item:hover .nav-icon .nav-icon-on {
+  display: inline;
+}
+.app-side .zn-nav-item {
+  position: relative;
+  isolation: isolate;
+}
 @media (min-width: 768px) {
   .zn-nav--auto {
     width: var(--layout-nav-rail);
@@ -790,9 +815,6 @@ body {
   .zn-nav--auto .zn-nav-item {
     width: 64px;
     min-height: 60px;
-  }
-  .zn-nav--auto .zn-nav-item.is-active {
-    background: var(--accent-soft);
   }
 }
 @media (min-width: 1024px) {
@@ -1123,6 +1145,10 @@ html {
   color: var(--danger);
   display: grid;
   place-items: center;
+}
+.zn-dialog-icon--accent {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 .zn-dialog-title {
   margin: 4px 0 0;
@@ -1549,4 +1575,38 @@ html {
 .zn-seg-item:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+/* Picker field: an Input that opens a popover or sheet */
+.zn-picker {
+  text-align: left;
+  cursor: pointer;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 38px;
+}
+.zn-picker:focus-visible {
+  border-bottom-color: var(--ring);
+  box-shadow: 0 1px 0 0 var(--ring);
+}
+.zn-picker-ph {
+  color: var(--ink-muted);
+}
+.zn-popover {
+  box-sizing: border-box;
+  min-width: 260px;
+  max-width: calc(100vw - 24px);
+  padding: var(--space-4);
+  border-radius: 20px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  outline: 0;
+  max-height: var(--radix-popover-content-available-height);
+  overflow-y: auto;
 }

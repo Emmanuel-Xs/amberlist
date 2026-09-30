@@ -1,12 +1,17 @@
 import { and, asc, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Db } from './db'
+import { addDays, daysBetween } from '../lib/dates'
+import { nextOccurrence } from '../lib/repeat'
+import type { RepeatRule } from '../lib/repeat'
+import { remindAtFor, utcToZoned } from '../lib/reminders'
 import {
   category,
   habit,
   habitCheckin,
   note,
   prefs,
+  pushSubscription,
   subtask,
   task,
   user,
@@ -25,6 +30,9 @@ import type {
 } from './validation'
 
 export class NotFoundError extends Error {}
+
+/** Today's date where the user is (their time zone), not the server's. */
+const todayIn = (tz: string) => utcToZoned(new Date(), tz).date
 const id = () => crypto.randomUUID()
 const now = () => new Date()
 
@@ -299,22 +307,81 @@ export async function getTask(db: Db, userId: string, taskId: string) {
   return full
 }
 
+/** Bad combination of otherwise valid fields (a repeat with no start date). Mapped to 400. */
+export class ValidationError extends Error {}
+
+type Repeatable = Pick<
+  TaskRow,
+  'startDate' | 'startTime' | 'dueDate' | 'repeatRule' | 'repeatEnd'
+>
+
+/** A repeat needs a start date to count from; a monthly rule remembers its day of the month. */
+function checkRepeat(t: Repeatable): RepeatRule | null {
+  if (!t.repeatRule) return null
+  if (!t.startDate)
+    throw new ValidationError('Repeating tasks need a start date.')
+  if (t.repeatRule.kind === 'monthly' && !t.repeatRule.day)
+    return { kind: 'monthly', day: Number(t.startDate.slice(8, 10)) }
+  return t.repeatRule
+}
+
+async function timezoneOf(db: Q, userId: string) {
+  const [p] = await db
+    .select({ tz: prefs.timezone })
+    .from(prefs)
+    .where(eq(prefs.userId, userId))
+  return p?.tz ?? 'UTC'
+}
+
+/** When the reminder fires. Null when off, done, undated, or already in the past. */
+function reminderMoment(
+  t: Pick<TaskRow, 'startDate' | 'startTime' | 'dueDate' | 'status'>,
+  offset: number | null,
+  tz: string,
+) {
+  if (t.status === 'done') return null
+  const at = remindAtFor(t, offset, tz)
+  return at && at.getTime() > Date.now() ? at : null
+}
+
 export async function createTask(
   db: Db,
   userId: string,
   input: z.infer<typeof taskCreate>,
 ) {
   await assertCategory(db, userId, input.categoryId)
-  const { subtasks: subs, ...fields } = input
+  const { subtasks: subs, remind, remindOffset, ...fields } = input
   const status = fields.status ?? 'todo'
+  const offset = remindOffset !== undefined ? remindOffset : remind ? 0 : null
+  const rule = checkRepeat({
+    startDate: fields.startDate ?? null,
+    startTime: fields.startTime ?? null,
+    dueDate: fields.dueDate ?? null,
+    repeatRule: fields.repeatRule ?? null,
+    repeatEnd: fields.repeatEnd ?? null,
+  })
+  const tz = await timezoneOf(db, userId)
   const [row] = await db
     .insert(task)
     .values({
       id: id(),
       userId,
       ...fields,
+      repeatRule: rule,
       status,
       completedAt: status === 'done' ? now() : null,
+      remind: offset !== null,
+      remindOffset: offset,
+      remindAt: reminderMoment(
+        {
+          startDate: fields.startDate ?? null,
+          startTime: fields.startTime ?? null,
+          dueDate: fields.dueDate ?? null,
+          status,
+        },
+        offset,
+        tz,
+      ),
     })
     .returning()
   if (subs?.length) {
@@ -331,6 +398,55 @@ export async function createTask(
   return getTask(db, userId, row.id)
 }
 
+/** The next open task of a series: same details, next date, unticked subtasks, counted down end. */
+async function spawnNext(tx: Q, userId: string, from: TaskRow, tz: string) {
+  const rule = checkRepeat(from)
+  if (!rule || !from.startDate) return null
+  const occ = nextOccurrence(rule, from.repeatEnd, from.startDate, todayIn(tz))
+  if (!occ) return null
+  const shift = daysBetween(from.startDate, occ.date)
+  const dueDate = from.dueDate ? addDays(from.dueDate, shift) : null
+  const values = {
+    startDate: occ.date,
+    startTime: from.startTime,
+    dueDate,
+    status: 'todo',
+  }
+  const [row] = await tx
+    .insert(task)
+    .values({
+      id: id(),
+      userId,
+      title: from.title,
+      categoryId: from.categoryId,
+      endTime: from.endTime,
+      priority: from.priority,
+      repeatRule: rule,
+      repeatEnd: occ.end,
+      remind: from.remindOffset !== null,
+      remindOffset: from.remindOffset,
+      remindAt: reminderMoment(values, from.remindOffset, tz),
+      ...values,
+    })
+    .returning()
+  const subs = await tx
+    .select({ title: subtask.title })
+    .from(subtask)
+    .where(and(eq(subtask.userId, userId), eq(subtask.taskId, from.id)))
+    .orderBy(asc(subtask.position), asc(subtask.createdAt))
+  if (subs.length)
+    await tx.insert(subtask).values(
+      subs.map((s, i) => ({
+        id: id(),
+        userId,
+        taskId: row.id,
+        title: s.title,
+        position: i,
+      })),
+    )
+  return row
+}
+
 export async function updateTask(
   db: Db,
   userId: string,
@@ -339,13 +455,118 @@ export async function updateTask(
 ) {
   if (input.categoryId !== undefined)
     await assertCategory(db, userId, input.categoryId)
-  const patch: Partial<TaskRow> = { ...input, updatedAt: now() }
-  if (input.status === 'done') patch.completedAt = now()
-  else if (input.status) patch.completedAt = null
+  const tz = await timezoneOf(db, userId)
+  const nextId = await db.transaction(async (tx) => {
+    const [cur] = await tx
+      .select()
+      .from(task)
+      .where(and(eq(task.id, taskId), eq(task.userId, userId)))
+    if (!cur) throw new NotFoundError()
+    const { remind, remindOffset, ...rest } = input
+    const merged = { ...cur, ...rest }
+    const rule = checkRepeat(merged)
+    const offset =
+      remindOffset !== undefined
+        ? remindOffset
+        : remind !== undefined
+          ? remind
+            ? 0
+            : null
+          : cur.remindOffset
+    const patch: Partial<TaskRow> = {
+      ...rest,
+      updatedAt: now(),
+      remind: offset !== null,
+      remindOffset: offset,
+      remindAt: reminderMoment(merged, offset, tz),
+    }
+    if (rest.repeatRule) patch.repeatRule = rule
+    if (rest.status === 'done') patch.completedAt = now()
+    else if (rest.status) patch.completedAt = null
+    // Editing the time or reminder must not re-arm a reminder that already went off.
+    const untouched =
+      rest.startDate === undefined &&
+      rest.startTime === undefined &&
+      rest.dueDate === undefined &&
+      remindOffset === undefined &&
+      remind === undefined &&
+      rest.status === undefined
+    if (untouched) delete patch.remindAt
+    const [row] = await tx
+      .update(task)
+      .set(patch)
+      .where(and(eq(task.id, taskId), eq(task.userId, userId)))
+      .returning()
+    const finishing = rest.status === 'done' && cur.status !== 'done'
+    if (!finishing || !row.repeatRule) return null
+    return (await spawnNext(tx, userId, row, tz))?.id ?? null
+  })
+  const updated = await getTask(db, userId, taskId)
+  return {
+    ...updated,
+    next: nextId ? await getTask(db, userId, nextId) : null,
+  }
+}
+
+/** Skip: move an open repeating task to its next day without a Completed entry. */
+export async function skipTask(db: Db, userId: string, taskId: string) {
+  const tz = await timezoneOf(db, userId)
+  await db.transaction(async (tx) => {
+    const [cur] = await tx
+      .select()
+      .from(task)
+      .where(and(eq(task.id, taskId), eq(task.userId, userId)))
+    if (!cur) throw new NotFoundError()
+    const rule = checkRepeat(cur)
+    if (!rule || !cur.startDate || cur.status === 'done')
+      throw new ValidationError('Only an open repeating task can be skipped.')
+    const occ = nextOccurrence(rule, cur.repeatEnd, cur.startDate, todayIn(tz))
+    if (!occ)
+      throw new ValidationError(
+        'This is the last one. Delete it or stop repeating instead.',
+      )
+    const shift = daysBetween(cur.startDate, occ.date)
+    const moved = {
+      startDate: occ.date,
+      dueDate: cur.dueDate ? addDays(cur.dueDate, shift) : null,
+      startTime: cur.startTime,
+      status: cur.status,
+    }
+    await tx
+      .update(task)
+      .set({
+        ...moved,
+        repeatEnd: occ.end,
+        remindAt: reminderMoment(moved, cur.remindOffset, tz),
+        updatedAt: now(),
+      })
+      .where(eq(task.id, taskId))
+  })
+  return getTask(db, userId, taskId)
+}
+
+/** Push a reminder back: fires again `minutes` from now. */
+export async function snoozeTask(
+  db: Db,
+  userId: string,
+  taskId: string,
+  minutes: number,
+) {
   const [row] = await db
     .update(task)
-    .set(patch)
-    .where(and(eq(task.id, taskId), eq(task.userId, userId)))
+    .set({
+      remindAt: new Date(Date.now() + minutes * 60_000),
+      remind: true,
+      remindOffset: sql`coalesce(${task.remindOffset}, 0)`,
+      updatedAt: now(),
+    })
+    .where(
+      and(
+        eq(task.id, taskId),
+        eq(task.userId, userId),
+        sql`${task.status} <> 'done'`,
+      ),
+    )
     .returning()
   if (!row) throw new NotFoundError()
   return getTask(db, userId, taskId)
@@ -583,6 +804,7 @@ async function wipeRows(q: Q, userId: string) {
   await q.delete(category).where(eq(category.userId, userId))
   await q.delete(habitCheckin).where(eq(habitCheckin.userId, userId))
   await q.delete(habit).where(eq(habit.userId, userId))
+  await q.delete(pushSubscription).where(eq(pushSubscription.userId, userId))
   await q.delete(prefs).where(eq(prefs.userId, userId))
 }
 
@@ -708,6 +930,10 @@ export async function mergeGuestData(
       .update(habitCheckin)
       .set({ userId: toUserId })
       .where(eq(habitCheckin.userId, fromUserId))
+    await tx
+      .update(pushSubscription)
+      .set({ userId: toUserId })
+      .where(eq(pushSubscription.userId, fromUserId))
 
     // One scratchpad per user: keep the account's and add the guest's text under it.
     const [[pad], [guestPad]] = await Promise.all([
@@ -982,4 +1208,50 @@ export async function toggleCheckin(
       .onConflictDoNothing()
   if (!done && existing) await db.delete(habitCheckin).where(where)
   return getHabit(db, userId, habitId)
+}
+
+// ---------- Push subscriptions (reminders) ----------
+export async function savePushSubscription(
+  db: Db,
+  userId: string,
+  input: { endpoint: string; keys: { p256dh: string; auth: string } },
+  userAgent: string | null,
+) {
+  await db
+    .insert(pushSubscription)
+    .values({
+      id: id(),
+      userId,
+      endpoint: input.endpoint,
+      p256dh: input.keys.p256dh,
+      auth: input.keys.auth,
+      userAgent: userAgent?.slice(0, 300) ?? null,
+    })
+    // The same browser subscribing again (or after signing in) moves to the current account.
+    .onConflictDoUpdate({
+      target: pushSubscription.endpoint,
+      set: {
+        userId,
+        p256dh: input.keys.p256dh,
+        auth: input.keys.auth,
+        userAgent: userAgent?.slice(0, 300) ?? null,
+      },
+    })
+  return { ok: true }
+}
+
+export async function deletePushSubscription(
+  db: Db,
+  userId: string,
+  endpoint: string,
+) {
+  await db
+    .delete(pushSubscription)
+    .where(
+      and(
+        eq(pushSubscription.userId, userId),
+        eq(pushSubscription.endpoint, endpoint),
+      ),
+    )
+  return { ok: true }
 }

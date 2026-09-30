@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { json, readBody, route } from './http'
+import { cronRoute, json, readBody, route } from './http'
+import * as push from './push'
 import * as ai from './ai'
 import * as s from './services'
 import * as v from './validation'
@@ -38,6 +39,57 @@ export const taskById = {
   DELETE: route(async ({ db, userId, params }) =>
     json(await s.deleteTask(db, userId, idParam(params))),
   ),
+}
+
+export const taskSkip = {
+  POST: route(async ({ db, userId, params }) =>
+    json(await s.skipTask(db, userId, idParam(params))),
+  ),
+}
+
+export const taskSnooze = {
+  POST: route(async ({ db, userId, request, params }) => {
+    const { minutes } = await readBody(request, v.snoozeInput)
+    return json(await s.snoozeTask(db, userId, idParam(params), minutes))
+  }),
+}
+
+export const pushConfig = {
+  GET: route(async () =>
+    json({
+      enabled: push.pushConfigured(),
+      publicKey: push.vapidPublicKey(),
+    }),
+  ),
+}
+
+export const pushSubscriptionRoute = {
+  POST: route(async ({ db, userId, request }) =>
+    json(
+      await s.savePushSubscription(
+        db,
+        userId,
+        await readBody(request, v.pushSubscribe),
+        request.headers.get('user-agent'),
+      ),
+      201,
+    ),
+  ),
+  DELETE: route(async ({ db, userId, request }) => {
+    const { endpoint } = await readBody(request, v.pushUnsubscribe)
+    return json(await s.deletePushSubscription(db, userId, endpoint))
+  }),
+}
+
+export const pushTest = {
+  POST: route(async ({ db, userId }) =>
+    json({ reached: await push.sendTestPush(db, userId) }),
+  ),
+}
+
+/** Called every few minutes by the scheduler (see .github/workflows/reminders.yml). */
+export const cronReminders = {
+  POST: cronRoute(async (db) => json(await push.sendDueReminders(db))),
 }
 
 export const taskSubtasks = {

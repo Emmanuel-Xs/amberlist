@@ -15,6 +15,7 @@ import {
   TodayCard,
 } from '#/components/Cards'
 import { QuickAdd } from '#/components/QuickAdd'
+import { ReminderBanners } from '#/components/ReminderUi'
 import { SaveNudge } from '#/components/SaveNudge'
 import { DateWheel } from '#/components/DateWheel'
 import { TaskRow } from '#/components/TaskRow'
@@ -114,6 +115,7 @@ function Home() {
         >
           <QuickAdd />
           <SaveNudge />
+          <ReminderBanners />
 
           {fresh && (
             <div style={{ borderRadius: 28, background: 'var(--surface)' }}>

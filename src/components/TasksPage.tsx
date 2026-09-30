@@ -5,6 +5,7 @@ import { useCategories, useTasks } from '#/lib/api'
 import { GROUP_LABELS, groupOf, sortTasks, toISODate } from '#/lib/dates'
 import type { Group } from '#/lib/dates'
 import { Icon } from '#/ui/icons'
+import { ReminderBanners } from './ReminderUi'
 import { Chip, EmptyState, SearchBar, Skeleton } from '#/ui/zen'
 import { QuickAdd } from './QuickAdd'
 import { TaskDetail } from './TaskDetail'
@@ -162,6 +163,7 @@ export function TasksPage({
           )}
           <ViewToggle view={view} onChange={setView} />
         </header>
+        <ReminderBanners />
         <SearchBar value={q} onChange={setQ} placeholder="Search tasks" />
         <QuickAdd />
         {!folderId && (
