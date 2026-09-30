@@ -36,3 +36,5 @@ Also follow `AGENTS.md` at the repo root (stack, security, tokens only, accessib
 ## Writing style for these files
 
 Concise, bullets, casual. No dashes as punctuation in prose: use commas or colons. Dates as `2026-09-29`, times in WAT.
+
+Starting a new Claude Code session? Read [handoff.md](handoff.md) for what is left and in what order.
