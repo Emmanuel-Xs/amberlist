@@ -4,7 +4,7 @@
 Remind people when a task starts, even when the tab is closed. Designed on the Round 4 canvas, boards 19 to 21.
 
 ## Status
-Built 2026-09-30 (code, tests, browser checks of the pickers, pre prompt, banners and menu). **Not yet verified end to end on the live site**: it needs the env vars and the GitHub Actions secret below, then a real push on a phone and a desktop.
+Built and verified live 2026-09-30: Emmanuel turned notifications on in Profile and a test notification arrived. The GitHub Actions scheduler ran against production (`{"claimed":0,"sent":0}`, secrets match). Not yet checked by hand: a real due reminder with Done and Snooze from the notification, on a phone, and the iPhone Home Screen case.
 
 ## How it works
 - **Data:** `task.remind_offset` (minutes before the start, null off), `task.remind_at` (exact moment, indexed, null once sent), `prefs.timezone`, table `push_subscription`. The old `remind` boolean is kept in step (true when an offset is set); the API still accepts `remind: true` as "when it starts".
@@ -17,7 +17,7 @@ Built 2026-09-30 (code, tests, browser checks of the pickers, pre prompt, banner
 - **In app:** `ReminderUi.tsx`: banners at the top of Home and Tasks (a reminder that fired, with Snooze and Done; and "Reminders are off on this device" once a day), reminder chip on rows and cards (bell plus time, amber soft when snoozed, slashed bell when blocked), Profile row with Off, On for this browser (Send a test, Turn off) and Blocked (`NotifySettings.tsx`).
 - **Endpoints:** `GET /api/push/config`, `POST` and `DELETE /api/push/subscription`, `POST /api/push/test`, `POST /api/tasks/:id/snooze`, `POST /api/cron/reminders`.
 
-## Setup (owner)
+## Setup (owner, done 2026-09-30)
 1. `npx web-push generate-vapid-keys`, then set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (mailto:) and `CRON_SECRET` on Vercel.
 2. GitHub repo, Settings, Secrets and variables, Actions: secret `CRON_SECRET` (same value) and variable `APP_URL` (`https://honeylist.vercel.app`).
 3. Redeploy. On the live site: Profile, Turn on, Send a test.
