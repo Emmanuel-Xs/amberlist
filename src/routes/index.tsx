@@ -16,6 +16,7 @@ import {
 } from '#/components/Cards'
 import { QuickAdd } from '#/components/QuickAdd'
 import { ReminderBanners } from '#/components/ReminderUi'
+import { SampleDataButton } from '#/components/SampleData'
 import { SaveNudge } from '#/components/SaveNudge'
 import { DateWheel } from '#/components/DateWheel'
 import { TaskRow } from '#/components/TaskRow'
@@ -125,7 +126,9 @@ function Home() {
                 text={
                   'Type it above and press Enter. Try "Read 20 pages tomorrow #study" and we\'ll set the date and folder for you.'
                 }
-              />
+              >
+                <SampleDataButton />
+              </EmptyState>
             </div>
           )}
 

@@ -155,8 +155,16 @@ export const prefs = pgTable('prefs', {
   pendingMerge: jsonb('pending_merge').$type<string[]>(),
   // IANA name such as Africa/Lagos; reminders count in it.
   timezone: text('timezone'),
+  // Ids of the rows "Load sample data" made, so "Clear sample data" removes only those.
+  sampleIds: jsonb('sample_ids').$type<SampleIds>(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
+
+export interface SampleIds {
+  tasks: string[]
+  notes: string[]
+  habits: string[]
+}
 
 export interface NudgeState {
   task?: string
@@ -262,6 +270,7 @@ alter table "task" add column if not exists remind_at timestamp;
 update "task" set remind_offset = 0 where remind = true and remind_offset is null;
 create index if not exists task_remind_at_idx on "task"(remind_at);
 alter table "prefs" add column if not exists timezone text;
+alter table "prefs" add column if not exists sample_ids jsonb;
 create table if not exists "push_subscription" (id text primary key, user_id text not null, endpoint text not null unique, p256dh text not null, auth text not null, user_agent text, created_at timestamp not null default now());
 create index if not exists push_subscription_user_idx on "push_subscription"(user_id);
 `

@@ -35,6 +35,7 @@ import { Route as ApiHabitsIdRouteImport } from './routes/api/habits/$id'
 import { Route as ApiMeIndexRouteImport } from './routes/api/me/index'
 import { Route as ApiMeDataRouteImport } from './routes/api/me/data'
 import { Route as ApiMeMergeRouteImport } from './routes/api/me/merge'
+import { Route as ApiMeSampleRouteImport } from './routes/api/me/sample'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiPushConfigRouteImport } from './routes/api/push/config'
@@ -178,6 +179,11 @@ const ApiMeMergeRoute = ApiMeMergeRouteImport.update({
   path: '/api/me/merge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMeSampleRoute = ApiMeSampleRouteImport.update({
+  id: '/api/me/sample',
+  path: '/api/me/sample',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNotesIndexRoute = ApiNotesIndexRouteImport.update({
   id: '/api/notes/',
   path: '/api/notes/',
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
   '/api/me/merge': typeof ApiMeMergeRoute
+  '/api/me/sample': typeof ApiMeSampleRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/push/config': typeof ApiPushConfigRoute
   '/api/push/subscription': typeof ApiPushSubscriptionRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
   '/api/me/merge': typeof ApiMeMergeRoute
+  '/api/me/sample': typeof ApiMeSampleRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/push/config': typeof ApiPushConfigRoute
   '/api/push/subscription': typeof ApiPushSubscriptionRoute
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
   '/api/me/merge': typeof ApiMeMergeRoute
+  '/api/me/sample': typeof ApiMeSampleRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/push/config': typeof ApiPushConfigRoute
   '/api/push/subscription': typeof ApiPushSubscriptionRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/api/habits/$id'
     | '/api/me/data'
     | '/api/me/merge'
+    | '/api/me/sample'
     | '/api/notes/$id'
     | '/api/push/config'
     | '/api/push/subscription'
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/api/habits/$id'
     | '/api/me/data'
     | '/api/me/merge'
+    | '/api/me/sample'
     | '/api/notes/$id'
     | '/api/push/config'
     | '/api/push/subscription'
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '/api/habits/$id'
     | '/api/me/data'
     | '/api/me/merge'
+    | '/api/me/sample'
     | '/api/notes/$id'
     | '/api/push/config'
     | '/api/push/subscription'
@@ -507,6 +519,7 @@ export interface RootRouteChildren {
   ApiHabitsIdRoute: typeof ApiHabitsIdRouteWithChildren
   ApiMeDataRoute: typeof ApiMeDataRoute
   ApiMeMergeRoute: typeof ApiMeMergeRoute
+  ApiMeSampleRoute: typeof ApiMeSampleRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
   ApiPushConfigRoute: typeof ApiPushConfigRoute
   ApiPushSubscriptionRoute: typeof ApiPushSubscriptionRoute
@@ -704,6 +717,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMeMergeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/me/sample': {
+      id: '/api/me/sample'
+      path: '/api/me/sample'
+      fullPath: '/api/me/sample'
+      preLoaderRoute: typeof ApiMeSampleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/notes/': {
       id: '/api/notes/'
       path: '/api/notes'
@@ -843,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHabitsIdRoute: ApiHabitsIdRouteWithChildren,
   ApiMeDataRoute: ApiMeDataRoute,
   ApiMeMergeRoute: ApiMeMergeRoute,
+  ApiMeSampleRoute: ApiMeSampleRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
   ApiPushConfigRoute: ApiPushConfigRoute,
   ApiPushSubscriptionRoute: ApiPushSubscriptionRoute,

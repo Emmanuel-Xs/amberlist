@@ -41,6 +41,16 @@ export const taskById = {
   ),
 }
 
+export const meSample = {
+  POST: route(async ({ db, userId, request }) => {
+    const { today } = await readBody(request, v.sampleInput)
+    return json(await s.loadSampleData(db, userId, today), 201)
+  }),
+  DELETE: route(async ({ db, userId }) =>
+    json(await s.clearSampleData(db, userId)),
+  ),
+}
+
 export const taskSkip = {
   POST: route(async ({ db, userId, params }) =>
     json(await s.skipTask(db, userId, idParam(params))),

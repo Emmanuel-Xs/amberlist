@@ -80,6 +80,8 @@ describe('auth', () => {
       [h.pushSubscriptionRoute.POST, 'POST'],
       [h.pushSubscriptionRoute.DELETE, 'DELETE'],
       [h.pushTest.POST, 'POST'],
+      [h.meSample.POST, 'POST'],
+      [h.meSample.DELETE, 'DELETE'],
     ]
     for (const [fn, method] of endpoints) {
       const r = await call(fn, method, {
@@ -1865,5 +1867,69 @@ describe('push subscriptions and delivery', () => {
       vi.stubEnv('CRON_SECRET', '')
       expect((await cron('Bearer ')).status).toBe(401)
     })
+  })
+})
+
+describe('sample data', () => {
+  const today = ymd(0)
+  const load = (user = 'alice') =>
+    call(h.meSample.POST, 'POST', { user, body: { today } })
+
+  it('fills the account, then clears only what it added', async () => {
+    const mine = await call(h.tasks.POST, 'POST', {
+      body: { title: 'My own task' },
+    })
+    const r = await load()
+    expect(r.status).toBe(201)
+    expect(r.body.tasks).toBeGreaterThan(5)
+    expect((await call(h.me.GET, 'GET')).body.sampleLoaded).toBe(true)
+    expect((await call(h.tasks.GET, 'GET')).body.length).toBe(r.body.tasks + 1)
+    expect((await call(h.notes.GET, 'GET')).body.length).toBe(r.body.notes)
+    expect((await call(h.habits.GET, 'GET')).body.length).toBe(r.body.habits)
+
+    const cleared = await call(h.meSample.DELETE, 'DELETE')
+    expect(cleared.status).toBe(200)
+    expect((await call(h.me.GET, 'GET')).body.sampleLoaded).toBe(false)
+    const left = (await call(h.tasks.GET, 'GET')).body
+    expect(left).toHaveLength(1)
+    expect(left[0].id).toBe(mine.body.id)
+    expect((await call(h.notes.GET, 'GET')).body).toHaveLength(0)
+    expect((await call(h.habits.GET, 'GET')).body).toHaveLength(0)
+  })
+
+  it('refuses a second load, bad input, and clearing when nothing is loaded', async () => {
+    expect((await load()).status).toBe(201)
+    expect((await load()).status).toBe(400)
+    expect(
+      (
+        await call(h.meSample.POST, 'POST', {
+          user: 'bob',
+          body: { today: '30/09/2026' },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (
+        await call(h.meSample.POST, 'POST', {
+          user: 'bob',
+          body: { today, extra: 1 },
+        })
+      ).status,
+    ).toBe(400)
+    expect(
+      (await call(h.meSample.DELETE, 'DELETE', { user: 'bob' })).status,
+    ).toBe(404)
+  })
+
+  it('never touches another person’s data', async () => {
+    await call(h.tasks.POST, 'POST', {
+      user: 'bob',
+      body: { title: 'Bob’s task' },
+    })
+    await load('alice')
+    await call(h.meSample.DELETE, 'DELETE', { user: 'alice' })
+    expect((await call(h.tasks.GET, 'GET', { user: 'bob' })).body).toHaveLength(
+      1,
+    )
   })
 })

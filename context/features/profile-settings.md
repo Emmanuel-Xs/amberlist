@@ -30,3 +30,4 @@ Built. Google save action built 2026-09-30. Privacy note not built.
 4. Export: `const d = page.waitForEvent('download')`, click "Export as JSON", filename starts `honeylist-export-`.
 5. Click "Delete all my data": `getByRole('alertdialog', { name: 'Delete all your data?' })`; "Delete everything" is disabled; `.confirm-word` is bold and uses `--danger`; fill `getByLabel(/Type DELETE/)` with `DELETE`; button enables; confirm; toast; `GET /api/tasks` is empty.
 6. Tablet and desktop: "Keyboard shortcuts (?)" opens dialog "Keyboard shortcuts". Phone: button hidden.
+- **Sample data:** Your data card has Load sample data / Clear sample data (`src/components/SampleData.tsx`, `/api/me/sample`). Loading twice is a 400; clearing when nothing is loaded is a 404.

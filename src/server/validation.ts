@@ -237,3 +237,6 @@ export const pushSubscribe = z
 export const pushUnsubscribe = z
   .object({ endpoint: z.string().url().max(2048) })
   .strict()
+
+/** "Load sample data": the browser's local date, so the examples land on the right days. */
+export const sampleInput = z.object({ today: date }).strict()

@@ -17,6 +17,7 @@ Sources: PRD = [prd.md](prd.md); L# = item # of Emmanuel's 22:38 list (2026-09-2
 | Welcome screen with name (and theme pick) | PRD, L1 | Done | approved | 2026-09-30: `src/components/Welcome.tsx`, full page on phones, dialog from 768. `prefs.onboarded_at`, `onboarded` in `GET/PATCH /api/me`. See [features/onboarding.md](features/onboarding.md). |
 | Just in time tips (quick add syntax, `- [ ]`, streaks, shortcuts) | PRD | Partly | yes | Shortcuts tip done (2026-09-30, toast, desktop, once per browser via localStorage). Others need `seenTips` pref. |
 | Keyboard shortcut sheet | PRD | Partly | no | `?` sheet exists, plus a one time desktop tip toast pointing to it. `G B` (habits) added 2026-09-30. `/` search and `G F` are missing. |
+| Load sample data and clear it (HNG Stage 1 reviewers) | HNG notice | Done | small addition, needs Emmanuel's eye | 2026-09-30: `POST` and `DELETE /api/me/sample`, `prefs.sample_ids`, button on the Home empty state and in Profile, Your data. Clear removes only what it loaded. |
 | Guest cleanup job (90 days inactive) | PRD | Not built | no | Can reuse the GitHub Actions scheduler (`.github/workflows/reminders.yml` pattern) and a `cronRoute` endpoint. |
 | Privacy note in settings | PRD | Done | no | 2026-09-30: full `/privacy` and `/terms` pages, linked from Profile. |
 | **Phase 3 (PRD)** | | | | |
