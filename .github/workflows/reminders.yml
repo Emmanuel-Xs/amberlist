@@ -1,0 +1,35 @@
+# Sends due reminders. Vercel's free plan only runs cron once a day, so this pings a secured
+# endpoint instead. GitHub runs scheduled workflows about every 5 minutes at best (it can lag
+# under load), so a reminder can arrive a few minutes late.
+#
+# Setup (repo Settings > Secrets and variables > Actions):
+#   secret   CRON_SECRET  the same value as the CRON_SECRET env var on Vercel
+#   variable APP_URL      for example https://honeylist.vercel.app (no trailing slash)
+name: Reminders
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Call the reminders endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$APP_URL" ]; then
+            echo "CRON_SECRET or APP_URL is not set, skipping."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 30 \
+            -X POST "$APP_URL/api/cron/reminders" \
+            -H "Authorization: Bearer $CRON_SECRET"

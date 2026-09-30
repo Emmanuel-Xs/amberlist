@@ -5,8 +5,13 @@ import type { Task } from '#/lib/api'
 import { groupOf, toISODate } from '#/lib/dates'
 import { sound } from '#/lib/feedback'
 import { TICK_HOLD_MS } from '#/lib/motion'
-import { doneMessage } from '#/lib/messages'
-import { toast } from '#/lib/store'
+import { doneMessage, repeatDoneMessage } from '#/lib/messages'
+import { nextLabel } from '#/lib/repeat'
+import {
+  askSnooze as openSnooze,
+  askStopRepeat as openStopRepeat,
+  toast,
+} from '#/lib/store'
 import { celebrateAllDone } from './Celebrate'
 import { tickSound } from './TickFill'
 
@@ -23,9 +28,16 @@ export function useTaskActions() {
     }
     // Hold briefly so the tick is seen before the row glides to Completed; Undo cancels the hold.
     let pending = true
+    // A repeating task makes its next one on the server; Undo removes it again.
+    let nextId: Promise<string | null> | null = null
     const timer = setTimeout(() => {
       pending = false
-      m.update.mutate({ id: t.id, status: 'done' })
+      if (t.repeatRule)
+        nextId = m.update
+          .mutateAsync({ id: t.id, status: 'done' })
+          .then((r) => r.next?.id ?? null)
+          .catch(() => null)
+      else m.update.mutate({ id: t.id, status: 'done' })
     }, TICK_HOLD_MS)
     let seal: ReturnType<typeof setTimeout> | undefined
     const undo = () => {
@@ -35,7 +47,10 @@ export function useTaskActions() {
         pending = false
         clearTimeout(timer)
         window.dispatchEvent(new CustomEvent('task-untick', { detail: t.id }))
-      } else m.update.mutate({ id: t.id, status: t.status })
+      } else {
+        m.update.mutate({ id: t.id, status: t.status })
+        void nextId?.then((id) => id && m.remove.mutate(id))
+      }
     }
     const today = toISODate(new Date())
     const all = qc.getQueryData<Task[]>(qk.tasks) ?? []
@@ -56,7 +71,9 @@ export function useTaskActions() {
         silent: true,
         badge: 'logo',
         message: 'Nice work',
-        detail: 'Rest, or pull something forward.',
+        detail: t.repeatRule
+          ? repeatDoneMessage(t, today).message.replace('Done. ', '') + '.'
+          : 'Rest, or pull something forward.',
         actionLabel: 'Undo',
         onAction: undo,
       })
@@ -66,7 +83,7 @@ export function useTaskActions() {
       tone: 'success',
       silent: true,
       badge: 'check',
-      ...doneMessage(t, all),
+      ...(t.repeatRule ? repeatDoneMessage(t, today) : doneMessage(t, all)),
       actionLabel: 'Undo',
       onAction: undo,
     })
@@ -86,9 +103,11 @@ export function useTaskActions() {
     toast({
       badge: 'trash',
       message: 'Task deleted',
-      detail: t.subtasks.length
-        ? `Its ${t.subtasks.length} subtask${t.subtasks.length === 1 ? '' : 's'} went with it.`
-        : undefined,
+      detail: t.repeatRule
+        ? 'It will not repeat again.'
+        : t.subtasks.length
+          ? `Its ${t.subtasks.length} subtask${t.subtasks.length === 1 ? '' : 's'} went with it.`
+          : undefined,
       actionLabel: 'Undo',
       onAction: () => {
         undone = true
@@ -110,6 +129,9 @@ export function useTaskActions() {
         endTime: t.endTime,
         dueDate: t.dueDate,
         priority: t.priority,
+        repeatRule: t.repeatRule,
+        repeatEnd: t.repeatEnd,
+        remindOffset: t.remindOffset,
         subtasks: t.subtasks.map((s) => s.title),
       },
       { onSuccess: () => toast({ icon: 'copy', message: 'Task duplicated' }) },
@@ -118,7 +140,81 @@ export function useTaskActions() {
   const start = (t: Task) =>
     m.update.mutate({ id: t.id, status: 'in_progress' })
 
-  return { toggle, remove, duplicate, start, mutations: m }
+  /** Skip this one: the task moves to its next day and nothing lands in Completed. */
+  const skip = (t: Task) =>
+    m.skip.mutate(t.id, {
+      onSuccess: (moved) =>
+        toast({
+          icon: 'skip',
+          message: `Skipped. Next one is ${nextLabel(moved.startDate ?? '', toISODate(new Date()))}`,
+          detail: 'Nothing was added to Completed.',
+          actionLabel: 'Undo',
+          onAction: () => {
+            sound('undo')
+            m.update.mutate({
+              id: t.id,
+              startDate: t.startDate,
+              dueDate: t.dueDate,
+              repeatEnd: t.repeatEnd,
+            })
+          },
+        }),
+      onError: (e) =>
+        toast({
+          tone: 'error',
+          icon: 'alert',
+          message: e.message,
+          duration: 0,
+        }),
+    })
+
+  /** After the confirm: the task stays, but no new ones are made. */
+  const stopRepeating = (t: Task) => {
+    m.update.mutate({ id: t.id, repeatRule: null, repeatEnd: null })
+    toast({
+      icon: 'repeat',
+      message: 'Stopped repeating',
+      detail: `${t.title} stays as a single task.`,
+      actionLabel: 'Undo',
+      onAction: () => {
+        sound('undo')
+        m.update.mutate({
+          id: t.id,
+          repeatRule: t.repeatRule,
+          repeatEnd: t.repeatEnd,
+        })
+      },
+    })
+  }
+
+  /** Push the reminder back. Undo restores the time it had. */
+  const snooze = (t: Task, minutes: number) =>
+    m.snooze.mutate(
+      { id: t.id, minutes },
+      {
+        onSuccess: (r) =>
+          toast({
+            icon: 'bell',
+            message: 'Snoozed',
+            detail: r.remindAt
+              ? `We will remind you again at ${new Date(r.remindAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}.`
+              : undefined,
+          }),
+      },
+    )
+
+  return {
+    toggle,
+    remove,
+    duplicate,
+    start,
+    skip,
+    stopRepeating,
+    snooze,
+    askStopRepeat: openStopRepeat,
+    askSnooze: openSnooze,
+    mutations: m,
+  }
 }
 
 /**

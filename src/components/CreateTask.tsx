@@ -10,7 +10,10 @@ import { sound } from '#/lib/feedback'
 import { parseQuickAdd } from '#/lib/parse'
 import { closeCreate, toast, ui } from '#/lib/store'
 import { Icon } from '#/ui/icons'
-import { Button, Chip, Input, Modal, Switch } from '#/ui/zen'
+import { Button, Chip, Input, Modal } from '#/ui/zen'
+import type { RepeatEnd, RepeatRule } from '#/lib/repeat'
+import { RemindField } from './RemindPicker'
+import { RepeatFields } from './RepeatPicker'
 
 /** Full task form: a bottom sheet on phones, a dialog from tablet up. */
 export function CreateTask() {
@@ -31,7 +34,9 @@ export function CreateTask() {
       endTime: '',
       categoryId: '',
       priority: 'medium' as 'low' | 'medium' | 'high',
-      remind: false,
+      remindOffset: null as number | null,
+      repeatRule: null as RepeatRule | null,
+      repeatEnd: null as RepeatEnd | null,
       subtasks: [] as string[],
     },
     onSubmit: ({ value }) => {
@@ -45,7 +50,9 @@ export function CreateTask() {
           endTime: value.startTime && value.endTime ? value.endTime : null,
           categoryId: value.categoryId || null,
           priority: value.priority,
-          remind: value.remind,
+          remindOffset: value.remindOffset,
+          repeatRule: value.repeatRule,
+          repeatEnd: value.repeatRule ? value.repeatEnd : null,
           subtasks: value.subtasks,
         },
         {
@@ -81,7 +88,9 @@ export function CreateTask() {
       endTime: p?.endTime ?? '',
       categoryId: cat?.id ?? '',
       priority: p?.priority ?? 'medium',
-      remind: false,
+      remindOffset: null,
+      repeatRule: null,
+      repeatEnd: null,
       subtasks: [],
     })
     setSubInput('')
@@ -192,6 +201,47 @@ export function CreateTask() {
             )}
           </form.Field>
         </div>
+        <form.Subscribe
+          selector={(st) => ({
+            startDate: st.values.startDate,
+            startTime: st.values.startTime,
+            dueDate: st.values.dueDate,
+            rule: st.values.repeatRule,
+            end: st.values.repeatEnd,
+            offset: st.values.remindOffset,
+          })}
+        >
+          {(v) => (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '16px 20px',
+              }}
+            >
+              <RepeatFields
+                value={{ rule: v.rule, end: v.end }}
+                startDate={v.startDate}
+                onStartDate={(d) => form.setFieldValue('startDate', d)}
+                onChange={(r) => {
+                  form.setFieldValue('repeatRule', r.rule)
+                  form.setFieldValue('repeatEnd', r.end)
+                }}
+                between={
+                  <RemindField
+                    value={v.offset}
+                    timing={{
+                      startDate: v.startDate,
+                      startTime: v.startTime,
+                      dueDate: v.dueDate,
+                    }}
+                    onChange={(o) => form.setFieldValue('remindOffset', o)}
+                  />
+                }
+              />
+            </div>
+          )}
+        </form.Subscribe>
         <form.Field name="categoryId">
           {(f) => (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -302,16 +352,6 @@ export function CreateTask() {
                 }}
               />
             </div>
-          )}
-        </form.Field>
-        <form.Field name="remind">
-          {(f) => (
-            <Switch
-              label="Remind me when it starts"
-              icon="bell"
-              checked={f.state.value}
-              onChange={f.handleChange}
-            />
           )}
         </form.Field>
         <button type="submit" hidden />

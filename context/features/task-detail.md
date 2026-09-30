@@ -13,15 +13,15 @@ Built.
   - Status radiogroup "Status": Todo, In progress, Done (Done runs the complete action with toast and maybe confetti).
   - Dates: Start, Due, From, To (To disabled until From is set; clearing From clears To). Every change PATCHes at once.
   - Folder radiogroup: Inbox plus each folder. Priority radiogroup: Low, Medium, High.
-  - Switch "Remind me when it starts" (saves `remind`, does nothing else yet).
+  - Repeat and Ends fields (popover or sheet, see [repeating-tasks.md](repeating-tasks.md)) and the Remind me field (see [reminders-notifications.md](reminders-notifications.md)), with a line saying what happens when it is done.
   - Subtasks: progressbar "Subtasks done", "2 of 5", checkbox per subtask (name = subtask title), "Delete subtask {title}", input "Add a subtask" (Enter adds). Ticking the first subtask sets the task to In progress (server side in `updateSubtask`).
   - Notes: linked notes as `NoteCard`s, "New note" creates "{title} notes" linked to the task and opens the editor.
   - "Saving" / "Saved" live label.
-- Create form: `src/components/CreateTask.tsx`, a `Modal` titled "New task" (bottom sheet on phones, dialog from md), TanStack Form. Fields Title (autofocus), Start (defaults to today), Due, From, To, Folder, Priority (default Medium), Subtasks (Enter adds), Remind. Buttons Cancel and "Create task". Opens prefilled from quick add text (`openCreate(draft)`). Toast "Task created".
+- Create form: `src/components/CreateTask.tsx`, a `Modal` titled "New task" (bottom sheet on phones, dialog from md), TanStack Form. Fields Title (autofocus), Start (defaults to today), Due, From, To, Folder, Priority (default Medium), Subtasks (Enter adds), Repeat, Remind me, Ends. Buttons Cancel and "Create task". Opens prefilled from quick add text (`openCreate(draft)`). Toast "Task created".
 - API: `PATCH /api/tasks/:id`, `POST /api/tasks/:id/subtasks`, `PATCH/DELETE /api/subtasks/:id`.
 
 ## Planned per PRD
-- "Day X of Y" progress; repeat; reminders; move and duplicate from detail; AI break down (Phase 3).
+- "Day X of Y" progress; move and duplicate from detail; AI break down (Phase 3).
 
 ## Known issues
 - Rendered twice at `/tasks/$id` (pane plus hidden mobile copy); ids `title-{id}`, `st-{id}`, `nt-{id}` are duplicated.

@@ -29,6 +29,7 @@ import { Route as ApiAiStatusRouteImport } from './routes/api/ai/status'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
+import { Route as ApiCronRemindersRouteImport } from './routes/api/cron/reminders'
 import { Route as ApiHabitsIndexRouteImport } from './routes/api/habits/index'
 import { Route as ApiHabitsIdRouteImport } from './routes/api/habits/$id'
 import { Route as ApiMeIndexRouteImport } from './routes/api/me/index'
@@ -36,10 +37,15 @@ import { Route as ApiMeDataRouteImport } from './routes/api/me/data'
 import { Route as ApiMeMergeRouteImport } from './routes/api/me/merge'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
+import { Route as ApiPushConfigRouteImport } from './routes/api/push/config'
+import { Route as ApiPushSubscriptionRouteImport } from './routes/api/push/subscription'
+import { Route as ApiPushTestRouteImport } from './routes/api/push/test'
 import { Route as ApiSubtasksIdRouteImport } from './routes/api/subtasks/$id'
 import { Route as ApiTasksIndexRouteImport } from './routes/api/tasks/index'
 import { Route as ApiTasksIdRouteImport } from './routes/api/tasks/$id'
 import { Route as ApiHabitsIdCheckinsRouteImport } from './routes/api/habits/$id.checkins'
+import { Route as ApiTasksIdSkipRouteImport } from './routes/api/tasks/$id.skip'
+import { Route as ApiTasksIdSnoozeRouteImport } from './routes/api/tasks/$id.snooze'
 import { Route as ApiTasksIdSubtasksRouteImport } from './routes/api/tasks/$id.subtasks'
 
 const IndexRoute = IndexRouteImport.update({
@@ -142,6 +148,11 @@ const ApiCategoriesIdRoute = ApiCategoriesIdRouteImport.update({
   path: '/api/categories/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronRemindersRoute = ApiCronRemindersRouteImport.update({
+  id: '/api/cron/reminders',
+  path: '/api/cron/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHabitsIndexRoute = ApiHabitsIndexRouteImport.update({
   id: '/api/habits/',
   path: '/api/habits/',
@@ -177,6 +188,21 @@ const ApiNotesIdRoute = ApiNotesIdRouteImport.update({
   path: '/api/notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPushConfigRoute = ApiPushConfigRouteImport.update({
+  id: '/api/push/config',
+  path: '/api/push/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushSubscriptionRoute = ApiPushSubscriptionRouteImport.update({
+  id: '/api/push/subscription',
+  path: '/api/push/subscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushTestRoute = ApiPushTestRouteImport.update({
+  id: '/api/push/test',
+  path: '/api/push/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSubtasksIdRoute = ApiSubtasksIdRouteImport.update({
   id: '/api/subtasks/$id',
   path: '/api/subtasks/$id',
@@ -196,6 +222,16 @@ const ApiHabitsIdCheckinsRoute = ApiHabitsIdCheckinsRouteImport.update({
   id: '/checkins',
   path: '/checkins',
   getParentRoute: () => ApiHabitsIdRoute,
+} as any)
+const ApiTasksIdSkipRoute = ApiTasksIdSkipRouteImport.update({
+  id: '/skip',
+  path: '/skip',
+  getParentRoute: () => ApiTasksIdRoute,
+} as any)
+const ApiTasksIdSnoozeRoute = ApiTasksIdSnoozeRouteImport.update({
+  id: '/snooze',
+  path: '/snooze',
+  getParentRoute: () => ApiTasksIdRoute,
 } as any)
 const ApiTasksIdSubtasksRoute = ApiTasksIdSubtasksRouteImport.update({
   id: '/subtasks',
@@ -223,10 +259,14 @@ export interface FileRoutesByFullPath {
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/cron/reminders': typeof ApiCronRemindersRoute
   '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
   '/api/me/merge': typeof ApiMeMergeRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/push/config': typeof ApiPushConfigRoute
+  '/api/push/subscription': typeof ApiPushSubscriptionRoute
+  '/api/push/test': typeof ApiPushTestRoute
   '/api/subtasks/$id': typeof ApiSubtasksIdRoute
   '/api/tasks/$id': typeof ApiTasksIdRouteWithChildren
   '/api/categories/': typeof ApiCategoriesIndexRoute
@@ -235,6 +275,8 @@ export interface FileRoutesByFullPath {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/tasks/': typeof ApiTasksIndexRoute
   '/api/habits/$id/checkins': typeof ApiHabitsIdCheckinsRoute
+  '/api/tasks/$id/skip': typeof ApiTasksIdSkipRoute
+  '/api/tasks/$id/snooze': typeof ApiTasksIdSnoozeRoute
   '/api/tasks/$id/subtasks': typeof ApiTasksIdSubtasksRoute
 }
 export interface FileRoutesByTo {
@@ -257,10 +299,14 @@ export interface FileRoutesByTo {
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/cron/reminders': typeof ApiCronRemindersRoute
   '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
   '/api/me/merge': typeof ApiMeMergeRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/push/config': typeof ApiPushConfigRoute
+  '/api/push/subscription': typeof ApiPushSubscriptionRoute
+  '/api/push/test': typeof ApiPushTestRoute
   '/api/subtasks/$id': typeof ApiSubtasksIdRoute
   '/api/tasks/$id': typeof ApiTasksIdRouteWithChildren
   '/api/categories': typeof ApiCategoriesIndexRoute
@@ -269,6 +315,8 @@ export interface FileRoutesByTo {
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/tasks': typeof ApiTasksIndexRoute
   '/api/habits/$id/checkins': typeof ApiHabitsIdCheckinsRoute
+  '/api/tasks/$id/skip': typeof ApiTasksIdSkipRoute
+  '/api/tasks/$id/snooze': typeof ApiTasksIdSnoozeRoute
   '/api/tasks/$id/subtasks': typeof ApiTasksIdSubtasksRoute
 }
 export interface FileRoutesById {
@@ -292,10 +340,14 @@ export interface FileRoutesById {
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/cron/reminders': typeof ApiCronRemindersRoute
   '/api/habits/$id': typeof ApiHabitsIdRouteWithChildren
   '/api/me/data': typeof ApiMeDataRoute
   '/api/me/merge': typeof ApiMeMergeRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/push/config': typeof ApiPushConfigRoute
+  '/api/push/subscription': typeof ApiPushSubscriptionRoute
+  '/api/push/test': typeof ApiPushTestRoute
   '/api/subtasks/$id': typeof ApiSubtasksIdRoute
   '/api/tasks/$id': typeof ApiTasksIdRouteWithChildren
   '/api/categories/': typeof ApiCategoriesIndexRoute
@@ -304,6 +356,8 @@ export interface FileRoutesById {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/tasks/': typeof ApiTasksIndexRoute
   '/api/habits/$id/checkins': typeof ApiHabitsIdCheckinsRoute
+  '/api/tasks/$id/skip': typeof ApiTasksIdSkipRoute
+  '/api/tasks/$id/snooze': typeof ApiTasksIdSnoozeRoute
   '/api/tasks/$id/subtasks': typeof ApiTasksIdSubtasksRoute
 }
 export interface FileRouteTypes {
@@ -328,10 +382,14 @@ export interface FileRouteTypes {
     | '/api/ai/status'
     | '/api/auth/$'
     | '/api/categories/$id'
+    | '/api/cron/reminders'
     | '/api/habits/$id'
     | '/api/me/data'
     | '/api/me/merge'
     | '/api/notes/$id'
+    | '/api/push/config'
+    | '/api/push/subscription'
+    | '/api/push/test'
     | '/api/subtasks/$id'
     | '/api/tasks/$id'
     | '/api/categories/'
@@ -340,6 +398,8 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/tasks/'
     | '/api/habits/$id/checkins'
+    | '/api/tasks/$id/skip'
+    | '/api/tasks/$id/snooze'
     | '/api/tasks/$id/subtasks'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -362,10 +422,14 @@ export interface FileRouteTypes {
     | '/api/ai/status'
     | '/api/auth/$'
     | '/api/categories/$id'
+    | '/api/cron/reminders'
     | '/api/habits/$id'
     | '/api/me/data'
     | '/api/me/merge'
     | '/api/notes/$id'
+    | '/api/push/config'
+    | '/api/push/subscription'
+    | '/api/push/test'
     | '/api/subtasks/$id'
     | '/api/tasks/$id'
     | '/api/categories'
@@ -374,6 +438,8 @@ export interface FileRouteTypes {
     | '/api/notes'
     | '/api/tasks'
     | '/api/habits/$id/checkins'
+    | '/api/tasks/$id/skip'
+    | '/api/tasks/$id/snooze'
     | '/api/tasks/$id/subtasks'
   id:
     | '__root__'
@@ -396,10 +462,14 @@ export interface FileRouteTypes {
     | '/api/ai/status'
     | '/api/auth/$'
     | '/api/categories/$id'
+    | '/api/cron/reminders'
     | '/api/habits/$id'
     | '/api/me/data'
     | '/api/me/merge'
     | '/api/notes/$id'
+    | '/api/push/config'
+    | '/api/push/subscription'
+    | '/api/push/test'
     | '/api/subtasks/$id'
     | '/api/tasks/$id'
     | '/api/categories/'
@@ -408,6 +478,8 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/tasks/'
     | '/api/habits/$id/checkins'
+    | '/api/tasks/$id/skip'
+    | '/api/tasks/$id/snooze'
     | '/api/tasks/$id/subtasks'
   fileRoutesById: FileRoutesById
 }
@@ -431,10 +503,14 @@ export interface RootRouteChildren {
   ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
+  ApiCronRemindersRoute: typeof ApiCronRemindersRoute
   ApiHabitsIdRoute: typeof ApiHabitsIdRouteWithChildren
   ApiMeDataRoute: typeof ApiMeDataRoute
   ApiMeMergeRoute: typeof ApiMeMergeRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
+  ApiPushConfigRoute: typeof ApiPushConfigRoute
+  ApiPushSubscriptionRoute: typeof ApiPushSubscriptionRoute
+  ApiPushTestRoute: typeof ApiPushTestRoute
   ApiSubtasksIdRoute: typeof ApiSubtasksIdRoute
   ApiTasksIdRoute: typeof ApiTasksIdRouteWithChildren
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
@@ -586,6 +662,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCategoriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/reminders': {
+      id: '/api/cron/reminders'
+      path: '/api/cron/reminders'
+      fullPath: '/api/cron/reminders'
+      preLoaderRoute: typeof ApiCronRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/habits/': {
       id: '/api/habits/'
       path: '/api/habits'
@@ -635,6 +718,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/push/config': {
+      id: '/api/push/config'
+      path: '/api/push/config'
+      fullPath: '/api/push/config'
+      preLoaderRoute: typeof ApiPushConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/subscription': {
+      id: '/api/push/subscription'
+      path: '/api/push/subscription'
+      fullPath: '/api/push/subscription'
+      preLoaderRoute: typeof ApiPushSubscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/test': {
+      id: '/api/push/test'
+      path: '/api/push/test'
+      fullPath: '/api/push/test'
+      preLoaderRoute: typeof ApiPushTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/subtasks/$id': {
       id: '/api/subtasks/$id'
       path: '/api/subtasks/$id'
@@ -663,6 +767,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHabitsIdCheckinsRouteImport
       parentRoute: typeof ApiHabitsIdRoute
     }
+    '/api/tasks/$id/skip': {
+      id: '/api/tasks/$id/skip'
+      path: '/skip'
+      fullPath: '/api/tasks/$id/skip'
+      preLoaderRoute: typeof ApiTasksIdSkipRouteImport
+      parentRoute: typeof ApiTasksIdRoute
+    }
+    '/api/tasks/$id/snooze': {
+      id: '/api/tasks/$id/snooze'
+      path: '/snooze'
+      fullPath: '/api/tasks/$id/snooze'
+      preLoaderRoute: typeof ApiTasksIdSnoozeRouteImport
+      parentRoute: typeof ApiTasksIdRoute
+    }
     '/api/tasks/$id/subtasks': {
       id: '/api/tasks/$id/subtasks'
       path: '/subtasks'
@@ -686,10 +804,14 @@ const ApiHabitsIdRouteWithChildren = ApiHabitsIdRoute._addFileChildren(
 )
 
 interface ApiTasksIdRouteChildren {
+  ApiTasksIdSkipRoute: typeof ApiTasksIdSkipRoute
+  ApiTasksIdSnoozeRoute: typeof ApiTasksIdSnoozeRoute
   ApiTasksIdSubtasksRoute: typeof ApiTasksIdSubtasksRoute
 }
 
 const ApiTasksIdRouteChildren: ApiTasksIdRouteChildren = {
+  ApiTasksIdSkipRoute: ApiTasksIdSkipRoute,
+  ApiTasksIdSnoozeRoute: ApiTasksIdSnoozeRoute,
   ApiTasksIdSubtasksRoute: ApiTasksIdSubtasksRoute,
 }
 
@@ -717,10 +839,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiStatusRoute: ApiAiStatusRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
+  ApiCronRemindersRoute: ApiCronRemindersRoute,
   ApiHabitsIdRoute: ApiHabitsIdRouteWithChildren,
   ApiMeDataRoute: ApiMeDataRoute,
   ApiMeMergeRoute: ApiMeMergeRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
+  ApiPushConfigRoute: ApiPushConfigRoute,
+  ApiPushSubscriptionRoute: ApiPushSubscriptionRoute,
+  ApiPushTestRoute: ApiPushTestRoute,
   ApiSubtasksIdRoute: ApiSubtasksIdRoute,
   ApiTasksIdRoute: ApiTasksIdRouteWithChildren,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,

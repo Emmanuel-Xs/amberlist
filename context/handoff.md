@@ -6,6 +6,8 @@ Written 2026-09-30. Read [README.md](README.md) first, then this file. Rules tha
 Live and verified: guest accounts, Google sign in (published, any Google account), tasks, subtasks, notes, scratchpad, folders, habits, AI (Groq, Gemini backup), PWA, privacy and terms pages, round 2 and 3 designs. Local dev needs no env vars (PGlite).
 
 ## Build next (designed, on the "Honeylist Screens" canvas, page Round 4, boards 17 to 21)
+
+**Update 2026-09-30:** items 1 and 2 below are built (see [features/repeating-tasks.md](features/repeating-tasks.md) and [features/reminders-notifications.md](features/reminders-notifications.md)). The reminder decisions are D29 and D30 (09:00 default, GitHub Actions scheduler). Still needed from the owner: the env vars and GitHub secret listed in the reminders feature file. The backlog statuses were reconciled in the same commit.
 Design is approved to build as drawn. Open the canvas: https://claude.ai/artifact/Q59DbcQdiSXB7p3KTYsmYn
 
 1. **Repeating tasks** (boards 17, 18): none, daily, weekdays, weekly on chosen days, monthly, custom every N days or weeks; optional end (never, date, after N). Adds `task.repeatRule` (json) and `task.repeatEnd`. Completing a repeat creates the next occurrence (server side, in one transaction with the completion), toast "Done. Next one is Thursday" with Undo that removes the new occurrence. Menu: Skip this one, Stop repeating (ConfirmDialog). Repeat chip on rows and grid cards (lucide `Repeat`, add to `src/ui/icons.tsx`). Pure date maths in `src/lib/repeat.ts` with tests (month ends, DST, weekdays).

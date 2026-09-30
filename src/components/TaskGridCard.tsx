@@ -4,6 +4,7 @@ import { colorVar } from '#/lib/colors'
 import { dueLabel, formatTimeRange, toISODate } from '#/lib/dates'
 import { Icon } from '#/ui/icons'
 import { MenuButton } from '#/ui/zen'
+import { RepeatChip, ReminderChip } from './TaskChips'
 import { Priority, useTaskMenu } from './TaskRow'
 import { TickFill } from './TickFill'
 import { useTaskActions, useTicked } from './useTaskActions'
@@ -100,6 +101,8 @@ export function TaskGridCard({
               {subDone} of {task.subtasks.length}
             </span>
           )}
+          <RepeatChip task={task} />
+          <ReminderChip task={task} />
           {!done && <Priority priority={task.priority} />}
         </div>
       </div>

@@ -76,3 +76,9 @@ Notable commits, newest first (2026-09-29, times WAT). Add an entry with every c
 - Rows: inset actions on hover, Low priority shown, tooltips, list or grid toggle, centred confirm dialogs.
 - Motion library (`motion`) adopted: toasts spring in, ticked rows hold 450 ms then glide to Completed, splash logo flies into the sidebar or phone header, page transitions via native View Transitions.
 - Repo skills: `.claude/skills/motion` (from motion-ai, MIT) and `.claude/skills/honeylist-motion`; Motion MCP in `.mcp.json`.
+
+## 2026-09-30: round 4, repeating tasks and reminders, design fidelity fixes
+- Button text optically centred; nav icons fill on hover (flame glyph added); sliding nav background pill.
+- Repeating tasks: picker (boards 17, 18), next task made server side on completion, skip, stop repeating, chips, tests.
+- Reminders: Remind me field, pre prompt, blocked help, Web Push (`public/sw.js`, `src/server/push.ts`), snooze, in app banners, reminder chips, Profile row, `push_subscription` table, GitHub Actions scheduler. New env vars `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`. New dependencies `web-push` and `@radix-ui/react-popover`.
+- Backlog statuses reconciled (habits, splash, motion, shadcn, Remind me switch).

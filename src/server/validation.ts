@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isAllowedCustomColor } from '../lib/colors'
+import { isTimeZone } from '../lib/reminders'
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM')
@@ -31,6 +32,49 @@ export const ICONS = [
   'note',
 ] as const
 
+const weekdayList = z.array(z.number().int().min(0).max(6)).max(7)
+
+/** Repeat rules use JS weekdays (0 Sunday to 6 Saturday). */
+export const repeatRule = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('daily') }).strict(),
+  z.object({ kind: z.literal('weekdays') }).strict(),
+  z
+    .object({
+      kind: z.literal('weekly'),
+      days: weekdayList.min(1, 'Pick at least one day.'),
+      interval: z.number().int().min(1).max(52).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal('monthly'),
+      day: z.number().int().min(1).max(31).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal('every'),
+      unit: z.enum(['day', 'week']),
+      interval: z.number().int().min(1).max(365),
+      days: weekdayList.optional(),
+    })
+    .strict(),
+])
+
+export const repeatEnd = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('never') }).strict(),
+  z.object({ kind: z.literal('on'), date }).strict(),
+  z
+    .object({
+      kind: z.literal('after'),
+      count: z.number().int().min(1).max(999),
+    })
+    .strict(),
+])
+
+/** A month of minutes is plenty of lead time. */
+const remindOffset = z.number().int().min(0).max(43_200)
+
 export const taskCreate = z
   .object({
     title: z.string().trim().min(1, 'Give the task a title.').max(200),
@@ -41,7 +85,11 @@ export const taskCreate = z
     dueDate: date.nullable().optional(),
     priority: z.enum(['low', 'medium', 'high']).optional(),
     status: z.enum(['todo', 'in_progress', 'done']).optional(),
+    // Legacy switch: true means "when it starts". Prefer remindOffset.
     remind: z.boolean().optional(),
+    remindOffset: remindOffset.nullable().optional(),
+    repeatRule: repeatRule.nullable().optional(),
+    repeatEnd: repeatEnd.nullable().optional(),
     subtasks: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
   })
   .strict()
@@ -89,7 +137,12 @@ export const prefsUpdate = z
     // Marks the welcome screen as done (finished or skipped). It can't be undone.
     onboarded: z.literal(true).optional(),
     // Hides one save nudge for good (the day is recorded on the server).
-    nudgeDismissed: z.enum(['task', 'days']).optional(),
+    nudgeDismissed: z.enum(['task', 'days', 'notify']).optional(),
+    timezone: z
+      .string()
+      .max(64)
+      .refine(isTimeZone, 'Not a known time zone.')
+      .optional(),
   })
   .strict()
 
@@ -162,4 +215,25 @@ export const habitCheckinToggle = z
     ),
     done: z.boolean().optional(),
   })
+  .strict()
+
+// ---------- Reminders ----------
+export const snoozeInput = z
+  .object({ minutes: z.number().int().min(1).max(10_080) })
+  .strict()
+
+export const pushSubscribe = z
+  .object({
+    endpoint: z.string().url().max(2048),
+    keys: z
+      .object({
+        p256dh: z.string().min(1).max(256),
+        auth: z.string().min(1).max(256),
+      })
+      .strict(),
+  })
+  .strict()
+
+export const pushUnsubscribe = z
+  .object({ endpoint: z.string().url().max(2048) })
   .strict()

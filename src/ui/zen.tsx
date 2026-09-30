@@ -1,4 +1,5 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import * as RadixPopover from '@radix-ui/react-popover'
 import {
   cloneElement,
   useEffect,
@@ -166,6 +167,38 @@ export function Input({
     </Field>
   )
 }
+/** A field that opens a picker: looks like an Input, shows the current choice. */
+export function PickerField({
+  label,
+  value,
+  placeholder,
+  trailingIcon = 'chevronDown',
+  hint,
+  className,
+  ...rest
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'value'> & {
+  label: ReactNode
+  value: string
+  placeholder?: string
+  trailingIcon?: IconName
+  hint?: string
+}) {
+  const id = useId()
+  return (
+    <Field id={id} {...{ label, hint, trailingIcon, className }} variant="line">
+      <button
+        type="button"
+        id={id}
+        aria-haspopup="dialog"
+        {...rest}
+        className="zn-input zn-picker"
+      >
+        {value || <span className="zn-picker-ph">{placeholder}</span>}
+      </button>
+    </Field>
+  )
+}
+
 export function Textarea({
   label,
   hint,
@@ -581,12 +614,14 @@ export function Alert({
   title,
   children,
   actionLabel,
+  actionIcon = 'refresh',
   onAction,
 }: {
   tone?: 'danger' | 'warning' | 'success' | 'info'
   title?: string
   children?: ReactNode
   actionLabel?: string
+  actionIcon?: IconName
   onAction?: () => void
 }) {
   const icon: IconName =
@@ -604,7 +639,7 @@ export function Alert({
         {children}
       </div>
       {actionLabel && (
-        <Button variant="ghost" size="sm" icon="refresh" onClick={onAction}>
+        <Button variant="ghost" size="sm" icon={actionIcon} onClick={onAction}>
           {actionLabel}
         </Button>
       )}
@@ -842,6 +877,46 @@ export function MenuButton({
   )
 }
 
+// ---------- Popover: the compact picker on tablet and up (shadcn Popover, Radix) ----------
+export function Popover({
+  open,
+  onOpenChange,
+  trigger,
+  label,
+  children,
+  align = 'start',
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  trigger: ReactNode
+  /** Accessible name of the panel. */
+  label: string
+  children: ReactNode
+  align?: 'start' | 'center' | 'end'
+}) {
+  return (
+    <RadixPopover.Root open={open} onOpenChange={onOpenChange}>
+      <RadixPopover.Trigger asChild>{trigger}</RadixPopover.Trigger>
+      <RadixPopover.Portal>
+        <RadixPopover.Content
+          className="zn-popover"
+          aria-label={label}
+          align={align}
+          side="bottom"
+          sideOffset={8}
+          collisionPadding={12}
+          style={{ zIndex: 70 }}
+        >
+          {children}
+        </RadixPopover.Content>
+      </RadixPopover.Portal>
+    </RadixPopover.Root>
+  )
+}
+
+/** Open modals, top last. Only the top one answers Escape and Tab, so a sheet can open over a dialog. */
+const modalStack: symbol[] = []
+
 // ---------- Modal: dialog on tablet and up, bottom sheet on phones ----------
 export function Modal({
   open,
@@ -853,6 +928,7 @@ export function Modal({
   variant = 'responsive',
   role = 'dialog',
   icon,
+  iconTone = 'danger',
 }: {
   open: boolean
   onClose: () => void
@@ -863,6 +939,8 @@ export function Modal({
   variant?: 'responsive' | 'right'
   role?: 'dialog' | 'alertdialog'
   icon?: IconName
+  /** Danger (red) suits confirms; accent (honey) suits friendly asks. */
+  iconTone?: 'danger' | 'accent'
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const tid = useId()
@@ -887,7 +965,12 @@ export function Modal({
     const first = touch ? marked : (marked ?? focusables()[0])
     if (first) first.focus()
     else el?.focus()
+    const me = Symbol('modal')
+    modalStack.push(me)
     const onKey = (e: KeyboardEvent) => {
+      if (modalStack[modalStack.length - 1] !== me) return
+      // A popover inside the dialog handles its own Escape first.
+      if (e.defaultPrevented) return
       if (e.key === 'Escape') {
         e.stopPropagation()
         closeRef.current()
@@ -911,6 +994,7 @@ export function Modal({
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKey)
+      modalStack.splice(modalStack.indexOf(me), 1)
       document.body.style.overflow = overflow
       prev?.focus()
     }
@@ -939,7 +1023,12 @@ export function Modal({
           <span className="zn-sheet-grip app-grip" aria-hidden="true" />
         )}
         {icon && (
-          <span className="zn-dialog-icon">
+          <span
+            className={cx(
+              'zn-dialog-icon',
+              iconTone === 'accent' && 'zn-dialog-icon--accent',
+            )}
+          >
             <Icon name={icon} size={22} />
           </span>
         )}
@@ -980,6 +1069,7 @@ export function ConfirmDialog({
   confirmLabel = 'Delete',
   confirmText,
   icon = 'trash',
+  confirmIcon = 'trash',
 }: {
   open: boolean
   onClose: () => void
@@ -989,6 +1079,8 @@ export function ConfirmDialog({
   confirmLabel?: string
   confirmText?: string
   icon?: IconName
+  /** Icon on the confirm button. */
+  confirmIcon?: IconName
 }) {
   const [typed, setTyped] = useState('')
   useEffect(() => setTyped(''), [open])
@@ -1008,7 +1100,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             variant="danger-solid"
-            icon="trash"
+            icon={confirmIcon}
             disabled={!ok}
             onClick={onConfirm}
           >

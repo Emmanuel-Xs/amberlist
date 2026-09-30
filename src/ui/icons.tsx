@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Bell,
+  BellOff,
   BookOpen,
   Calendar,
   Check,
@@ -29,9 +30,11 @@ import {
   Pin,
   Play,
   Plus,
+  Repeat,
   RotateCw,
   Search,
   ShoppingCart,
+  SkipForward,
   SlidersHorizontal,
   Sun,
   Target,
@@ -59,6 +62,9 @@ export const ICONS = {
   clock: Clock,
   flag: Flag,
   bell: Bell,
+  bellOff: BellOff,
+  repeat: Repeat,
+  skip: SkipForward,
   inbox: Inbox,
   check: Check,
   play: Play,
@@ -131,6 +137,10 @@ const NOTE_RINGS = 'M2 6h4M2 10h4M2 14h4M2 18h4'
 const FOLDER =
   'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'
 
+// Lucide Flame, drawn as a closed shape so it can take the honey fill.
+const FLAME =
+  'M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z'
+
 const NAV_GLYPHS: Partial<
   Record<IconName, { idle: ReactNode; active: ReactNode }>
 > = {
@@ -179,6 +189,10 @@ const NAV_GLYPHS: Partial<
     idle: <path d={FOLDER} />,
     active: <path d={FOLDER} {...HONEY} />,
   },
+  flame: {
+    idle: <path d={FLAME} />,
+    active: <path d={FLAME} {...HONEY} />,
+  },
   user: {
     idle: (
       <>
@@ -225,7 +239,19 @@ export function NavIcon({
       focusable="false"
       className="nav-icon"
     >
-      {active ? glyph.active : glyph.idle}
+      {/* Both layers render; CSS shows the honey one when active or hovered. */}
+      <g
+        className="nav-icon-off"
+        style={active ? { display: 'none' } : undefined}
+      >
+        {glyph.idle}
+      </g>
+      <g
+        className="nav-icon-on"
+        style={active ? { display: 'inline' } : undefined}
+      >
+        {glyph.active}
+      </g>
     </svg>
   )
 }

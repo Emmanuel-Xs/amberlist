@@ -40,6 +40,13 @@ function Privacy() {
           recognise you and show your name and photo in the app.
         </li>
         <li>
+          <strong>For reminders:</strong> your time zone, the reminder you set
+          on a task, and, only if you turn notifications on, a push subscription
+          for that browser (an address at your browser's push service and two
+          keys, plus the browser name). Turn it off in Profile and it is
+          deleted.
+        </li>
+        <li>
           <strong>In your browser:</strong> a few small settings in local
           storage (for example list or grid view and whether a tip was shown)
           and a service worker that lets the app open offline.
@@ -69,6 +76,11 @@ function Privacy() {
         <li>Neon stores the database.</li>
         <li>
           Google handles sign in, and Groq and Google process AI requests.
+        </li>
+        <li>
+          Your browser's push service (Google, Apple or Mozilla, depending on
+          the browser) carries reminder notifications to you. They contain the
+          task title and time.
         </li>
       </ul>
       <p>These providers act on our behalf and only to run the service.</p>

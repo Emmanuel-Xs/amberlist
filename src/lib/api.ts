@@ -1,3 +1,4 @@
+import type { RepeatEnd, RepeatRule } from '#/lib/repeat'
 import type { HexColor, NotePresetColor, PresetColor } from '#/lib/colors'
 import {
   queryOptions,
@@ -25,6 +26,12 @@ export interface Task {
   status: 'todo' | 'in_progress' | 'done'
   completedAt: string | null
   remind: boolean
+  /** Repeating: one open task per series; finishing it makes the next. */
+  repeatRule: RepeatRule | null
+  repeatEnd: RepeatEnd | null
+  /** Minutes before the start (null off) and the moment it will fire (null once sent). */
+  remindOffset: number | null
+  remindAt: string | null
   createdAt: string
   subtasks: Subtask[]
   noteCount: number
@@ -69,14 +76,31 @@ export interface Prefs {
   /** Set after a Google sign in when this device and the account both had data. */
   pendingMerge: { tasks: number; notes: number } | null
   /** The day (ISO) each save nudge was dismissed. */
-  nudgeState: { task?: string; days?: string } | null
+  nudgeState: { task?: string; days?: string; notify?: string } | null
+  /** IANA zone the reminders count in. */
+  timezone: string | null
 }
 export type PrefsUpdate = Partial<
   Pick<Prefs, 'displayName' | 'theme' | 'sounds'>
-> & { onboarded?: true; nudgeDismissed?: 'task' | 'days' }
+> & {
+  onboarded?: true
+  nudgeDismissed?: 'task' | 'days' | 'notify'
+  timezone?: string
+}
 export type TaskInput = Partial<
-  Omit<Task, 'id' | 'subtasks' | 'noteCount' | 'createdAt' | 'completedAt'>
+  Omit<
+    Task,
+    | 'id'
+    | 'subtasks'
+    | 'noteCount'
+    | 'createdAt'
+    | 'completedAt'
+    | 'remind'
+    | 'remindAt'
+  >
 > & { subtasks?: string[] }
+/** What finishing a task returns: the task, plus the next one when it repeats. */
+export type TaskResult = Task & { next?: Task | null }
 
 export class ApiError extends Error {
   constructor(
@@ -180,11 +204,31 @@ export function useTaskMutations() {
   })
   const update = useMutation({
     mutationFn: ({ id, ...input }: TaskInput & { id: string }) =>
-      api<Task>(`/tasks/${id}`, { method: 'PATCH', json: input }),
+      api<TaskResult>(`/tasks/${id}`, { method: 'PATCH', json: input }),
     onMutate: ({ id, ...input }) => ({
       prev: patchCache(id, (t) => ({ ...t, ...input }) as Task),
     }),
     onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(qk.tasks, ctx.prev),
+    onSuccess: ({ next, ...t }) => {
+      replace(t)
+      // Finishing a repeating task made the next one on the server: show it at once.
+      if (next)
+        qc.setQueryData<Task[]>(qk.tasks, (old) =>
+          old && !old.some((x) => x.id === next.id) ? [next, ...old] : old,
+        )
+    },
+    onSettled: settle,
+  })
+  /** Skip this one: the open repeating task moves to its next day. */
+  const skip = useMutation({
+    mutationFn: (id: string) =>
+      api<Task>(`/tasks/${id}/skip`, { method: 'POST' }),
+    onSuccess: replace,
+    onSettled: settle,
+  })
+  const snooze = useMutation({
+    mutationFn: ({ id, minutes }: { id: string; minutes: number }) =>
+      api<Task>(`/tasks/${id}/snooze`, { method: 'POST', json: { minutes } }),
     onSuccess: replace,
     onSettled: settle,
   })
@@ -237,7 +281,16 @@ export function useTaskMutations() {
       api<Task>(`/subtasks/${id}`, { method: 'DELETE' }),
     onSuccess: replace,
   })
-  return { create, update, remove, addSubtask, updateSubtask, deleteSubtask }
+  return {
+    create,
+    update,
+    skip,
+    snooze,
+    remove,
+    addSubtask,
+    updateSubtask,
+    deleteSubtask,
+  }
 }
 
 export function useNoteMutations() {

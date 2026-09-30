@@ -1,3 +1,4 @@
+import { nextLabel, nextOccurrence } from './repeat'
 import type { Task } from '#/lib/api'
 import { groupOf, toISODate } from '#/lib/dates'
 
@@ -106,4 +107,24 @@ export function doneMessage(t: Task, all: Task[], now = new Date()): Msg {
       ? `${plural(doneWeek, 'task')} done this week.`
       : 'Moved to Completed.'
   return { message: head, detail }
+}
+
+/** After finishing a repeating task: what happens next. */
+export function repeatDoneMessage(t: Task, today: string): Msg {
+  const occ =
+    t.repeatRule && t.startDate
+      ? nextOccurrence(t.repeatRule, t.repeatEnd, t.startDate, today)
+      : null
+  if (!occ)
+    return {
+      message: 'Done. That was the last one',
+      detail: 'It will not come back.',
+    }
+  const caughtUp = !!t.dueDate && t.dueDate < today
+  return {
+    message: caughtUp
+      ? `Done. You are caught up. Next one is ${nextLabel(occ.date, today)}`
+      : `Done. Next one is ${nextLabel(occ.date, today)}`,
+    detail: 'Moved to Completed.',
+  }
 }
