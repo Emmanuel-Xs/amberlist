@@ -2,6 +2,9 @@
 
 Notable commits, newest first (2026-09-29, times WAT). Add an entry with every commit that changes behavior or looks.
 
+## 2026-09-30: privacy and terms pages
+- Public `/privacy` and `/terms` (`src/components/LegalPage.tsx`) with the logo, needed for Google's consent screen. They render without the guest session, splash, welcome or nav, are in the sitemap, and are linked from the Profile footer.
+
 ## 2026-09-30: round 3 fixes and shadcn
 - Splash: name hangs below the centred logo; page enter is fade only, so the logo no longer jumps a notch when it lands.
 - Mobile text weight flicker: Poppins 400 to 700 preloaded, `font-synthesis: none`, text size adjust.

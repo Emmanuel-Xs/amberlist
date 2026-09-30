@@ -4,6 +4,7 @@ import {
   Link,
   Outlet,
   Scripts,
+  useRouterState,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -159,12 +160,21 @@ function NotFound() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext()
+  const path = useRouterState({ select: (st) => st.location.pathname })
+  // Public pages (privacy, terms) open straight away: no guest session, splash, welcome or nav.
+  const isPublic = path === '/privacy' || path === '/terms'
   return (
     <QueryClientProvider client={queryClient}>
       <MotionConfig reducedMotion="user">
-        <AppShell>
-          <Outlet />
-        </AppShell>
+        {isPublic ? (
+          <main id="main">
+            <Outlet />
+          </main>
+        ) : (
+          <AppShell>
+            <Outlet />
+          </AppShell>
+        )}
         <PwaSupport />
       </MotionConfig>
     </QueryClientProvider>

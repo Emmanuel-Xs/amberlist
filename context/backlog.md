@@ -18,7 +18,7 @@ Sources: PRD = [prd.md](prd.md); L# = item # of Emmanuel's 22:38 list (2026-09-2
 | Just in time tips (quick add syntax, `- [ ]`, streaks, shortcuts) | PRD | Partly | yes | Shortcuts tip done (2026-09-30, toast, desktop, once per browser via localStorage). Others need `seenTips` pref. |
 | Keyboard shortcut sheet | PRD | Partly | no | `?` sheet exists, plus a one time desktop tip toast pointing to it. `G B` (habits) added 2026-09-30. `/` search and `G F` are missing. |
 | Guest cleanup job (90 days inactive) | PRD | Not built | no | |
-| Privacy note in settings | PRD | Partly | no | "Your data" section explains delete; no note on what is stored. |
+| Privacy note in settings | PRD | Done | no | 2026-09-30: full `/privacy` and `/terms` pages, linked from Profile. |
 | **Phase 3 (PRD)** | | | | |
 | AI break down task | PRD | Done (verified live 2026-09-30) | yes (built from DS parts, screenshots to approve) | 2026-09-30: "Break it down" under Subtasks in task detail, checkable chips, Add selected. `POST /api/ai/breakdown`. Groq, Gemini, xAI via the AI SDK (D25). See [features/ai.md](features/ai.md). |
 | AI turn note or scratchpad into tasks | PRD | Done (verified live 2026-09-30) | yes (screenshots to approve) | 2026-09-30: "Turn into tasks" in the note editor and the scratchpad, review list (edit titles, untick), then creates. `POST /api/ai/extract`. |

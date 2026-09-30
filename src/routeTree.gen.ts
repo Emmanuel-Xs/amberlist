@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ApiScratchpadRouteImport } from './routes/api/scratchpad'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as FoldersIndexRouteImport } from './routes/folders/index'
@@ -45,9 +47,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiScratchpadRoute = ApiScratchpadRouteImport.update({
@@ -193,7 +205,9 @@ const ApiTasksIdSubtasksRoute = ApiTasksIdSubtasksRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/terms': typeof TermsRoute
   '/api/scratchpad': typeof ApiScratchpadRoute
   '/api/search': typeof ApiSearchRoute
   '/folders/$id': typeof FoldersIdRoute
@@ -225,7 +239,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/terms': typeof TermsRoute
   '/api/scratchpad': typeof ApiScratchpadRoute
   '/api/search': typeof ApiSearchRoute
   '/folders/$id': typeof FoldersIdRoute
@@ -258,7 +274,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/terms': typeof TermsRoute
   '/api/scratchpad': typeof ApiScratchpadRoute
   '/api/search': typeof ApiSearchRoute
   '/folders/$id': typeof FoldersIdRoute
@@ -292,7 +310,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/privacy'
     | '/profile'
+    | '/terms'
     | '/api/scratchpad'
     | '/api/search'
     | '/folders/$id'
@@ -324,7 +344,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/privacy'
     | '/profile'
+    | '/terms'
     | '/api/scratchpad'
     | '/api/search'
     | '/folders/$id'
@@ -356,7 +378,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/privacy'
     | '/profile'
+    | '/terms'
     | '/api/scratchpad'
     | '/api/search'
     | '/folders/$id'
@@ -389,7 +413,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  TermsRoute: typeof TermsRoute
   ApiScratchpadRoute: typeof ApiScratchpadRoute
   ApiSearchRoute: typeof ApiSearchRoute
   FoldersIdRoute: typeof FoldersIdRoute
@@ -427,11 +453,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/scratchpad': {
@@ -659,7 +699,9 @@ const ApiTasksIdRouteWithChildren = ApiTasksIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  TermsRoute: TermsRoute,
   ApiScratchpadRoute: ApiScratchpadRoute,
   ApiSearchRoute: ApiSearchRoute,
   FoldersIdRoute: FoldersIdRoute,

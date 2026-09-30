@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, meQuery, useNotes, useTasks, useUpdateMe } from '#/lib/api'
 import type { PrefsUpdate } from '#/lib/api'
@@ -306,6 +306,9 @@ function Profile() {
           >
             <LogoMark size={28} />
             Honeylist 0.1 · Built with AI for HNG 15
+          </p>
+          <p style={{ textAlign: 'center', fontSize: 13, margin: 0 }}>
+            <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>
           </p>
         </div>
       </div>
