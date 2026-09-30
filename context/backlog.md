@@ -7,7 +7,7 @@ Sources: PRD = [prd.md](prd.md); L# = item # of Emmanuel's 22:38 list (2026-09-2
 | Item | Source | Status | Design | Notes |
 | --- | --- | --- | --- | --- |
 | **Phase 2 (PRD)** | | | | |
-| Google sign in (Better Auth Google provider, OAuth client, env vars) | PRD, L26 | Done | approved | 2026-09-30: built, button shows only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set. **Owner:** create the OAuth client and add the env vars in Vercel (steps in [features/guest-auth-and-google.md](features/guest-auth-and-google.md)). Round trip not testable in the sandbox. |
+| Google sign in (Better Auth Google provider, OAuth client, env vars) | PRD, L26 | Done | approved | 2026-09-30: built, button shows only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set. **Owner:** create the OAuth client and add the env vars in Vercel (steps in [features/guest-auth-and-google.md](features/guest-auth-and-google.md)). Verified live by Emmanuel 2026-09-30 (project `honeylist` in Google Cloud, consent screen in Testing mode, so add test users until a custom domain allows publishing). |
 | Guest badge plus "Save your data with Google" action | PRD | Done | no | 2026-09-30: Profile board card with "Continue with Google"; signed in shows photo, email, Sign out. Calm note when Google isn't configured. |
 | Save nudges (after 2nd task, after 3 days) | PRD, D3 | Done | board | 2026-09-30: `SaveNudge` on Home, "You're a guest" warning Alert style. Never while typing, one per session, dismissal in `prefs.nudge_state`, stops after sign in. Days of use counted per browser. |
 | Link guest in place plus merge prompt (`mergeGuestData`) | PRD | Done | no | 2026-09-30: `onLinkAccount` + `linkGuestAccount`; prompt only when both sides have data (`prefs.pending_merge`), `POST /api/me/merge`. Discard asks to confirm. |
@@ -20,8 +20,8 @@ Sources: PRD = [prd.md](prd.md); L# = item # of Emmanuel's 22:38 list (2026-09-2
 | Guest cleanup job (90 days inactive) | PRD | Not built | no | |
 | Privacy note in settings | PRD | Partly | no | "Your data" section explains delete; no note on what is stored. |
 | **Phase 3 (PRD)** | | | | |
-| AI break down task | PRD | Done (verify with a real key) | yes (built from DS parts, screenshots to approve) | 2026-09-30: "Break it down" under Subtasks in task detail, checkable chips, Add selected. `POST /api/ai/breakdown`. Groq, Gemini, xAI via the AI SDK (D25). See [features/ai.md](features/ai.md). |
-| AI turn note or scratchpad into tasks | PRD | Done (verify with a real key) | yes (screenshots to approve) | 2026-09-30: "Turn into tasks" in the note editor and the scratchpad, review list (edit titles, untick), then creates. `POST /api/ai/extract`. |
+| AI break down task | PRD | Done (verified live 2026-09-30) | yes (built from DS parts, screenshots to approve) | 2026-09-30: "Break it down" under Subtasks in task detail, checkable chips, Add selected. `POST /api/ai/breakdown`. Groq, Gemini, xAI via the AI SDK (D25). See [features/ai.md](features/ai.md). |
+| AI turn note or scratchpad into tasks | PRD | Done (verified live 2026-09-30) | yes (screenshots to approve) | 2026-09-30: "Turn into tasks" in the note editor and the scratchpad, review list (edit titles, untick), then creates. `POST /api/ai/extract`. |
 | PWA install and offline read with "You're offline" banner | PRD | Done (verify on the live site) | no | 2026-09-30: full manifest (maskable icons, shortcuts, screenshots, window controls overlay), `public/sw.js` (prod only), offline banner, safe area padding, `?new=task` shortcut. Offline reload shows the cached shell but no data (API is never cached). See [features/pwa.md](features/pwa.md). |
 | Polish pass | PRD | Not built | no | |
 | **Other PRD gaps** | | | | |
