@@ -2,6 +2,16 @@
 
 Notable commits, newest first (2026-09-29, times WAT). Add an entry with every commit that changes behavior or looks.
 
+## 2026-10-01: mobile platform fixes
+- Every `:hover` style is now behind `@media (hover: hover) and (pointer: fine)`. 33 rules in `zen.css` and `styles.css` (buttons, chips, nav, menu, segmented, calendar days, swatches, task and note cards, folders, habits, scrollbars) previously stuck after a tap on a phone, because touch has no hover and the browser fakes one until you tap elsewhere. The tap highlight itself is now off, so each control gained an `:active` press state (`zn-icon-btn`, `zn-check`, `zn-nav-item`, `zn-chip`, `zn-menu-item`, `zn-seg-item`) at 96 to 98% scale or a background change, 100 to 150 ms.
+- The toast countdown now pauses on `:active` as well as `:focus-within` and hover, so an Undo toast does not disappear while it is being pressed on a phone.
+- Text inputs go to 16 px under `(pointer: coarse)` only (`.zn-input`, `.zn-textarea`, `.zn-search-input`), which is what stops iOS zooming the page on focus and never zooming back out. Desktop keeps the approved 15 px.
+- `html` gets `overscroll-behavior: none` (pull to refresh and rubber banding were fighting our own scroll areas), `.zn-scroll` and the bottom sheet get `contain`, and the horizontal date strip and `.zn-scroll-x-hidden` get `touch-action: pan-y` plus `overscroll-behavior-x: contain`.
+- `touch-action: manipulation` on controls kills the 300 ms tap delay. `user-select: none` and `-webkit-touch-callout: none` are on controls only, never on prose: anchors are excluded from the blanket rule on purpose, because the email address on the legal pages and links inside a note must stay copyable.
+- The sticky rail's `height: 100vh` became `100dvh`; `100vh` is the tallest viewport, so a bar pinned to it sits under the phone's URL bar.
+- Viewport meta gained `interactive-widget=resizes-content` and a `color-scheme` meta was added. `viewport-fit=cover`, per scheme `theme-color` and the runtime `useThemeColorSync` were already there and are unchanged.
+- **Not verified on hardware.** Everything above was checked in code and in a browser at desktop width. Sticky hover, the tap highlight, URL bar height, input zoom, tap delay, overscroll, safe areas and the software keyboard do not reproduce in device emulation, so they still need a real phone.
+
 ## 2026-09-30: phone bar glitch and nav animation
 - The phone bar no longer vanishes when a bottom nav link is tapped. `useHideOnScroll` kept its scroll baseline from mount, so the router's scroll restoration read as a large downward jump and the bar stayed translated off screen. The baseline is now a ref re-read on every navigation, and a new page always starts with the bar shown.
 - The phone bar now has the sliding honey pill (`NavPill`, `SPRING_GLIDE`) the sidebar has, so switching sections animates like desktop. Bar items got the `position: relative; isolation: isolate` the sidebar already had, which is what the absolutely positioned pill needs.

@@ -48,6 +48,10 @@ body {
 html {
   background: var(--bg);
   background-color: var(--bg);
+  /* The app has its own scroll containers; pull-to-refresh and rubber-banding only fight them. */
+  overscroll-behavior: none;
+  /* iOS/Android paint a grey flash over every tapped element. We give our own press feedback. */
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   margin: 0;
@@ -59,6 +63,44 @@ body {
   text-size-adjust: 100%;
   font-synthesis: none;
 }
+/* Controls respond on press, not on click, and never double-tap-zoom. */
+button,
+a,
+[role='button'],
+summary,
+label {
+  touch-action: manipulation;
+}
+/* Control text is not content: holding a finger must not select it or pop the callout.
+   Anchors are excluded by default because prose links (an email address, a link inside a
+   note) must stay selectable and copyable; only known controls opt in below. */
+button,
+[role='button'],
+summary,
+.zn-btn,
+.zn-chip,
+.zn-nav-item,
+.zn-menu-item,
+.zn-seg-item,
+.zn-toast-action,
+.dw-stage,
+.task-row-actions,
+.task-action,
+.note-card-delete,
+.habit-check,
+.habit-row-link,
+.zn-swatch,
+.quick-add-btn,
+.folder-card,
+.folder-tab,
+.pk-opt,
+.skip-link {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+/* iOS zooms the page when a focused control is under 16px and never zooms back out.
+   The design's own 15px inputs live in zen.css; the rest are already 16px or set inline. */
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
@@ -95,8 +137,10 @@ body {
   font-size: 13px;
   text-decoration: none;
 }
-.link:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    text-decoration: underline;
+  }
 }
 .hide-scroll {
   scrollbar-width: none;
@@ -161,6 +205,8 @@ body {
   width: 100%;
   max-height: 92vh;
   overflow-y: auto;
+  /* A dragged sheet must not pull the page behind it. */
+  overscroll-behavior: contain;
   background: var(--surface);
   color: var(--ink);
   border-radius: 28px 28px 0 0;
@@ -376,8 +422,10 @@ body {
   text-decoration: none;
   transition: transform 0.15s;
 }
-.folder-card:hover {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .folder-card:hover {
+    transform: translateY(-2px);
+  }
 }
 .folder-tab {
   width: 50%;
@@ -874,7 +922,12 @@ select:-webkit-autofill {
   position: absolute;
   inset: -6px;
 }
-.note-card-delete:hover,
+@media (hover: hover) and (pointer: fine) {
+  .note-card-delete:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
 .note-card-delete:focus-visible {
   opacity: 1;
   background: rgba(0, 0, 0, 0.08);
@@ -905,12 +958,21 @@ select:-webkit-autofill {
     background 0.15s ease-out,
     color 0.15s ease-out;
 }
-.task-action.zn-icon-btn:hover,
+@media (hover: hover) and (pointer: fine) {
+  .task-action.zn-icon-btn:hover {
+    background: var(--surface);
+    color: var(--ink);
+  }
+}
 .task-action.zn-icon-btn[aria-expanded='true'] {
   background: var(--surface);
   color: var(--ink);
 }
-.task-card .task-action.zn-icon-btn:hover,
+@media (hover: hover) and (pointer: fine) {
+  .task-card .task-action.zn-icon-btn:hover {
+    background: var(--surface-raised);
+  }
+}
 .task-card .task-action.zn-icon-btn[aria-expanded='true'] {
   background: var(--surface-raised);
 }
@@ -989,8 +1051,10 @@ select:-webkit-autofill {
   box-shadow: var(--shadow-card);
   transition: background 0.15s ease-out;
 }
-.task-card:hover {
-  background: var(--surface-raised);
+@media (hover: hover) and (pointer: fine) {
+  .task-card:hover {
+    background: var(--surface-raised);
+  }
 }
 .task-card.is-selected {
   outline: 2px solid var(--accent);
@@ -1148,8 +1212,10 @@ select:-webkit-autofill {
   inset: -2px;
   border-radius: inherit;
 }
-.quick-add-btn:hover {
-  filter: brightness(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .quick-add-btn:hover {
+    filter: brightness(1.05);
+  }
 }
 .quick-add-btn:focus-visible {
   outline: 2px solid var(--ring);
@@ -1341,7 +1407,12 @@ select:-webkit-autofill {
   cursor: pointer;
   transition: background-color 150ms ease-out;
 }
-.color-add:hover,
+@media (hover: hover) and (pointer: fine) {
+  .color-add:hover {
+    background: var(--surface);
+    border-style: solid;
+  }
+}
 .color-add[aria-expanded='true'] {
   background: var(--surface);
   border-style: solid;
@@ -1686,8 +1757,10 @@ select:-webkit-autofill {
 .dw-date-btn > svg {
   flex: none;
 }
-.dw-date-btn:hover {
-  background: var(--line);
+@media (hover: hover) and (pointer: fine) {
+  .dw-date-btn:hover {
+    background: var(--line);
+  }
 }
 .dw-date-btn:focus-visible {
   outline: 2px solid var(--ring);
@@ -1729,6 +1802,7 @@ select:-webkit-autofill {
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   cursor: grab;
 }
 .dw-stage:active {
@@ -1942,11 +2016,15 @@ select:-webkit-autofill {
   height: 44px;
   font-size: 15px;
 }
-.dw-cal-day:hover {
-  background: var(--surface);
+@media (hover: hover) and (pointer: fine) {
+  .dw-cal-day:hover {
+    background: var(--surface);
+  }
 }
-.dw-cal--sheet .dw-cal-day:hover {
-  background: var(--surface-raised);
+@media (hover: hover) and (pointer: fine) {
+  .dw-cal--sheet .dw-cal-day:hover {
+    background: var(--surface-raised);
+  }
 }
 .dw-cal-day:focus-visible {
   outline: 2px solid var(--ring);
@@ -1957,12 +2035,19 @@ select:-webkit-autofill {
   font-weight: 600;
   box-shadow: inset 0 0 0 1.5px var(--accent-ink);
 }
-.dw-cal-day.is-selected,
-.dw-cal-day.is-selected:hover {
+.dw-cal-day.is-selected {
   background: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
   box-shadow: inset 0 0 0 1.5px var(--accent-edge);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dw-cal-day.is-selected:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1.5px var(--accent-edge);
+  }
 }
 .dw-cal-dot {
   width: 4px;
@@ -2042,7 +2127,12 @@ select:-webkit-autofill {
     stroke 0.18s ease-out;
 }
 /* Hover previews the filled honey icon, like the nav. */
-.habit-row:hover .habit-row-icon svg,
+@media (hover: hover) and (pointer: fine) {
+  .habit-row:hover .habit-row-icon svg {
+    fill: var(--accent);
+    stroke: var(--accent-ink);
+  }
+}
 .habit-row-link:focus-visible .habit-row-icon svg {
   fill: var(--accent);
   stroke: var(--accent-ink);
@@ -2105,8 +2195,10 @@ select:-webkit-autofill {
     background-color 0.18s ease-out,
     border-color 0.18s ease-out;
 }
-.habit-check:hover {
-  border-color: var(--accent-edge);
+@media (hover: hover) and (pointer: fine) {
+  .habit-check:hover {
+    border-color: var(--accent-edge);
+  }
 }
 .habit-check:focus-visible {
   outline: 2px solid var(--ring);
@@ -2736,8 +2828,10 @@ select:-webkit-autofill {
   cursor: pointer;
   width: 100%;
 }
-.pk-opt:hover {
-  background: var(--line);
+@media (hover: hover) and (pointer: fine) {
+  .pk-opt:hover {
+    background: var(--line);
+  }
 }
 .pk-opt:focus-visible {
   outline: 2px solid var(--ring);

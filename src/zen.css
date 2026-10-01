@@ -112,8 +112,10 @@ body {
   background: var(--accent);
   color: var(--on-accent);
 }
-.zn-btn--primary:hover {
-  filter: brightness(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .zn-btn--primary:hover {
+    filter: brightness(1.05);
+  }
 }
 .zn-btn--secondary {
   background: var(--surface-raised);
@@ -128,11 +130,13 @@ body {
   background: transparent;
   color: var(--ink);
 }
-.zn-btn--ghost:hover,
-.zn-btn--outline:hover,
-.zn-btn--secondary:hover {
-  background: var(--surface-raised);
-  filter: brightness(1.08);
+@media (hover: hover) and (pointer: fine) {
+  .zn-btn--ghost:hover,
+  .zn-btn--outline:hover,
+  .zn-btn--secondary:hover {
+    background: var(--surface-raised);
+    filter: brightness(1.08);
+  }
 }
 .zn-btn--danger {
   background: transparent;
@@ -182,6 +186,15 @@ body {
   border: 0;
   outline: 0;
   box-sizing: border-box;
+}
+/* iOS zooms the page when a focused input is under 16px and never zooms back out.
+   Scoped to touch so the approved 15px stays 15px on desktop. */
+@media (pointer: coarse) {
+  .zn-input,
+  .zn-textarea,
+  .zn-search-input {
+    font-size: 16px;
+  }
 }
 .zn-input::placeholder {
   color: var(--ink-muted);
@@ -295,9 +308,17 @@ body {
   color: var(--ink);
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    background 0.12s ease-out,
+    transform 0.1s ease-out;
 }
-.zn-chip:hover {
-  background: var(--surface-raised);
+.zn-chip:active {
+  transform: scale(0.96);
+}
+@media (hover: hover) and (pointer: fine) {
+  .zn-chip:hover {
+    background: var(--surface-raised);
+  }
 }
 .zn-chip.is-selected {
   background: var(--accent);
@@ -380,6 +401,12 @@ body {
   cursor: pointer;
   padding: 0;
   position: relative;
+  transition:
+    border-color 0.15s ease-out,
+    transform 0.1s ease-out;
+}
+.zn-check:active {
+  transform: scale(0.9);
 }
 .zn-check::after {
   content: '';
@@ -451,9 +478,19 @@ body {
   display: grid;
   place-items: center;
   cursor: pointer;
+  /* Press feedback: the tap highlight is off, so touch needs its own response. */
+  transition:
+    background 0.15s ease-out,
+    transform 0.1s ease-out;
 }
-.zn-icon-btn:hover {
+.zn-icon-btn:active {
   background: var(--surface-raised);
+  transform: scale(0.96);
+}
+@media (hover: hover) and (pointer: fine) {
+  .zn-icon-btn:hover {
+    background: var(--surface-raised);
+  }
 }
 
 /* Category tile */
@@ -478,8 +515,10 @@ body {
   overflow: hidden;
   transition: transform 0.15s;
 }
-.zn-cat:hover {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .zn-cat:hover {
+    transform: translateY(-2px);
+  }
 }
 .zn-cat--lavender {
   background: var(--lavender);
@@ -590,6 +629,9 @@ body {
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   align-items: center;
+  /* Horizontal strip owns sideways; the page keeps vertical scroll. */
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
 }
 .zn-dates::-webkit-scrollbar {
   display: none;
@@ -667,9 +709,17 @@ body {
   font-size: 11px;
   font-weight: 500;
   border-radius: var(--radius-md);
+  transition:
+    color 0.12s ease-out,
+    transform 0.1s ease-out;
 }
-.zn-nav-item:hover {
-  color: var(--ink);
+.zn-nav-item:active {
+  transform: scale(0.94);
+}
+@media (hover: hover) and (pointer: fine) {
+  .zn-nav-item:hover {
+    color: var(--ink);
+  }
 }
 .zn-nav-item.is-active {
   /* The icon carries the honey (NavIcon); the label stays ink. */
@@ -780,13 +830,21 @@ body {
 .nav-icon .nav-icon-on {
   display: none;
 }
-.zn-nav-item.is-active .nav-icon .nav-icon-off,
-.zn-nav-item:hover .nav-icon .nav-icon-off {
+.zn-nav-item.is-active .nav-icon .nav-icon-off {
   display: none;
 }
-.zn-nav-item.is-active .nav-icon .nav-icon-on,
-.zn-nav-item:hover .nav-icon .nav-icon-on {
+@media (hover: hover) and (pointer: fine) {
+  .zn-nav-item:hover .nav-icon .nav-icon-off {
+    display: none;
+  }
+}
+.zn-nav-item.is-active .nav-icon .nav-icon-on {
   display: inline;
+}
+@media (hover: hover) and (pointer: fine) {
+  .zn-nav-item:hover .nav-icon .nav-icon-on {
+    display: inline;
+  }
 }
 .app-side .zn-nav-item,
 .app-bottom .zn-nav-item {
@@ -805,7 +863,8 @@ body {
   .zn-nav--fixed.zn-nav--auto {
     position: sticky;
     top: 0;
-    height: 100vh;
+    /* dvh, not vh: a sticky rail pinned to 100vh overflows by the URL bar's height. */
+    height: 100dvh;
   }
   .zn-nav--auto .zn-nav-list {
     flex-direction: column;
@@ -918,9 +977,13 @@ html {
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
   scrollbar-gutter: stable;
+  /* Keep the container's own bounce, but stop the page behind it from moving. */
+  overscroll-behavior: contain;
 }
-.zn-scroll:hover {
-  scrollbar-color: var(--accent) transparent;
+@media (hover: hover) and (pointer: fine) {
+  .zn-scroll:hover {
+    scrollbar-color: var(--accent) transparent;
+  }
 }
 ::-webkit-scrollbar {
   width: 12px;
@@ -947,6 +1010,8 @@ html {
   overflow-x: auto;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
 }
 .zn-scroll-x-hidden::-webkit-scrollbar {
   display: none;
@@ -984,38 +1049,52 @@ html {
   opacity: 0.45;
   cursor: not-allowed;
 }
-.zn-chip:disabled:hover {
-  background: transparent;
+@media (hover: hover) and (pointer: fine) {
+  .zn-chip:disabled:hover {
+    background: transparent;
+  }
 }
-.zn-chip.is-selected:hover {
-  filter: brightness(1.05);
-  background: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .zn-chip.is-selected:hover {
+    filter: brightness(1.05);
+    background: var(--accent);
+  }
 }
 .zn-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-.zn-task:hover {
-  background: var(--surface-raised);
+@media (hover: hover) and (pointer: fine) {
+  .zn-task:hover {
+    background: var(--surface-raised);
+  }
 }
-.zn-check:hover {
-  border-color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .zn-check:hover {
+    border-color: var(--accent);
+  }
 }
-.zn-date:not(.is-selected):hover {
-  background: var(--line);
+@media (hover: hover) and (pointer: fine) {
+  .zn-date:not(.is-selected):hover {
+    background: var(--line);
+  }
 }
 
 /* Destructive and error */
-.zn-btn--danger:hover {
-  background: var(--danger-soft);
-  filter: none;
+@media (hover: hover) and (pointer: fine) {
+  .zn-btn--danger:hover {
+    background: var(--danger-soft);
+    filter: none;
+  }
 }
 .zn-btn--danger-solid {
   background: var(--danger);
   color: var(--on-danger);
 }
-.zn-btn--danger-solid:hover {
-  filter: brightness(1.06);
+@media (hover: hover) and (pointer: fine) {
+  .zn-btn--danger-solid:hover {
+    filter: brightness(1.06);
+  }
 }
 .zn-alert {
   display: flex;
@@ -1096,9 +1175,15 @@ html {
   color: var(--ink);
   cursor: pointer;
   text-align: left;
+  transition: background 0.12s ease-out;
 }
-.zn-menu-item:hover {
+.zn-menu-item:active {
   background: var(--line);
+}
+@media (hover: hover) and (pointer: fine) {
+  .zn-menu-item:hover {
+    background: var(--line);
+  }
 }
 .zn-menu-item:focus-visible {
   outline: 2px solid var(--ring);
@@ -1111,8 +1196,10 @@ html {
 .zn-menu-item.is-danger {
   color: var(--danger);
 }
-.zn-menu-item.is-danger:hover {
-  background: var(--danger-soft);
+@media (hover: hover) and (pointer: fine) {
+  .zn-menu-item.is-danger:hover {
+    background: var(--danger-soft);
+  }
 }
 .zn-menu-kbd {
   margin-left: auto;
@@ -1395,8 +1482,10 @@ html {
   border-radius: 10px;
   cursor: pointer;
 }
-.zn-toast-action:hover {
-  background: var(--accent-soft);
+@media (hover: hover) and (pointer: fine) {
+  .zn-toast-action:hover {
+    background: var(--accent-soft);
+  }
 }
 .zn-toast-action:focus-visible {
   outline: 2px solid var(--ring);
@@ -1415,8 +1504,14 @@ html {
 .zn-toast--error .zn-toast-timer {
   background: var(--danger);
 }
-.zn-toast:hover .zn-toast-timer,
-.zn-toast:focus-within .zn-toast-timer {
+@media (hover: hover) and (pointer: fine) {
+  .zn-toast:hover .zn-toast-timer {
+    animation-play-state: paused;
+  }
+}
+.zn-toast:focus-within .zn-toast-timer,
+/* Touch has no hover, so holding the toast must pause its countdown too. */
+.zn-toast:active .zn-toast-timer {
   animation-play-state: paused;
 }
 @keyframes zn-toast-timer {
@@ -1559,14 +1654,19 @@ html {
     background 0.15s ease-out,
     color 0.15s ease-out;
 }
+.zn-seg-item:active {
+  color: var(--ink);
+}
 /* 44px tall hit area inside the 44px track */
 .zn-seg-item::after {
   content: '';
   position: absolute;
   inset: -4px 0;
 }
-.zn-seg-item:hover {
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .zn-seg-item:hover {
+    color: var(--ink);
+  }
 }
 .zn-seg-item[aria-pressed='true'] {
   background: var(--accent);
