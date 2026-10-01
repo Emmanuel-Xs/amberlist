@@ -44,11 +44,15 @@ function useActive() {
   return (to: string) => (to === '/' ? path === '/' : path.startsWith(to))
 }
 
-/** The honey pill behind the current item. One shared layoutId, so it glides between items. */
-function NavPill() {
+/**
+ * The honey pill behind the current item. It glides between items of its own bar, so
+ * `scope` has to be unique: the sidebar and the phone bar are both in the DOM at phone
+ * widths, and a shared layoutId made Motion animate one bar's pill into the other.
+ */
+function NavPill({ scope }: { scope: 'side' | 'bottom' }) {
   return (
     <motion.span
-      layoutId="nav-pill"
+      layoutId={`nav-pill-${scope}`}
       className="zn-nav-pill"
       aria-hidden="true"
       style={{ borderRadius: 14 }}
@@ -96,7 +100,7 @@ function SideNav({ ready }: { ready: boolean }) {
                   .join(' ')}
                 aria-current={isActive(n.to) ? 'page' : undefined}
               >
-                {isActive(n.to) && <NavPill />}
+                {isActive(n.to) && <NavPill scope="side" />}
                 <NavIcon name={n.icon} active={isActive(n.to)} />
                 <span className="zn-nav-label">{n.label}</span>
               </Link>
@@ -231,7 +235,7 @@ function SideNav({ ready }: { ready: boolean }) {
               justifyContent: 'center',
             }}
           >
-            {isActive('/profile') && <NavPill />}
+            {isActive('/profile') && <NavPill scope="side" />}
             <NavIcon name="user" active={isActive('/profile')} />
             <span className="app-sidebar-extra" style={{ flex: 1 }}>
               Profile
@@ -294,7 +298,7 @@ function BottomNav() {
                   .join(' ')}
                 aria-current={isActive(n.to) ? 'page' : undefined}
               >
-                {isActive(n.to) && <NavPill />}
+                {isActive(n.to) && <NavPill scope="bottom" />}
                 <NavIcon name={n.icon} active={isActive(n.to)} />
                 <span className="zn-nav-label">{n.label}</span>
               </Link>

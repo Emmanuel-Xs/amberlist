@@ -1534,6 +1534,19 @@ select:-webkit-autofill {
 .app-content {
   view-transition-name: page;
 }
+/* The phone bar gets its own transition name. Without it the page snapshot is painted in the
+   top layer, which sits above every z-index, so a tall page crossfades straight over the bar. */
+.app-bottom {
+  view-transition-name: app-bottom;
+}
+::view-transition-group(app-bottom) {
+  animation: none;
+}
+::view-transition-old(app-bottom),
+::view-transition-new(app-bottom) {
+  animation: none;
+  mix-blend-mode: normal;
+}
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

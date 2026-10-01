@@ -192,4 +192,4 @@ From his 22:38 list on 2026-09-29. Nothing here may be coded before a design is 
 ## Round 4 additions (2026-09-30)
 - `Popover` (Radix) with `.zn-popover`, `PickerField` (an Input that opens a picker), `Modal iconTone="accent"`, `Alert actionIcon`, `ConfirmDialog confirmIcon`. Picker parts use the `pk-` classes in `src/styles.css`.
 - Icons added: `repeat`, `skip`, `bellOff`.
-- Nav: hover previews the honey fill; the active background is the sliding `zn-nav-pill`. The pill is in the sidebar, the rail and the phone bar, and every one of those items is `position: relative; isolation: isolate` so it can sit behind the label.
+- Nav: hover previews the honey fill; the active background is the sliding `zn-nav-pill`. The pill is in the sidebar, the rail and the phone bar, and every one of those items is `position: relative; isolation: isolate` so it can sit behind the label. The two bars each use their own `layoutId` (`nav-pill-side`, `nav-pill-bottom`): both are in the DOM at phone widths, and one shared id made Motion animate the bar's pill into the hidden sidebar.

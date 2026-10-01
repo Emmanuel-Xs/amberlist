@@ -6,6 +6,12 @@ Notable commits, newest first (2026-09-29, times WAT). Add an entry with every c
 - The phone bar no longer vanishes when a bottom nav link is tapped. `useHideOnScroll` kept its scroll baseline from mount, so the router's scroll restoration read as a large downward jump and the bar stayed translated off screen. The baseline is now a ref re-read on every navigation, and a new page always starts with the bar shown.
 - The phone bar now has the sliding honey pill (`NavPill`, `SPRING_GLIDE`) the sidebar has, so switching sections animates like desktop. Bar items got the `position: relative; isolation: isolate` the sidebar already had, which is what the absolutely positioned pill needs.
 
+## 2026-10-01: page content cut into the phone bar
+- Found with sample data loaded (64 tasks, Tasks page 5054px tall). Two separate causes.
+- `NavPill` had a hardcoded `layoutId="nav-pill"`, so adding it to the phone bar put two pills with the same id in the DOM at once (the sidebar and the bar are both mounted below 768px). Motion's shared-layout animation then flew the bar's pill up into the hidden sidebar and back. The pill now takes a `scope` and uses `nav-pill-side` or `nav-pill-bottom`. This was a regression from the entry above.
+- The page snapshot is painted in the view-transition top layer, above every z-index, so the fixed bar did not cover it: on the Tasks page `.app-content` overhung the bar by 4298px and crossfaded over it on every navigation. `.app-bottom` now carries `view-transition-name: app-bottom` with no animation, so it is its own layer and stays put.
+- Verified at 390px over Home, Tasks, Notes and Habits, back and forth nine times: the bar stays at 772 to 844px, the pill stays inside the bar, no flying frames. View transitions themselves could not be exercised locally (the local Brave build reports no `startViewTransition`), so that part is reasoned from the spec and the measured geometry, not seen on screen.
+
 ## 2026-09-30: privacy and terms pages
 - Public `/privacy` and `/terms` (`src/components/LegalPage.tsx`) with the logo, needed for Google's consent screen. They render without the guest session, splash, welcome or nav, are in the sitemap, and are linked from the Profile footer.
 

@@ -11,6 +11,7 @@ Calm app, lively moments. Motion explains what happened; it never decorates.
 
 - **Motion for React** (`motion/react`) for anything inside a page: springs, `AnimatePresence`, `layout`/`layoutId`, drag with inertia, motion values. Never import `framer-motion`.
 - **Native View Transitions** for page changes, set on the router (`defaultViewTransition` in `src/router.tsx`). Only the content (`.app-content`, `view-transition-name: page`) animates; the nav never moves. Picking a task inside the same section does not animate the page.
+- **Gotcha:** a view-transition snapshot is painted in the top layer, above every z-index, so a fixed nav does not sit on top of it. Anything fixed that must stay visible needs its own `view-transition-name` (`.app-bottom` has `app-bottom`, with no animation), or a tall page crossfades straight over it on every navigation.
 - **Plain CSS** for hovers, focus and tiny state changes (150 to 200 ms).
 - The general Motion skill lives in `.claude/skills/motion` (from `npx motion-ai`); the Motion MCP server is in `.mcp.json`.
 
